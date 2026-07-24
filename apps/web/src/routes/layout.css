@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+@theme {
+    /* --- COLORS --- */
+    --color-brand-primary: #C8702E;
+    --color-brand-secondary: #E8A87C;
+    --color-brand-dark: #1A1A1A;
+    --color-brand-light: #F9F9F7;
+    --color-brand-gold: #DAA520;
+
+    /* --- FONTS --- */
+    /* We override the default 'sans' and 'serif' utilities */
+    --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+    --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+
+    /* --- IMAGES --- */
+    --background-image-hero-pattern: url('/assets/wallpaper01.jpg');
+}
+
+/* Custom Utility Classes (Optional) */
+@utility container {
+    margin-inline: auto;
+    padding-inline: 1rem;
+}
