@@ -1,0 +1,39 @@
+{
+	"name": "@trailblazers/web",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo \"\"",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"seed": "vite-node src/lib/server/seed.ts"
+	},
+	"dependencies": {
+		"@trailblazers/core": "*",
+		"@trailblazers/ui": "*",
+		"bcryptjs": "^2.4.3",
+		"dotenv": "^17.2.3",
+		"drizzle-orm": "^0.45.1",
+		"postgres": "^3.4.7"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^7.0.0",
+		"@sveltejs/kit": "^2.49.1",
+		"@sveltejs/vite-plugin-svelte": "^6.2.1",
+		"@tailwindcss/forms": "^0.5.10",
+		"@tailwindcss/typography": "^0.5.14",
+		"@types/bcryptjs": "^2.4.6",
+		"@types/pg": "^8.16.0",
+		"autoprefixer": "^10.4.20",
+		"postcss": "^8.4.49",
+		"svelte": "^5.45.6",
+		"svelte-check": "^4.3.4",
+		"tailwindcss": "^3.4.9",
+		"typescript": "^5.9.3",
+		"vite": "^7.2.6",
+		"vite-node": "^3.0.0"
+	}
+}
