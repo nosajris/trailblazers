@@ -16,7 +16,11 @@ export const nodes = [
 	() => import('./nodes/12'),
 	() => import('./nodes/13'),
 	() => import('./nodes/14'),
-	() => import('./nodes/15')
+	() => import('./nodes/15'),
+	() => import('./nodes/16'),
+	() => import('./nodes/17'),
+	() => import('./nodes/18'),
+	() => import('./nodes/19')
 ];
 
 export const server_loads = [0];
@@ -24,18 +28,22 @@ export const server_loads = [0];
 export const dictionary = {
 		"/": [~2],
 		"/bep-hub": [~3],
-		"/contact": [~4],
-		"/events": [~5],
-		"/events/[id]": [~6],
-		"/faq": [~7],
-		"/give": [~8],
-		"/groups": [~9],
-		"/messages": [~10],
-		"/plan-a-visit": [~11],
-		"/serve": [~12],
-		"/stories": [~13],
-		"/stories/[id]": [~14],
-		"/watch": [~15]
+		"/connect": [~4],
+		"/contact": [~5],
+		"/demo": [6],
+		"/demo/lucia": [~7],
+		"/demo/lucia/login": [~8],
+		"/events": [~9],
+		"/events/[id]": [~10],
+		"/faq": [~11],
+		"/give": [~12],
+		"/groups": [~13],
+		"/messages": [~14],
+		"/plan-a-visit": [~15],
+		"/serve": [~16],
+		"/stories": [~17],
+		"/stories/[id]": [~18],
+		"/watch": [~19]
 	};
 
 export const hooks = {

@@ -9,10 +9,11 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	resolve: {
 		alias: {
-			'@trailblazers/ui': path.resolve(__dirname, '../../packages/ui/src')
+			'@trailblazers/ui': path.resolve(__dirname, '../../packages/ui/src'),
+			'@trailblazers/core': path.resolve(__dirname, '../../packages/core/src')
 		}
 	},
 	ssr: {
-		noExternal: ['@trailblazers/core']
+		noExternal: ['@trailblazers/core', '@trailblazers/ui']
 	}
 });

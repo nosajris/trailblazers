@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-vercel';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,7 +11,8 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		alias: {
-			'@trailblazers/ui': path.resolve(__dirname, '../../packages/ui/src')
+			'@trailblazers/ui': path.resolve(__dirname, '../../packages/ui/src'),
+			'@trailblazers/core': path.resolve(__dirname, '../../packages/core/src')
 		}
 	}
 };

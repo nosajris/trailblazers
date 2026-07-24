@@ -1,6 +1,18 @@
 {
 	"compilerOptions": {
 		"paths": {
+			"@trailblazers/ui": [
+				"../../../packages/ui/src"
+			],
+			"@trailblazers/ui/*": [
+				"../../../packages/ui/src/*"
+			],
+			"@trailblazers/core": [
+				"../../../packages/core/src"
+			],
+			"@trailblazers/core/*": [
+				"../../../packages/core/src/*"
+			],
 			"$lib": [
 				"../src/lib"
 			],

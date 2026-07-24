@@ -1,1 +1,0 @@
-import{aT as o,at as n,u as c}from"./BkQjlgfs.js";function r(e){throw new Error("https://svelte.dev/e/lifecycle_outside_component")}function f(e){n===null&&r(),o(()=>{const t=c(e);if(typeof t=="function")return t})}const l=Object.freeze(Object.defineProperty({__proto__:null},Symbol.toStringTag,{value:"Module"}));export{l as _,f as o};
