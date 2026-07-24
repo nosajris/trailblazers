@@ -1,0 +1,24 @@
+{
+	"name": "@trailblazers/core",
+	"version": "0.0.1",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./db/schema": {
+			"types": "./src/db/schema.ts",
+			"default": "./src/db/schema.ts"
+		}
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.45.1",
+		"postgres": "^3.4.7",
+		"zod": "^3.24.2"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.2",
+		"typescript": "^5.9.3"
+	}
+}
