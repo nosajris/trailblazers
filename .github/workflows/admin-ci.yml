@@ -1,50 +1,54 @@
-name: Admin Portal CI (@trailblazers/admin)
+name: "CI: Admin Portal"
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
-      - 'apps/admin/**'
-      - 'packages/**'
-      - 'drizzle/**'
-      - 'package.json'
-      - 'turbo.json'
-      - '.github/workflows/admin-ci.yml'
+      - "apps/admin/**"
+      - "packages/**"
+      - "package.json"
+      - "package-lock.json"
+      - "turbo.json"
+      - ".github/workflows/admin-ci.yml"
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
-      - 'apps/admin/**'
-      - 'packages/**'
-      - 'drizzle/**'
-      - 'package.json'
-      - 'turbo.json'
+      - "apps/admin/**"
+      - "packages/**"
+      - "package.json"
+      - "package-lock.json"
+      - "turbo.json"
+
+concurrency:
+  group: admin-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  admin-typecheck-and-build:
-    name: Typecheck & Build Staff Admin Portal
+  typecheck-and-build:
+    name: Typecheck & Build
     runs-on: ubuntu-latest
+    env:
+      CI: true
+      VERCEL: 1
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20.x
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: SvelteKit Typecheck (@trailblazers/admin)
+      - name: Typecheck
         run: npm run check:admin
 
-      - name: Build Staff Admin Portal (@trailblazers/admin)
+      - name: Build
         run: npm run build:admin
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/trailblazers' }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY || 'ci_secret_key_demo' }}
-          NODE_ENV: 'production'
+          DATABASE_URL: "postgresql://localhost:5432/placeholder"
+          SECRET_KEY: "ci_build_key"
