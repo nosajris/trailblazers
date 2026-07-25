@@ -12,7 +12,6 @@
 		"dev:web": "npm run dev -w @trailblazers/web",
 		"dev:admin": "npm run dev -w @trailblazers/admin",
 		"build": "turbo build && node scripts/vercel-postbuild.js",
-
 		"build:web": "npm run build -w @trailblazers/web",
 		"build:admin": "npm run build -w @trailblazers/admin",
 		"preview": "npm run preview -w @trailblazers/web",
@@ -25,9 +24,9 @@
 		"db:push": "drizzle-kit push --config drizzle.config.ts",
 		"db:health": "node scripts/db-health-check.js",
 		"seed": "npm run seed -w @trailblazers/web"
-
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.62.0",
 		"drizzle-kit": "^0.31.8",
 		"turbo": "2.10.6",
 		"typescript": "^5.9.3"
