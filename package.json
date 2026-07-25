@@ -11,7 +11,8 @@
 		"dev": "turbo dev",
 		"dev:web": "npm run dev -w @trailblazers/web",
 		"dev:admin": "npm run dev -w @trailblazers/admin",
-		"build": "turbo build",
+		"build": "turbo build && node scripts/vercel-postbuild.js",
+
 		"build:web": "npm run build -w @trailblazers/web",
 		"build:admin": "npm run build -w @trailblazers/admin",
 		"preview": "npm run preview -w @trailblazers/web",
