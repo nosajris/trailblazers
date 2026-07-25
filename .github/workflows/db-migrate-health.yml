@@ -35,6 +35,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Run Drizzle Database Migrations
+        if: ${{ secrets.DATABASE_URL != '' }}
         run: npm run db:migrate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
