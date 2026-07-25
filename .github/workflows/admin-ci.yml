@@ -1,0 +1,50 @@
+name: Admin Portal CI (@trailblazers/admin)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/admin/**'
+      - 'packages/**'
+      - 'drizzle/**'
+      - 'package.json'
+      - 'turbo.json'
+      - '.github/workflows/admin-ci.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'apps/admin/**'
+      - 'packages/**'
+      - 'drizzle/**'
+      - 'package.json'
+      - 'turbo.json'
+
+jobs:
+  admin-typecheck-and-build:
+    name: Typecheck & Build Staff Admin Portal
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: SvelteKit Typecheck (@trailblazers/admin)
+        run: npm run check:admin
+
+      - name: Build Staff Admin Portal (@trailblazers/admin)
+        run: npm run build:admin
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/trailblazers' }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY || 'ci_secret_key_demo' }}
+          NODE_ENV: 'production'

@@ -1,0 +1,45 @@
+name: Database Migration & Health Check
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'drizzle/**'
+      - 'packages/core/src/db/**'
+      - 'drizzle.config.ts'
+      - '.github/workflows/db-migrate-health.yml'
+  workflow_dispatch:
+
+jobs:
+  migrate-and-check-health:
+    name: Run Database Migrations & Health Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Monorepo Dependencies
+        run: npm ci
+
+      - name: Check Database Connectivity & Pre-Migration Health
+        run: npm run db:health
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Run Drizzle Database Migrations
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Verify Post-Migration Schema Integrity & Health
+        run: npm run db:health
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

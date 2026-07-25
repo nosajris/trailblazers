@@ -23,7 +23,9 @@
 		"db:generate": "drizzle-kit generate --config drizzle.config.ts",
 		"db:migrate": "drizzle-kit migrate --config drizzle.config.ts",
 		"db:push": "drizzle-kit push --config drizzle.config.ts",
+		"db:health": "node scripts/db-health-check.js",
 		"seed": "npm run seed -w @trailblazers/web"
+
 	},
 	"devDependencies": {
 		"drizzle-kit": "^0.31.8",
