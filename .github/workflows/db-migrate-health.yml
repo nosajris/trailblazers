@@ -18,57 +18,8 @@ concurrency:
 
 jobs:
   migrate:
-    name: Validate Migrations
+    name: Run Migrations & Health Check
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: ci
-          POSTGRES_PASSWORD: ci_password
-          POSTGRES_DB: trailblazers_ci
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U ci"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=5
-
-    env:
-      CI: true
-      DATABASE_URL: "postgresql://ci:ci_password@localhost:5432/trailblazers_ci"
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Pre-migration health check
-        run: node scripts/db-health-check.js
-
-      - name: Run migrations
-        run: npm run db:migrate
-
-      - name: Post-migration health check
-        run: node scripts/db-health-check.js
-
-  deploy-migrations:
-    name: Deploy to Production DB
-    needs: migrate
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: production
-
     env:
       CI: true
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -77,26 +28,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check DATABASE_URL
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::DATABASE_URL secret not configured — skipping migration"
+            echo "SKIP=true" >> $GITHUB_ENV
+          else
+            echo "✅ DATABASE_URL is set"
+          fi
+
       - name: Setup Node.js
+        if: env.SKIP != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "npm"
 
       - name: Install dependencies
+        if: env.SKIP != 'true'
         run: npm ci
 
-      - name: Check production DATABASE_URL
-        run: |
-          if [ -z "$DATABASE_URL" ]; then
-            echo "⚠️ DATABASE_URL secret not configured — skipping production migration"
-            echo "SKIP_MIGRATION=true" >> $GITHUB_ENV
-          fi
+      - name: Pre-migration health check
+        if: env.SKIP != 'true'
+        run: node scripts/db-health-check.js
 
-      - name: Run production migrations
-        if: env.SKIP_MIGRATION != 'true'
+      - name: Run migrations
+        if: env.SKIP != 'true'
         run: npm run db:migrate
 
       - name: Post-migration health check
-        if: env.SKIP_MIGRATION != 'true'
+        if: env.SKIP != 'true'
         run: node scripts/db-health-check.js

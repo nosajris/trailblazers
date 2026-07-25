@@ -30,6 +30,8 @@ jobs:
     env:
       CI: true
       VERCEL: 1
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     steps:
       - name: Checkout
@@ -49,6 +51,3 @@ jobs:
 
       - name: Build
         run: npm run build:web
-        env:
-          DATABASE_URL: "postgresql://localhost:5432/placeholder"
-          SECRET_KEY: "ci_build_key"
