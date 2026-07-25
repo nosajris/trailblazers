@@ -1,9 +1,139 @@
+CREATE TYPE "public"."user_role" AS ENUM('ADMIN', 'SECRETARY', 'LEADER', 'MEMBER');--> statement-breakpoint
+CREATE TYPE "public"."event_type" AS ENUM('CAMP', 'WORKSHOP', 'MEETUP');--> statement-breakpoint
+CREATE TYPE "public"."group_type" AS ENUM('CAMPUS', 'PRO', 'INTEREST', 'ONLINE');--> statement-breakpoint
+CREATE TYPE "public"."equipment_status" AS ENUM('AVAILABLE', 'RENTED', 'MAINTENANCE');--> statement-breakpoint
 CREATE TYPE "public"."page_section_type" AS ENUM('HERO', 'EVENTS_RAIL', 'BLOG', 'TESTIMONIALS', 'GROUPS', 'SERVE', 'LEADERS', 'IM_NEW', 'PARENTS', 'FAQ', 'CONTACT', 'CUSTOM');--> statement-breakpoint
-ALTER TYPE "public"."user_role" ADD VALUE 'SECRETARY' BEFORE 'LEADER';--> statement-breakpoint
 CREATE TABLE "sessions" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
 	"expires_at" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "users" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"email" text NOT NULL,
+	"password_hash" text NOT NULL,
+	"full_name" text NOT NULL,
+	"role" "user_role" DEFAULT 'MEMBER',
+	"avatar_url" text,
+	"created_at" timestamp with time zone DEFAULT now(),
+	CONSTRAINT "users_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+CREATE TABLE "events" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"title" text NOT NULL,
+	"description" text NOT NULL,
+	"date" timestamp with time zone NOT NULL,
+	"location" text NOT NULL,
+	"image_url" text,
+	"type" "event_type" NOT NULL,
+	"price" integer DEFAULT 0,
+	"early_bird_deadline" timestamp with time zone,
+	"capacity" integer,
+	"registered_count" integer DEFAULT 0,
+	"is_featured" boolean DEFAULT false,
+	"status" text DEFAULT 'PUBLISHED' NOT NULL,
+	"sort_order" integer DEFAULT 0,
+	"published_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE "blogs" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"title" text NOT NULL,
+	"category" text,
+	"summary" text NOT NULL,
+	"content" text,
+	"image_url" text,
+	"author_id" integer,
+	"status" text DEFAULT 'PUBLISHED' NOT NULL,
+	"sort_order" integer DEFAULT 0,
+	"published_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE "groups" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"leader" text NOT NULL,
+	"day_time" text NOT NULL,
+	"type" "group_type" NOT NULL,
+	"image_url" text,
+	"description" text,
+	"status" text DEFAULT 'PUBLISHED' NOT NULL,
+	"sort_order" integer DEFAULT 0
+);
+--> statement-breakpoint
+CREATE TABLE "testimonials" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"role" text,
+	"content" text NOT NULL,
+	"rating" integer DEFAULT 5,
+	"is_featured" boolean DEFAULT false,
+	"status" text DEFAULT 'PUBLISHED' NOT NULL,
+	"sort_order" integer DEFAULT 0,
+	"created_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE "leaders" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"role" text NOT NULL,
+	"image_url" text,
+	"order" integer DEFAULT 0,
+	"status" text DEFAULT 'PUBLISHED' NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "faqs" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"question" text NOT NULL,
+	"answer" text NOT NULL,
+	"order" integer DEFAULT 0,
+	"status" text DEFAULT 'PUBLISHED' NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "inquiries" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"email" text NOT NULL,
+	"message" text,
+	"type" text DEFAULT 'GENERAL',
+	"status" text DEFAULT 'PENDING',
+	"created_at" timestamp with time zone DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE "bep_profiles" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" integer NOT NULL,
+	"business_name" text NOT NULL,
+	"industry" text NOT NULL,
+	"description" text NOT NULL,
+	"website_url" text,
+	"is_verified" boolean DEFAULT false,
+	"status" text DEFAULT 'PUBLISHED' NOT NULL,
+	"sort_order" integer DEFAULT 0
+);
+--> statement-breakpoint
+CREATE TABLE "equipment" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"description" text,
+	"status" "equipment_status" DEFAULT 'AVAILABLE',
+	"daily_rate" integer NOT NULL,
+	"image_url" text,
+	"sort_order" integer DEFAULT 0
+);
+--> statement-breakpoint
+CREATE TABLE "statistics" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"district_name" text NOT NULL,
+	"date" date NOT NULL,
+	"attendance_count" integer DEFAULT 0,
+	"salvations_count" integer DEFAULT 0,
+	"notes" text,
+	"submitted_by" integer
 );
 --> statement-breakpoint
 CREATE TABLE "page_sections" (
@@ -124,35 +254,10 @@ CREATE TABLE "tasks" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "blogs" ALTER COLUMN "created_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "blogs" ALTER COLUMN "created_at" SET DEFAULT now();--> statement-breakpoint
-ALTER TABLE "events" ALTER COLUMN "date" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "events" ALTER COLUMN "early_bird_deadline" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "events" ALTER COLUMN "created_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "events" ALTER COLUMN "created_at" SET DEFAULT now();--> statement-breakpoint
-ALTER TABLE "inquiries" ALTER COLUMN "created_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "inquiries" ALTER COLUMN "created_at" SET DEFAULT now();--> statement-breakpoint
-ALTER TABLE "testimonials" ALTER COLUMN "created_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "testimonials" ALTER COLUMN "created_at" SET DEFAULT now();--> statement-breakpoint
-ALTER TABLE "users" ALTER COLUMN "created_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "users" ALTER COLUMN "created_at" SET DEFAULT now();--> statement-breakpoint
-ALTER TABLE "bep_profiles" ADD COLUMN "status" text DEFAULT 'PUBLISHED' NOT NULL;--> statement-breakpoint
-ALTER TABLE "bep_profiles" ADD COLUMN "sort_order" integer DEFAULT 0;--> statement-breakpoint
-ALTER TABLE "blogs" ADD COLUMN "status" text DEFAULT 'PUBLISHED' NOT NULL;--> statement-breakpoint
-ALTER TABLE "blogs" ADD COLUMN "sort_order" integer DEFAULT 0;--> statement-breakpoint
-ALTER TABLE "blogs" ADD COLUMN "published_at" timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "equipment" ADD COLUMN "sort_order" integer DEFAULT 0;--> statement-breakpoint
-ALTER TABLE "events" ADD COLUMN "status" text DEFAULT 'PUBLISHED' NOT NULL;--> statement-breakpoint
-ALTER TABLE "events" ADD COLUMN "sort_order" integer DEFAULT 0;--> statement-breakpoint
-ALTER TABLE "events" ADD COLUMN "published_at" timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "faqs" ADD COLUMN "status" text DEFAULT 'PUBLISHED' NOT NULL;--> statement-breakpoint
-ALTER TABLE "groups" ADD COLUMN "status" text DEFAULT 'PUBLISHED' NOT NULL;--> statement-breakpoint
-ALTER TABLE "groups" ADD COLUMN "sort_order" integer DEFAULT 0;--> statement-breakpoint
-ALTER TABLE "leaders" ADD COLUMN "status" text DEFAULT 'PUBLISHED' NOT NULL;--> statement-breakpoint
-ALTER TABLE "testimonials" ADD COLUMN "is_featured" boolean DEFAULT false;--> statement-breakpoint
-ALTER TABLE "testimonials" ADD COLUMN "status" text DEFAULT 'PUBLISHED' NOT NULL;--> statement-breakpoint
-ALTER TABLE "testimonials" ADD COLUMN "sort_order" integer DEFAULT 0;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "blogs" ADD CONSTRAINT "blogs_author_id_users_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "bep_profiles" ADD CONSTRAINT "bep_profiles_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "statistics" ADD CONSTRAINT "statistics_submitted_by_users_id_fk" FOREIGN KEY ("submitted_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "page_sections" ADD CONSTRAINT "page_sections_page_id_pages_id_fk" FOREIGN KEY ("page_id") REFERENCES "public"."pages"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sermons" ADD CONSTRAINT "sermons_series_id_sermon_series_id_fk" FOREIGN KEY ("series_id") REFERENCES "public"."sermon_series"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint

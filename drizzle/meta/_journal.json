@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1766100924112,
-      "tag": "0000_elite_pandemic",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1766101600034,
-      "tag": "0001_ambitious_the_professor",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1766102821114,
-      "tag": "0002_crazy_micromax",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1766103000000,
-      "tag": "0003_modular_cms",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1784934189830,
-      "tag": "0004_remarkable_butterfly",
+      "when": 1784943274627,
+      "tag": "0000_square_bill_hollister",
       "breakpoints": true
     }
   ]
