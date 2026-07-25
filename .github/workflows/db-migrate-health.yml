@@ -15,6 +15,8 @@ jobs:
   migrate-and-check-health:
     name: Run Database Migrations & Health Audit
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - name: Checkout repository
@@ -31,16 +33,10 @@ jobs:
 
       - name: Check Database Connectivity & Pre-Migration Health
         run: npm run db:health
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Run Drizzle Database Migrations
-        if: ${{ secrets.DATABASE_URL != '' }}
+        if: ${{ env.DATABASE_URL != '' }}
         run: npm run db:migrate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Verify Post-Migration Schema Integrity & Health
         run: npm run db:health
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
