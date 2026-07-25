@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const adapter = process.env.VERCEL ? adapterVercel() : adapterAuto();
+const isVercelBuild = !!(process.env.VERCEL || process.env.VERCEL_ENV);
+const adapter = isVercelBuild ? adapterVercel() : adapterAuto();
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
