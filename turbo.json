@@ -1,8 +1,18 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "DATABASE_URL",
+    "SECRET_KEY",
+    "NODE_ENV",
+    "VERCEL",
+    "VERCEL_ENV",
+    "WEB_PORT",
+    "ADMIN_PORT"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".svelte-kit/**", "dist/**"]
     },
     "check": {
