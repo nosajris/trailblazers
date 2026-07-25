@@ -13,7 +13,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".svelte-kit/**", "dist/**"]
+      "outputs": [".svelte-kit/**", ".vercel/**", "dist/**"]
     },
     "check": {
       "dependsOn": ["^check"]
