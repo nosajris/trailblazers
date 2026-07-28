@@ -82,7 +82,9 @@
 	});
 
 	onDestroy(() => {
-		document.body.style.overflow = '';
+		if (typeof document !== 'undefined') {
+			document.body.style.overflow = '';
+		}
 	});
 </script>
 
