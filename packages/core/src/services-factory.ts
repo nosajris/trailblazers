@@ -19,6 +19,8 @@ import { createAuditLogsService } from './modules/audit-logs/service.js';
 import { createTasksService } from './modules/tasks/service.js';
 import { createExportService } from './modules/export/service.js';
 import { createEmailService } from './modules/email/service.js';
+import { createEquipmentService } from './modules/equipment/service.js';
+import { createStatisticsService } from './modules/statistics/service.js';
 
 export function createCoreServices(db: Database) {
 	return {
@@ -32,6 +34,7 @@ export function createCoreServices(db: Database) {
 		faq: createFaqService(db),
 		inquiries: createInquiryService(db),
 		bep: createBepService(db),
+		equipment: createEquipmentService(db),
 		settings: createSettingsService(db),
 		pages: createPageComposerService(db),
 		serve: createServeService(db),
@@ -40,9 +43,11 @@ export function createCoreServices(db: Database) {
 		auditLogs: createAuditLogsService(db),
 		tasks: createTasksService(db),
 		export: createExportService(),
-		email: createEmailService()
+		email: createEmailService(),
+		statistics: createStatisticsService(db)
 	};
 }
+
 
 
 
