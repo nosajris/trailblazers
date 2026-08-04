@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Admin App Styling & Linear Design System Verification', () => {
 	async function loginAsAdmin(page: any) {
 		await page.goto('http://localhost:5174/login');
-		await page.locator('#admin-email-input').fill('admin@paoz.org');
-		await page.locator('#admin-password-input').fill('secret');
+		await page.locator('#admin-email-input').fill('admin@paoz.test');
+		await page.locator('#admin-password-input').fill('password123');
 		await page.locator('button[type="submit"]').click();
 		await page.waitForURL((url: URL) => url.pathname !== '/login');
 	}

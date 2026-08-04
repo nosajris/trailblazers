@@ -6,7 +6,7 @@
 // -----------------------------------------------------------------------------
 
 export const usersData = [
-	{ email: 'admin@paoz.org', password: 'secret', fullName: 'Admin User', role: 'ADMIN' as const },
+	{ email: 'admin@paoz.test', password: 'password123', fullName: 'Admin User', role: 'ADMIN' as const },
 	{ email: 'secretary@paoz.org', password: 'secret', fullName: 'Rutendo Chikafu', role: 'SECRETARY' as const },
 	{ email: 'leader@paoz.org', password: 'secret', fullName: 'Sarah Leader', role: 'LEADER' as const },
 	{ email: 'member@paoz.org', password: 'secret', fullName: 'John Member', role: 'MEMBER' as const },

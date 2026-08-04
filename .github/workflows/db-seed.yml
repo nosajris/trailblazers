@@ -74,5 +74,6 @@ jobs:
         run: |
           echo "### 🚀 Database Seeding Completed" >> $GITHUB_STEP_SUMMARY
           echo "- **Execution Status**: Success ✅" >> $GITHUB_STEP_SUMMARY
-          echo "- **Target Database**: \`${DATABASE_URL%%@*}\`..." >> $GITHUB_STEP_SUMMARY
+          echo "- **Seeded Admin Email**: \`admin@paoz.test\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Seeded Admin Password**: \`password123\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Trigger**: \`${{ github.event_name }}\`" >> $GITHUB_STEP_SUMMARY
