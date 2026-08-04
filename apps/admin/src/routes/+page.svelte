@@ -36,22 +36,22 @@
 	</div>
 
 	<!-- Interactive KPI Stats Grid -->
-	<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+	<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
 		<!-- Stat Card 1: Sermons -->
 		<div class="stat-card admin-card admin-card-hover p-5 relative overflow-hidden group bg-white border border-zinc-200 rounded-xl shadow-sm">
 			<div class="flex items-center justify-between">
-				<div class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Published Sermons</div>
+				<div class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Sermons & Media</div>
 				<div class="h-8 w-8 rounded-lg bg-[var(--brand-primary-muted,rgba(249,92,75,0.15))] text-brand-primary flex items-center justify-center">
 					<svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
 				</div>
 			</div>
 			<div class="mt-3 flex items-baseline gap-2">
 				<span class="text-3xl font-bold text-zinc-900">{data.stats.totalSermons}</span>
-				<span class="text-xs text-zinc-400 font-medium">media items</span>
+				<span class="text-xs text-zinc-400 font-medium">messages published</span>
 			</div>
 			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
 				<a href="/sermons" class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
-					Manage Sermons
+					Manage Sermons & Series
 					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
 			</div>
@@ -67,7 +67,7 @@
 			</div>
 			<div class="mt-3 flex items-baseline gap-2">
 				<span class="text-3xl font-bold text-zinc-900">{data.stats.totalEvents}</span>
-				<span class="text-xs text-zinc-400 font-medium">upcoming</span>
+				<span class="text-xs text-zinc-400 font-medium">upcoming gatherings</span>
 			</div>
 			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
 				<a href="/events" class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
@@ -97,30 +97,67 @@
 			</div>
 		</div>
 
-		<!-- Stat Card 4: Tasks -->
+		<!-- Stat Card 4: Ministry Leaders -->
 		<div class="stat-card admin-card admin-card-hover p-5 relative overflow-hidden group bg-white border border-zinc-200 rounded-xl shadow-sm">
 			<div class="flex items-center justify-between">
-				<div class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Pending Follow-up Tasks</div>
+				<div class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Ministry Leaders</div>
+				<div class="h-8 w-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+					<svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+				</div>
+			</div>
+			<div class="mt-3 flex items-baseline gap-2">
+				<span class="text-3xl font-bold text-zinc-900">{data.stats.totalLeaders}</span>
+				<span class="text-xs text-zinc-400 font-medium">team directors</span>
+			</div>
+			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
+				<a href="/leaders" class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
+					Manage Leaders
+					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+				</a>
+			</div>
+		</div>
+
+		<!-- Stat Card 5: Leads & Inquiries -->
+		<div class="stat-card admin-card admin-card-hover p-5 relative overflow-hidden group bg-white border border-zinc-200 rounded-xl shadow-sm">
+			<div class="flex items-center justify-between">
+				<div class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Pending Leads & Inquiries</div>
 				<div class="h-8 w-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
 					<svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
 				</div>
 			</div>
 			<div class="mt-3 flex items-baseline gap-2">
-				<span class="text-3xl font-bold text-amber-700">{data.stats.pendingTasks}</span>
-				{#if data.stats.pendingTasks > 0}
-					<span class="admin-badge admin-badge-warning text-[10px]">Action Needed</span>
-				{:else}
-					<span class="admin-badge admin-badge-success text-[10px]">All Clear</span>
-				{/if}
+				<span class="text-3xl font-bold text-amber-700">{data.stats.pendingInquiries}</span>
+				<span class="text-xs text-zinc-400 font-medium">unresolved ({data.stats.totalInquiries} total)</span>
 			</div>
 			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
 				<a href="/submissions" class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
-					View Leads & Tasks
+					View Visitor Leads
+					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+				</a>
+			</div>
+		</div>
+
+		<!-- Stat Card 6: Equipment -->
+		<div class="stat-card admin-card admin-card-hover p-5 relative overflow-hidden group bg-white border border-zinc-200 rounded-xl shadow-sm">
+			<div class="flex items-center justify-between">
+				<div class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Equipment Inventory</div>
+				<div class="h-8 w-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center">
+					<svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+				</div>
+			</div>
+			<div class="mt-3 flex items-baseline gap-2">
+				<span class="text-3xl font-bold text-zinc-900">{data.stats.totalEquipment}</span>
+				<span class="text-xs text-zinc-400 font-medium">registered items</span>
+			</div>
+			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
+				<a href="/equipment" class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
+					View Equipment Inventory
 					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
 			</div>
 		</div>
 	</div>
+
 
 	<!-- Main Content Section: Audit Logs + System Summary -->
 	<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">

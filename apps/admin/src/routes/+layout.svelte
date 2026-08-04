@@ -73,12 +73,101 @@
 						Stories & Articles
 					</a>
 					<a
+						href="/leaders"
+						data-active={isActive('/leaders') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/leaders') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+						Ministry Leaders
+					</a>
+					<a
+						href="/testimonials"
+						data-active={isActive('/testimonials') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/testimonials') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+						Testimonials
+					</a>
+					<a
+						href="/bep"
+						data-active={isActive('/bep') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/bep') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+						BEP Marketplace
+					</a>
+					<a
+						href="/equipment"
+						data-active={isActive('/equipment') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/equipment') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+						Equipment Inventory
+					</a>
+					<a
+						href="/pages"
+						data-active={isActive('/pages') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/pages') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+						Landing Pages CMS
+					</a>
+					<a
+						href="/parents"
+						data-active={isActive('/parents') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/parents') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+						Parents Portal
+					</a>
+					<a
+						href="/newcomers"
+						data-active={isActive('/newcomers') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/newcomers') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+						VIP Newcomers
+					</a>
+
+					<a
+						href="/faq"
+						data-active={isActive('/faq') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/faq') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+						FAQ Portal
+					</a>
+					<a
+						href="/serve"
+						data-active={isActive('/serve') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/serve') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+						Volunteer Serve
+					</a>
+					<a
 						href="/submissions"
 						data-active={isActive('/submissions') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/submissions') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
 						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
 						Visitor & Serve Leads
+					</a>
+					<a
+						href="/statistics"
+						data-active={isActive('/statistics') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/statistics') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+						District Statistics
+					</a>
+					<a
+						href="/users"
+						data-active={isActive('/users') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/users') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+						Staff Accounts
 					</a>
 					<a
 						href="/audit-logs"
@@ -96,6 +185,8 @@
 						<svg class="h-4 w-4 text-[var(--brand-primary,#f95c4b)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
 						Site Settings
 					</a>
+
+
 				</nav>
 			</div>
 
