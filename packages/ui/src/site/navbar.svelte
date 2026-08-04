@@ -221,7 +221,7 @@
 			>
 			<a
 				class="rounded-full border border-brand-dark/20 bg-white/40 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-brand-dark backdrop-blur-sm transition hover:border-brand-primary hover:bg-brand-primary/10 hover:text-brand-primary"
-				href="/admin">Staff Portal</a
+				href="https://trailblazersadmin.vercel.app/login">Staff Portal</a
 			>
 		</div>
 
@@ -335,7 +335,7 @@
 					{/each}
 					<a
 						class="mt-2 rounded-xl px-3 py-3 text-base font-semibold text-brand-primary hover:bg-brand-primary/10 transition"
-						href="/admin"
+						href="https://trailblazersadmin.vercel.app/login"
 						onclick={closeMenu}>Staff Portal</a
 					>
 				</nav>
