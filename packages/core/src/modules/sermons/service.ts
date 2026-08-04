@@ -61,6 +61,11 @@ export function createSermonService(db: Database) {
 		async createSeries(title: string, description?: string, coverImageUrl?: string) {
 			const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 			return repo.createSeries({ title, slug, description, coverImageUrl });
+		},
+
+		async deleteSeries(id: number) {
+			return repo.deleteSeries(id);
 		}
 	};
 }
+

@@ -1,4 +1,4 @@
-import { desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { inquiries } from './schema.js';
 import { Sanitizer } from '../../util/sanitizer.js';
@@ -59,6 +59,16 @@ export function createInquiryService(db: Database) {
 				status: r.status || 'PENDING',
 				createdAt: r.createdAt || new Date()
 			}));
+		},
+
+		async updateStatus(id: number, status: string) {
+			const rows = await db.update(inquiries).set({ status }).where(eq(inquiries.id, id)).returning();
+			return rows[0];
+		},
+
+		async deleteInquiry(id: number) {
+			await db.delete(inquiries).where(eq(inquiries.id, id));
 		}
 	};
 }
+

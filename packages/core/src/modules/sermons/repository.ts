@@ -43,6 +43,11 @@ export function createSermonRepository(db: Database) {
 		async createSeries(data: typeof sermonSeries.$inferInsert) {
 			const rows = await db.insert(sermonSeries).values(data).returning();
 			return rows[0];
+		},
+
+		async deleteSeries(id: number) {
+			await db.delete(sermonSeries).where(eq(sermonSeries.id, id));
 		}
 	};
 }
+

@@ -38,6 +38,47 @@ export function createIamService(db: Database) {
 				.limit(1);
 			const row = rows[0];
 			return row ? toPublicUser(row.user) : null;
+		},
+
+		async getAllUsersForAdmin(): Promise<PublicUserVm[]> {
+			const rows = await db.select().from(users);
+			return rows.map(toPublicUser);
+		},
+
+		async saveUser(input: {
+			id?: number;
+			fullName: string;
+			email: string;
+			role?: 'ADMIN' | 'SECRETARY' | 'LEADER' | 'MEMBER';
+			avatarUrl?: string;
+			passwordHash?: string;
+		}) {
+			const values = {
+				fullName: input.fullName,
+				email: input.email,
+				role: input.role || 'MEMBER',
+				avatarUrl: input.avatarUrl || null,
+				...(input.passwordHash ? { passwordHash: input.passwordHash } : {})
+			};
+
+			if (input.id) {
+				const rows = await db.update(users).set(values).where(eq(users.id, input.id)).returning();
+				return toPublicUser(rows[0]);
+			} else {
+				const rows = await db
+					.insert(users)
+					.values({
+						...values,
+						passwordHash: input.passwordHash || 'pbkdf2:default'
+					})
+					.returning();
+				return toPublicUser(rows[0]);
+			}
+		},
+
+		async deleteUser(id: number) {
+			await db.delete(users).where(eq(users.id, id));
 		}
 	};
 }
+

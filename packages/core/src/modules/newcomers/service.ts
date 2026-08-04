@@ -25,6 +25,61 @@ export function createNewcomerService(db: Database) {
 						imageUrl: publicMediaUrl(rows[0].imageUrl)
 					}
 				: null;
+		},
+
+		async getAllForAdmin() {
+			const rows = await db
+				.select()
+				.from(newcomerContent)
+				.orderBy(asc(newcomerContent.sortOrder), asc(newcomerContent.id));
+			return rows.map((r) => ({
+				id: r.id,
+				headline: r.headline,
+				subheadline: r.subheadline,
+				body: r.body,
+				ctaLabel: r.ctaLabel,
+				ctaHref: r.ctaHref,
+				imageUrl: r.imageUrl,
+				sortOrder: r.sortOrder,
+				status: r.status
+			}));
+		},
+
+		async saveNewcomerContent(input: {
+			id?: number;
+			headline: string;
+			subheadline?: string;
+			body?: string;
+			ctaLabel?: string;
+			ctaHref?: string;
+			imageUrl?: string;
+			sortOrder?: number;
+			status?: string;
+		}) {
+			const values = {
+				headline: input.headline,
+				subheadline: input.subheadline || null,
+				body: input.body || null,
+				ctaLabel: input.ctaLabel || null,
+				ctaHref: input.ctaHref || null,
+				imageUrl: input.imageUrl || null,
+				sortOrder: input.sortOrder ?? 0,
+				status: input.status || 'PUBLISHED',
+				updatedAt: new Date()
+			};
+
+			if (input.id) {
+				const rows = await db.update(newcomerContent).set(values).where(eq(newcomerContent.id, input.id)).returning();
+				return rows[0];
+			} else {
+				const rows = await db.insert(newcomerContent).values(values).returning();
+				return rows[0];
+			}
+		},
+
+		async deleteNewcomerContent(id: number) {
+			await db.delete(newcomerContent).where(eq(newcomerContent.id, id));
 		}
 	};
 }
+

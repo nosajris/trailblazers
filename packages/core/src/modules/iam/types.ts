@@ -5,4 +5,6 @@ export type PublicUserVm = {
 	email: string;
 	fullName: string;
 	role: UserRole;
+	avatarUrl: string | null;
 };
+

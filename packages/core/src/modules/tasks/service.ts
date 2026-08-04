@@ -22,6 +22,11 @@ export function createTasksService(db: Database) {
 
 		async toggleTaskCompleted(id: number, isCompleted: boolean) {
 			return repo.updateStatus(id, isCompleted);
+		},
+
+		async deleteTask(id: number) {
+			return repo.delete(id);
 		}
 	};
 }
+

@@ -8,6 +8,8 @@ export function toPublicUser(row: Row): PublicUserVm {
 		id: row.id,
 		email: row.email,
 		fullName: row.fullName,
-		role: row.role as UserRole
+		role: row.role as UserRole,
+		avatarUrl: row.avatarUrl
 	};
 }
+

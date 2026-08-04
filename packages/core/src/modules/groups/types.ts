@@ -7,3 +7,9 @@ export type GroupCardVm = {
 	imageUrl: string | null;
 	description: string | null;
 };
+
+export type GroupAdminVm = GroupCardVm & {
+	status: string;
+	sortOrder: number | null;
+};
+

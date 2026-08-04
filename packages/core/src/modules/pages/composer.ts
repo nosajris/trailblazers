@@ -34,6 +34,31 @@ export function createPageComposerService(db: Database) {
 			);
 
 			return results.filter((block): block is HomeSectionBlock => block !== null);
+		},
+
+		async getAllPagesForAdmin() {
+			return db.select().from(pages);
+		},
+
+		async savePage(input: { id?: number; title: string; slug: string; status?: string }) {
+			const values = {
+				title: input.title,
+				slug: input.slug,
+				status: input.status || 'PUBLISHED'
+			};
+
+			if (input.id) {
+				const rows = await db.update(pages).set(values).where(eq(pages.id, input.id)).returning();
+				return rows[0];
+			} else {
+				const rows = await db.insert(pages).values(values).returning();
+				return rows[0];
+			}
+		},
+
+		async deletePage(id: number) {
+			await db.delete(pages).where(eq(pages.id, id));
 		}
 	};
 }
+

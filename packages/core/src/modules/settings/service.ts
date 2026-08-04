@@ -164,6 +164,32 @@ export function createSettingsService(db: Database) {
 			};
 		},
 
+		async updateSetting(key: string, value: unknown) {
+			await db
+				.insert(siteSettings)
+				.values({ key, value })
+				.onConflictDoUpdate({
+					target: siteSettings.key,
+					set: { value }
+				});
+		},
+
+		async saveBundle(bundle: Partial<SiteSettingsBundle>) {
+			if (bundle.navLinks !== undefined) {
+				await this.updateSetting('nav_links', bundle.navLinks);
+			}
+			if (bundle.footerColumns !== undefined) {
+				await this.updateSetting('footer_columns', bundle.footerColumns);
+			}
+			if (bundle.seoDefaults !== undefined) {
+				await this.updateSetting('seo_defaults', bundle.seoDefaults);
+			}
+			if (bundle.siteExtras !== undefined) {
+				await this.updateSetting('site_extras', bundle.siteExtras);
+			}
+		},
+
 		defaults: DEFAULTS
 	};
 }
+
