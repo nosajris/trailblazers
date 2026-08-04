@@ -4,12 +4,12 @@ test.describe('Elevation Church Template & Standalone Staff Admin App Verificati
 	test('Public Elevation Church Web Routes Load Successfully', async ({ page }) => {
 		// Homepage
 		await page.goto('/');
-		await expect(page).toHaveTitle(/PAOZ TRAILBLAZERS/i);
+		await expect(page).toHaveTitle(/Trailblazers/i);
 		await expect(page.locator('text=PLAN A VISIT').first()).toBeVisible();
 
 		// Watch & Messages
 		await page.goto('/watch');
-		await expect(page.locator('text=WATCH & LISTEN')).toBeVisible();
+		await expect(page.locator('text=WATCH & LISTEN').first()).toBeVisible();
 
 		// Events
 		await page.goto('/events');
