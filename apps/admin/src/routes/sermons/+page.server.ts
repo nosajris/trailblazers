@@ -68,5 +68,31 @@ export const actions: Actions = {
 			await services.auditLogs.logAction('DELETE_SERMON', 'SERMON', String(id), `Deleted sermon ID: ${id}`, locals.user?.id, locals.user?.fullName);
 		}
 		return { success: true };
+	},
+
+	createSeries: async ({ request, locals }) => {
+		const form = await request.formData();
+		const title = form.get('title')?.toString().trim();
+		const description = form.get('description')?.toString().trim();
+		const coverImageUrl = form.get('coverImageUrl')?.toString().trim();
+
+		if (!title) {
+			return fail(400, { error: 'Series title is required' });
+		}
+
+		const saved = await services.sermons.createSeries(title, description, coverImageUrl);
+		await services.auditLogs.logAction('CREATE_SERMON_SERIES', 'SERMON_SERIES', String(saved.id), `Created sermon series: ${saved.title}`, locals.user?.id, locals.user?.fullName);
+		return { success: true };
+	},
+
+	deleteSeries: async ({ request, locals }) => {
+		const form = await request.formData();
+		const id = Number(form.get('id'));
+		if (id) {
+			await services.sermons.deleteSeries(id);
+			await services.auditLogs.logAction('DELETE_SERMON_SERIES', 'SERMON_SERIES', String(id), `Deleted sermon series ID: ${id}`, locals.user?.id, locals.user?.fullName);
+		}
+		return { success: true };
 	}
 };
+
