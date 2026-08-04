@@ -15,33 +15,41 @@ export const actions: Actions = {
 			return fail(400, { error: 'Email and password are required' });
 		}
 
-		const user = await services.iam.getUserByEmail(email);
-		if (!user) {
-			return fail(400, { error: 'Invalid credentials' });
+		try {
+			const user = await services.iam.getUserByEmail(email);
+			if (!user) {
+				return fail(400, { error: 'Invalid credentials. Please ensure the database has been seeded.' });
+			}
+
+			const isValidPassword = user.passwordHash ? bcrypt.compareSync(password, user.passwordHash) : false;
+			if (!isValidPassword) {
+				return fail(400, { error: 'Invalid credentials' });
+			}
+
+			if (!canAccessAdmin(user.role || undefined)) {
+				return fail(403, { error: 'Access denied. Staff privileges required.' });
+			}
+
+			const sessionId = crypto.randomUUID();
+			const expiresAt = new Date(Date.now() + 86400000 * 7);
+
+			await services.iam.createSession(user.id, sessionId, expiresAt);
+			await services.auditLogs.logAction('LOGIN', 'USER', String(user.id), `Staff logged in: ${user.email}`, user.id, user.fullName);
+
+			cookies.set(SESSION_COOKIE, sessionId, {
+				path: '/',
+				httpOnly: true,
+				sameSite: 'lax',
+				secure: process.env.NODE_ENV === 'production',
+				expires: expiresAt
+			});
+		} catch (err: any) {
+			if (err?.status === 303 || err?.location) {
+				throw err; // Re-throw SvelteKit redirects
+			}
+			console.error('[AdminLoginError]', err);
+			return fail(500, { error: err?.message || 'Database connection error during login.' });
 		}
-
-		const isValidPassword = bcrypt.compareSync(password, user.passwordHash);
-		if (!isValidPassword) {
-			return fail(400, { error: 'Invalid credentials' });
-		}
-
-		if (!canAccessAdmin(user.role || undefined)) {
-			return fail(403, { error: 'Access denied. Staff privileges required.' });
-		}
-
-		const sessionId = crypto.randomUUID();
-		const expiresAt = new Date(Date.now() + 86400000 * 7);
-
-		await services.iam.createSession(user.id, sessionId, expiresAt);
-		await services.auditLogs.logAction('LOGIN', 'USER', String(user.id), `Staff logged in: ${user.email}`, user.id, user.fullName);
-
-		cookies.set(SESSION_COOKIE, sessionId, {
-			path: '/',
-			httpOnly: true,
-			sameSite: 'lax',
-			secure: process.env.NODE_ENV === 'production',
-			expires: expiresAt
-		});
 
 		throw redirect(303, '/');
 	}
