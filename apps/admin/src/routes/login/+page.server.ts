@@ -48,6 +48,9 @@ export const actions: Actions = {
 				throw err; // Re-throw SvelteKit redirects
 			}
 			console.error('[AdminLoginError]', err);
+			if (err?.code === 'ECONNREFUSED' || err?.cause?.code === 'ECONNREFUSED') {
+				return fail(500, { error: 'Database connection failed (ECONNREFUSED). Please set DATABASE_URL in your Vercel project environment variables.' });
+			}
 			return fail(500, { error: err?.message || 'Database connection error during login.' });
 		}
 
