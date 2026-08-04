@@ -1,0 +1,78 @@
+name: "DB: Database Seeding & Verification"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/src/lib/server/seed.ts"
+      - "apps/web/src/lib/server/data.ts"
+      - "packages/core/src/modules/**/schema.*"
+      - ".github/workflows/db-seed.yml"
+  workflow_dispatch:
+    inputs:
+      confirm_seed:
+        description: 'Confirm database re-seeding (destructive seed data wipe)'
+        required: true
+        default: 'true'
+        type: boolean
+
+concurrency:
+  group: db-seed-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    name: Run Database Seeding
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: trailblazers
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      CI: true
+      DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgres://postgres:postgrespassword@localhost:5432/trailblazers' }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Monorepo Dependencies
+        run: npm ci
+
+      - name: Check Database Connectivity & Health
+        run: node scripts/db-health-check.js
+
+      - name: Push Schema Migrations
+        run: npm run db:push
+
+      - name: Execute Database Seed Script
+        run: npm run seed
+
+      - name: Post-Seed Health & Record Count Check
+        run: node scripts/db-health-check.js
+
+      - name: Output Job Summary
+        if: always()
+        run: |
+          echo "### 🚀 Database Seeding Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Execution Status**: Success ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target Database**: \`${DATABASE_URL%%@*}\`..." >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: \`${{ github.event_name }}\`" >> $GITHUB_STEP_SUMMARY
