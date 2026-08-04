@@ -3,10 +3,107 @@
 @import "tailwindcss/utilities";
 
 @layer base {
+	:root {
+		--zinc-50: #fafafa;
+		--zinc-100: #f4f4f5;
+		--zinc-200: #e4e4e7;
+		--zinc-300: #d4d4d8;
+		--zinc-400: #a1a1aa;
+		--zinc-500: #71717a;
+		--zinc-600: #52525b;
+		--zinc-700: #3f3f46;
+		--zinc-800: #27272a;
+		--zinc-900: #18181b;
+		--zinc-950: #09090b;
+
+		--brand-primary: #f95c4b;
+		--brand-primary-hover: #ff7a6b;
+		--brand-primary-muted: rgba(249, 92, 75, 0.15);
+		--brand-fg: #ffffff;
+
+		--color-border: #e4e4e7;
+		--color-border-subtle: #f4f4f5;
+		--color-bg-app: #fafafa;
+		--color-bg-surface: #ffffff;
+		--color-bg-sidebar: #18181b;
+
+		--color-success-bg: #ecfdf5;
+		--color-success-fg: #047857;
+		--color-success-border: #a7f3d0;
+		--color-warning-bg: #fffbeb;
+		--color-warning-fg: #b45309;
+		--color-warning-border: #fde68a;
+		--color-danger-bg: #fef2f2;
+		--color-danger-fg: #dc2626;
+		--color-danger-border: #fecaca;
+	}
+
 	html {
 		scroll-behavior: smooth;
 	}
 	body {
-		@apply bg-zinc-50 text-zinc-900;
+		@apply bg-zinc-50 text-zinc-900 font-sans antialiased;
+	}
+}
+
+@layer components {
+	.admin-card {
+		@apply bg-white border border-zinc-200 rounded-xl shadow-sm transition-all duration-200;
+	}
+
+	.admin-card-hover {
+		@apply hover:shadow-md hover:border-zinc-300;
+	}
+
+	.admin-input {
+		@apply w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20;
+	}
+
+	.admin-btn-primary {
+		@apply inline-flex items-center justify-center rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-secondary active:translate-y-px disabled:opacity-50;
+	}
+
+	.admin-btn-secondary {
+		@apply inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 shadow-sm transition-all hover:bg-zinc-50 hover:border-zinc-400 active:translate-y-px disabled:opacity-50;
+	}
+
+	.admin-table {
+		@apply min-w-full divide-y divide-zinc-200 text-left border-collapse;
+	}
+
+	.admin-table th {
+		@apply bg-zinc-50 px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 border-b border-zinc-200;
+	}
+
+	.admin-table td {
+		@apply px-6 py-4 text-sm text-zinc-700 border-b border-zinc-100;
+	}
+
+	.admin-table tbody tr:last-child td {
+		@apply border-b-0;
+	}
+
+	.admin-table tbody tr {
+		@apply transition-colors hover:bg-zinc-50/80;
+	}
+
+	.admin-badge {
+		@apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+	}
+
+	.admin-badge-success {
+		@apply bg-emerald-50 text-emerald-700 border border-emerald-200;
+	}
+
+	.admin-badge-warning {
+		@apply bg-amber-50 text-amber-800 border border-amber-200;
+	}
+
+	.admin-badge-danger {
+		@apply bg-red-50 text-red-700 border border-red-200;
+	}
+
+	.admin-badge-neutral {
+		@apply bg-zinc-100 text-zinc-700 border border-zinc-200;
 	}
 }

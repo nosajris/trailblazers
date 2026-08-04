@@ -1,0 +1,41 @@
+:root {
+	/* Neutral Grayscale (Linear Theme Tokens) */
+	--zinc-50: #fafafa;
+	--zinc-100: #f4f4f5;
+	--zinc-200: #e4e4e7;
+	--zinc-300: #d4d4d8;
+	--zinc-400: #a1a1aa;
+	--zinc-500: #71717a;
+	--zinc-600: #52525b;
+	--zinc-700: #3f3f46;
+	--zinc-800: #27272a;
+	--zinc-900: #18181b;
+	--zinc-950: #09090b;
+
+	/* Brand & Action Colors */
+	--brand-primary: #f95c4b;
+	--brand-primary-hover: #e04a39;
+	--brand-primary-muted: rgba(249, 92, 75, 0.15);
+	--brand-fg: #ffffff;
+
+	/* Functional System Tokens */
+	--color-border: var(--zinc-200);
+	--color-border-subtle: var(--zinc-100);
+	--color-bg-app: var(--zinc-50);
+	--color-bg-surface: #ffffff;
+	--color-bg-sidebar: var(--zinc-900);
+	--color-text-main: var(--zinc-900);
+	--color-text-muted: var(--zinc-500);
+	--color-text-subtle: var(--zinc-400);
+
+	/* Status Colors */
+	--color-success-bg: #ecfdf5;
+	--color-success-fg: #047857;
+	--color-success-border: #a7f3d0;
+	--color-warning-bg: #fffbeb;
+	--color-warning-fg: #b45309;
+	--color-warning-border: #fde68a;
+	--color-danger-bg: #fef2f2;
+	--color-danger-fg: #dc2626;
+	--color-danger-border: #fecaca;
+}
