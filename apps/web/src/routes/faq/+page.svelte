@@ -13,7 +13,15 @@
 <SiteShell settings={data.settings}>
 	<section class="relative overflow-hidden bg-brand-dark py-14 text-white md:py-20">
 		<div class="absolute inset-0 opacity-20">
-			<img src="/images/wallpaper03.jpg" alt="" class="h-full w-full object-cover" sizes="100vw" />
+			<img
+				src="/images/wallpaper03.jpg"
+				alt=""
+				class="h-full w-full object-cover"
+				sizes="100vw"
+				fetchpriority="high"
+				loading="eager"
+				decoding="async"
+			/>
 		</div>
 		<div class="absolute inset-0 bg-gradient-to-r from-brand-dark via-brand-dark to-brand-dark/80"></div>
 		<div class="relative mx-auto max-w-4xl px-4 text-center sm:px-6 md:px-10">

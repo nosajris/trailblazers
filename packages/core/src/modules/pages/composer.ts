@@ -21,18 +21,19 @@ export function createPageComposerService(db: Database) {
 				.where(and(eq(pageSections.pageId, page.id), eq(pageSections.status, 'PUBLISHED')))
 				.orderBy(asc(pageSections.sortOrder), asc(pageSections.id));
 
-			const blocks: HomeSectionBlock[] = [];
+			// Each section's data loader is independent (events, blog, groups, etc. don't
+			// depend on one another), so fetch them concurrently instead of one at a time —
+			// this turns N sequential DB round trips into 1 round trip's worth of latency.
+			const results = await Promise.all(
+				sections.map((section) => {
+					const loader = registry[section.sectionType] as
+						| ((s: typeof section) => Promise<HomeSectionBlock | null>)
+						| undefined;
+					return loader ? loader(section) : Promise.resolve(null);
+				})
+			);
 
-			for (const section of sections) {
-				const loader = registry[section.sectionType] as
-					| ((s: typeof section) => Promise<HomeSectionBlock | null>)
-					| undefined;
-				if (!loader) continue;
-				const block = await loader(section);
-				if (block) blocks.push(block);
-			}
-
-			return blocks;
+			return results.filter((block): block is HomeSectionBlock => block !== null);
 		}
 	};
 }

@@ -18,9 +18,14 @@ function buildFallbackBlocks(): HomeSectionBlock[] {
 }
 
 export const load = async () => {
-	const settings = await services.settings.getBundle();
-	let blocks = await services.pages.composePublicPage('/');
-	const latestSermon = await services.sermons.getFeaturedSermon();
+	// These three calls don't depend on each other's results — run them concurrently
+	// instead of sequentially to cut the homepage's server-side latency roughly 3x.
+	const [settings, initialBlocks, latestSermon] = await Promise.all([
+		services.settings.getBundle(),
+		services.pages.composePublicPage('/'),
+		services.sermons.getFeaturedSermon()
+	]);
+	let blocks = initialBlocks;
 
 	if (blocks.length === 0) {
 		const [

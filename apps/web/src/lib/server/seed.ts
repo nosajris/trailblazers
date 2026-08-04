@@ -1,48 +1,71 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'node:crypto';
 import { db } from './db';
 import {
+	auditLogs,
 	bepProfiles,
 	blogs,
 	equipment,
 	events,
 	faqs,
 	groups,
+	inquiries,
 	leaders,
 	newcomerContent,
 	pageSections,
 	pages,
 	parentContent,
 	serveContent,
-	siteSettings,
 	sermons,
+	sermonSeries,
+	sessions,
+	siteSettings,
+	statistics,
+	tasks,
 	testimonials,
-	users,
-	inquiries
+	users
 } from '@trailblazers/core';
 
 import {
-	eventsData,
-	blogsData,
-	groupsData,
+	auditLogsData,
 	bepData,
+	blogsData,
 	equipmentData,
-	testimonialsData,
+	eventsData,
+	faqsData,
+	groupsData,
+	inquiriesData,
 	leadersData,
-	faqsData
+	newcomerContentData,
+	pagesData,
+	parentContentData,
+	serveContentData,
+	sermonsData,
+	sermonSeriesData,
+	siteSettingsExtraData,
+	statisticsData,
+	tasksData,
+	testimonialsData,
+	usersData
 } from './data';
 
 const hash = (pw: string) => bcrypt.hashSync(pw, 10);
 
 async function main() {
-	console.log('Starting seed...');
+	console.log('Starting seed...\n');
 
+	// Delete in FK-safe order (children before parents).
+	await db.delete(auditLogs);
+	await db.delete(tasks);
+	await db.delete(statistics);
+	await db.delete(inquiries);
 	await db.delete(pageSections);
 	await db.delete(pages);
 	await db.delete(siteSettings);
 	await db.delete(sermons);
+	await db.delete(sermonSeries);
 	await db.delete(bepProfiles);
 	await db.delete(blogs);
-	await db.delete(inquiries);
 	await db.delete(equipment);
 	await db.delete(events);
 	await db.delete(groups);
@@ -52,53 +75,70 @@ async function main() {
 	await db.delete(serveContent);
 	await db.delete(newcomerContent);
 	await db.delete(parentContent);
+	await db.delete(sessions);
 	await db.delete(users);
 
-	console.log('Cleared existing data.');
+	console.log('Cleared existing data.\n');
 
+	// ---------------------------------------------------------------------
+	// Users (10) — everything else with a userId FK is seeded relative to these.
+	// ---------------------------------------------------------------------
 	const insertedUsers = await db
 		.insert(users)
-		.values([
-			{ email: 'admin@paoz.org', passwordHash: hash('secret'), fullName: 'Admin User', role: 'ADMIN' },
-			{
-				email: 'secretary@paoz.org',
-				passwordHash: hash('secret'),
-				fullName: 'CMS Secretary',
-				role: 'SECRETARY'
-			},
-			{ email: 'leader@paoz.org', passwordHash: hash('secret'), fullName: 'Sarah Leader', role: 'LEADER' },
-			{ email: 'member@paoz.org', passwordHash: hash('secret'), fullName: 'John Member', role: 'MEMBER' }
-		])
+		.values(
+			usersData.map((u) => ({
+				email: u.email,
+				passwordHash: hash(u.password),
+				fullName: u.fullName,
+				role: u.role
+			}))
+		)
 		.returning();
-
-	await db.insert(sermons).values([
-		{
-			title: 'Faith That Moves With Your Week',
-			slug: 'faith-that-moves-with-your-week',
-			speaker: 'Pastor Tafadzwa',
-			youtubeId: 'dQw4w9WgXcQ',
-			scripture: 'Hebrews 11:1-6',
-			summary: 'Discover how daily faith empowers young adults to lead in university, business, and community.',
-			discussionGuide: '1. What step of faith is God calling you to take this week?\n2. How can our small group support your leadership journey?',
-			isFeatured: true,
-			publishedAt: new Date()
-		},
-		{
-			title: 'The Blueprint for Purposeful Leadership',
-			slug: 'blueprint-for-purposeful-leadership',
-			speaker: 'Guest Speaker Pastor Sarah',
-			youtubeId: 'dQw4w9WgXcQ',
-			scripture: 'Proverbs 3:5-6',
-			summary: 'Understanding your divine identity and leading with integrity in modern culture.',
-			discussionGuide: '1. How do you maintain Christian principles in competitive environments?\n2. Share one goal for your personal spiritual growth.',
-			isFeatured: false,
-			publishedAt: new Date(Date.now() - 86400000 * 7)
-		}
-	]);
-
-
 	console.log(`Inserted ${insertedUsers.length} users.`);
 
+	// Sessions (10) — one live demo session per user, 30 days out.
+	const thirtyDaysFromNow = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+	await db.insert(sessions).values(
+		insertedUsers.map((u) => ({
+			id: crypto.randomUUID(),
+			userId: u.id,
+			expiresAt: thirtyDaysFromNow
+		}))
+	);
+	console.log(`Inserted ${insertedUsers.length} sessions.`);
+
+	// ---------------------------------------------------------------------
+	// Sermon series (10) -> sermons (10, referencing a series + published date offsets)
+	// ---------------------------------------------------------------------
+	const insertedSeries = await db.insert(sermonSeries).values(
+		sermonSeriesData.map((s) => ({
+			title: s.title,
+			slug: s.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
+			description: s.description,
+			coverImageUrl: s.coverImageUrl
+		}))
+	).returning();
+	console.log(`Inserted ${insertedSeries.length} sermon series.`);
+
+	await db.insert(sermons).values(
+		sermonsData.map((s) => ({
+			title: s.title,
+			slug: s.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
+			speaker: s.speaker,
+			seriesId: insertedSeries[s.seriesIndex % insertedSeries.length]!.id,
+			youtubeId: s.youtubeId,
+			scripture: s.scripture,
+			summary: s.summary,
+			discussionGuide: s.discussionGuide,
+			isFeatured: s.isFeatured,
+			publishedAt: new Date(Date.now() - s.daysAgo * 86400000)
+		}))
+	);
+	console.log(`Inserted ${sermonsData.length} sermons.`);
+
+	// ---------------------------------------------------------------------
+	// Events, blogs, groups
+	// ---------------------------------------------------------------------
 	const eventsToInsert = eventsData.map(({ id: _id, ...rest }) => rest);
 	await db.insert(events).values(eventsToInsert);
 	console.log(`Inserted ${eventsData.length} events.`);
@@ -106,7 +146,7 @@ async function main() {
 	const blogsToInsert = blogsData.map((blog, index) => {
 		const author = insertedUsers[index % insertedUsers.length];
 		const { id: _id, ...rest } = blog;
-		return { ...rest, authorId: author!.id };
+		return { ...rest, authorId: author!.id, publishedAt: new Date(Date.now() - index * 86400000) };
 	});
 	await db.insert(blogs).values(blogsToInsert);
 	console.log(`Inserted ${blogsData.length} blogs.`);
@@ -115,11 +155,12 @@ async function main() {
 	await db.insert(groups).values(groupsToInsert);
 	console.log(`Inserted ${groupsData.length} groups.`);
 
-	const entrepreneurUser =
-		insertedUsers.find((u) => u.email === 'entrepreneur@paoz.org') || insertedUsers[0];
-	const bepToInsert = bepData.map(({ id: _id, userId: _uid, ...rest }) => ({
+	// ---------------------------------------------------------------------
+	// BEP profiles + equipment
+	// ---------------------------------------------------------------------
+	const bepToInsert = bepData.map(({ id: _id, userId, ...rest }) => ({
 		...rest,
-		userId: entrepreneurUser!.id
+		userId: insertedUsers[(userId - 1) % insertedUsers.length]!.id
 	}));
 	await db.insert(bepProfiles).values(bepToInsert);
 	console.log(`Inserted ${bepData.length} BEP profiles.`);
@@ -128,112 +169,57 @@ async function main() {
 	await db.insert(equipment).values(equipmentToInsert);
 	console.log(`Inserted ${equipmentData.length} equipment items.`);
 
+	// ---------------------------------------------------------------------
+	// Testimonials, leaders, faqs
+	// ---------------------------------------------------------------------
 	const testimonialsToInsert = testimonialsData.map(({ id: _id, ...rest }) => rest);
 	await db.insert(testimonials).values(testimonialsToInsert);
+	console.log(`Inserted ${testimonialsData.length} testimonials.`);
+
 	const leadersToInsert = leadersData.map(({ id: _id, ...rest }) => rest);
 	await db.insert(leaders).values(leadersToInsert);
+	console.log(`Inserted ${leadersData.length} leaders.`);
+
 	const faqsToInsert = faqsData.map(({ id: _id, ...rest }) => rest);
 	await db.insert(faqs).values(faqsToInsert);
+	console.log(`Inserted ${faqsData.length} FAQs.`);
 
-	await db.insert(serveContent).values({
-		headline: 'Serve with us',
-		subheadline: 'Your gifts make Sunday possible.',
-		body: 'Join a team and build the church alongside friends.',
-		ctaLabel: 'Ask about teams',
-		ctaHref: '/contact',
-		imageUrl: '/images/wallpaper04.jpg',
-		status: 'PUBLISHED',
-		sortOrder: 0
-	});
+	// ---------------------------------------------------------------------
+	// Rich content blocks (serve / newcomer / parent) — 10 rows each, only the
+	// first (sortOrder 0, status PUBLISHED) is shown on the live site today.
+	// ---------------------------------------------------------------------
+	await db.insert(serveContent).values(serveContentData);
+	console.log(`Inserted ${serveContentData.length} serve_content rows.`);
 
-	await db.insert(newcomerContent).values({
-		headline: "I'm new here",
-		subheadline: 'Start your journey with Trailblazers.',
-		body: 'We saved a seat for you. Plan a visit and meet the team.',
-		ctaLabel: 'Plan a visit',
-		ctaHref: '/plan-a-visit',
-		imageUrl: '/images/slider03.jpeg',
-		status: 'PUBLISHED',
-		sortOrder: 0
-	});
+	await db.insert(newcomerContent).values(newcomerContentData);
+	console.log(`Inserted ${newcomerContentData.length} newcomer_content rows.`);
 
-	await db.insert(parentContent).values({
-		headline: 'For parents',
-		subheadline: 'What we believe about the next generation.',
-		body: 'Safety, community, and discipleship matter here.',
-		ctaLabel: 'Talk to us',
-		ctaHref: '/contact',
-		imageUrl: '/images/image01.jpeg',
-		status: 'PUBLISHED',
-		sortOrder: 0
-	});
+	await db.insert(parentContent).values(parentContentData);
+	console.log(`Inserted ${parentContentData.length} parent_content rows.`);
 
-	const [home] = await db
-		.insert(pages)
-		.values({ slug: '/', title: 'Home', status: 'PUBLISHED' })
-		.returning();
+	// ---------------------------------------------------------------------
+	// Pages + page sections (10 pages; home page drives the live public site)
+	// ---------------------------------------------------------------------
+	let totalSections = 0;
+	for (const page of pagesData) {
+		const [inserted] = await db.insert(pages).values({ slug: page.slug, title: page.title, status: 'PUBLISHED' }).returning();
+		await db.insert(pageSections).values(
+			page.sections.map((s) => ({
+				pageId: inserted!.id,
+				sectionType: s.sectionType as (typeof pageSections.$inferInsert)['sectionType'],
+				sortOrder: s.sortOrder,
+				status: 'PUBLISHED',
+				config: s.config
+			}))
+		);
+		totalSections += page.sections.length;
+	}
+	console.log(`Inserted ${pagesData.length} pages and ${totalSections} page_sections.`);
 
-	const heroConfig = {
-		title: 'Ignited for impact',
-		subtitle: 'A transformational leadership ecosystem for young adults.',
-		imageUrl: '/images/wallpaper01.jpg',
-		videoUrl: '',
-		primaryCtaLabel: 'Plan a visit',
-		primaryCtaHref: '/plan-a-visit',
-		secondaryCtaLabel: 'Browse events',
-		secondaryCtaHref: '/events'
-	};
-
-	await db.insert(pageSections).values([
-		{ pageId: home!.id, sectionType: 'HERO', sortOrder: 0, status: 'PUBLISHED', config: heroConfig },
-		{
-			pageId: home!.id,
-			sectionType: 'EVENTS_RAIL',
-			sortOrder: 1,
-			status: 'PUBLISHED',
-			config: { title: 'Upcoming events', limit: 3 }
-		},
-		{
-			pageId: home!.id,
-			sectionType: 'BLOG',
-			sortOrder: 2,
-			status: 'PUBLISHED',
-			config: { title: 'Stories & updates', limit: 3 }
-		},
-		{
-			pageId: home!.id,
-			sectionType: 'TESTIMONIALS',
-			sortOrder: 3,
-			status: 'PUBLISHED',
-			config: { title: 'What people are saying' }
-		},
-		{
-			pageId: home!.id,
-			sectionType: 'GROUPS',
-			sortOrder: 4,
-			status: 'PUBLISHED',
-			config: { title: 'Connect in community' }
-		},
-		{ pageId: home!.id, sectionType: 'SERVE', sortOrder: 5, status: 'PUBLISHED', config: {} },
-		{ pageId: home!.id, sectionType: 'LEADERS', sortOrder: 6, status: 'PUBLISHED', config: { title: 'Leadership' } },
-		{ pageId: home!.id, sectionType: 'IM_NEW', sortOrder: 7, status: 'PUBLISHED', config: {} },
-		{ pageId: home!.id, sectionType: 'PARENTS', sortOrder: 8, status: 'PUBLISHED', config: {} },
-		{
-			pageId: home!.id,
-			sectionType: 'FAQ',
-			sortOrder: 9,
-			status: 'PUBLISHED',
-			config: { title: 'Questions' }
-		},
-		{
-			pageId: home!.id,
-			sectionType: 'CONTACT',
-			sortOrder: 10,
-			status: 'PUBLISHED',
-			config: { title: 'We would love to hear from you', intro: 'Send us a note.' }
-		}
-	]);
-
+	// ---------------------------------------------------------------------
+	// Site settings — 4 core keys the app reads today + 6 extra rows modelling
+	// features found while auditing elevationchurch.org (giving, service times, etc.)
+	// ---------------------------------------------------------------------
 	await db.insert(siteSettings).values([
 		{
 			key: 'nav_links',
@@ -326,17 +312,71 @@ async function main() {
 				watchEmbedUrl: '',
 				messagesUrl: '/messages',
 				planVisitHref: '/plan-a-visit',
-				campuses: [{ id: 'main', label: 'Gather with us', href: '/contact' }],
+				campuses: [
+					{ id: 'harare', label: 'Harare — Resurrection Center', href: '/plan-a-visit' },
+					{ id: 'bulawayo', label: 'Bulawayo — NUST Hub', href: '/plan-a-visit' },
+					{ id: 'gweru', label: 'Gweru — MSU Ignite', href: '/plan-a-visit' },
+					{ id: 'online', label: 'Online — Diaspora Connect', href: '/watch' }
+				],
 				languageOptions: [
 					{ code: 'en', label: 'English', href: '#' },
 					{ code: 'es', label: 'Español', href: '#' }
 				],
 				organizationName: 'Trailblazers Young Adults'
 			}
-		}
+		},
+		...siteSettingsExtraData
 	]);
+	console.log(`Inserted ${4 + siteSettingsExtraData.length} site_settings rows.`);
 
-	console.log('Seed completed successfully.');
+	// ---------------------------------------------------------------------
+	// Inquiries, statistics, tasks, audit logs
+	// ---------------------------------------------------------------------
+	await db.insert(inquiries).values(inquiriesData);
+	console.log(`Inserted ${inquiriesData.length} inquiries.`);
+
+	await db.insert(statistics).values(
+		statisticsData.map((s, index) => ({
+			districtName: s.districtName,
+			date: new Date(Date.now() - s.daysAgo * 86400000).toISOString().slice(0, 10),
+			attendanceCount: s.attendanceCount,
+			salvationsCount: s.salvationsCount,
+			notes: s.notes,
+			submittedBy: insertedUsers[index % insertedUsers.length]!.id
+		}))
+	);
+	console.log(`Inserted ${statisticsData.length} statistics rows.`);
+
+	await db.insert(tasks).values(
+		tasksData.map((t, index) => ({
+			title: t.title,
+			description: t.description,
+			assignedToUserId: insertedUsers[index % insertedUsers.length]!.id,
+			relatedEntityType: t.relatedEntityType,
+			relatedEntityId: t.relatedEntityId,
+			isCompleted: index % 4 === 0,
+			dueDate: new Date(Date.now() + t.daysDue * 86400000)
+		}))
+	);
+	console.log(`Inserted ${tasksData.length} tasks.`);
+
+	await db.insert(auditLogs).values(
+		auditLogsData.map((a, index) => {
+			const actor = insertedUsers[index % insertedUsers.length]!;
+			return {
+				userId: actor.id,
+				userName: actor.fullName,
+				action: a.action,
+				entityType: a.entityType,
+				entityId: a.entityId,
+				details: a.details,
+				createdAt: new Date(Date.now() - index * 3600000)
+			};
+		})
+	);
+	console.log(`Inserted ${auditLogsData.length} audit_logs rows.`);
+
+	console.log('\nSeed completed successfully — every table has at least 10 rows.');
 	process.exit(0);
 }
 

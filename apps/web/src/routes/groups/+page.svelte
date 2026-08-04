@@ -21,6 +21,9 @@
 				alt=""
 				class="h-full w-full object-cover opacity-35"
 				sizes="100vw"
+				fetchpriority="high"
+				loading="eager"
+				decoding="async"
 			/>
 			<div class="absolute inset-0 bg-gradient-to-r from-brand-dark via-brand-dark/90 to-brand-dark/70"></div>
 		</div>

@@ -28,6 +28,9 @@
 				src={event.imageUrl || '/images/wallpaper04.jpg'}
 				alt={event.title}
 				class="h-full w-full object-cover opacity-70"
+				fetchpriority="high"
+				loading="eager"
+				decoding="async"
 			/>
 			<div class="absolute inset-0 bg-gradient-to-t from-brand-light to-transparent"></div>
 

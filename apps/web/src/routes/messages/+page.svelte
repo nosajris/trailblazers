@@ -40,7 +40,15 @@
 <SiteShell settings={data.settings}>
 	<section class="relative overflow-hidden bg-brand-dark py-16 text-white md:py-24">
 		<div class="absolute inset-0 opacity-25">
-			<img src="/images/sermon2.jpg" alt="" class="h-full w-full object-cover object-top" sizes="100vw" />
+			<img
+				src="/images/sermon2.jpg"
+				alt=""
+				class="h-full w-full object-cover object-top"
+				sizes="100vw"
+				fetchpriority="high"
+				loading="eager"
+				decoding="async"
+			/>
 		</div>
 		<div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/90 to-brand-dark/50"></div>
 		<div class="{container} relative max-w-4xl">

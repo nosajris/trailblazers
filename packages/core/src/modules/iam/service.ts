@@ -28,12 +28,16 @@ export function createIamService(db: Database) {
 		},
 
 		async validateSession(sessionId: string): Promise<PublicUserVm | null> {
-			const session = await db.query.sessions.findFirst({
-				where: and(eq(sessions.id, sessionId), gt(sessions.expiresAt, new Date()))
-			});
-			if (!session) return null;
-			const user = await db.query.users.findFirst({ where: eq(users.id, session.userId) });
-			return user ? toPublicUser(user) : null;
+			// Single join instead of two sequential round trips — this runs on every
+			// authenticated request in both apps (see hooks.server.ts), so it's a hot path.
+			const rows = await db
+				.select({ user: users })
+				.from(sessions)
+				.innerJoin(users, eq(sessions.userId, users.id))
+				.where(and(eq(sessions.id, sessionId), gt(sessions.expiresAt, new Date())))
+				.limit(1);
+			const row = rows[0];
+			return row ? toPublicUser(row.user) : null;
 		}
 	};
 }

@@ -26,7 +26,14 @@
 	<!-- Elevation-style Hero section -->
 	<section class="relative overflow-hidden border-b border-white/10 bg-brand-dark py-16 text-white md:py-24">
 		<div class="absolute inset-0 opacity-30">
-			<img src="/images/sermon1.jpg" alt="Sermons background" class="h-full w-full object-cover" />
+			<img
+				src="/images/sermon1.jpg"
+				alt="Sermons background"
+				class="h-full w-full object-cover"
+				fetchpriority="high"
+				loading="eager"
+				decoding="async"
+			/>
 		</div>
 		<div class="absolute inset-0 bg-gradient-to-r from-brand-dark via-brand-dark/95 to-brand-dark/80"></div>
 		<div class="{container} relative max-w-4xl">

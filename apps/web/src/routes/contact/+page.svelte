@@ -19,6 +19,9 @@
 				alt=""
 				class="h-full w-full object-cover object-center"
 				sizes="100vw"
+				fetchpriority="high"
+				loading="eager"
+				decoding="async"
 			/>
 		</div>
 		<div class="absolute inset-0 bg-gradient-to-r from-brand-dark via-brand-dark/95 to-brand-dark/70"></div>

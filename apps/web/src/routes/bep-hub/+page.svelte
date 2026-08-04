@@ -58,7 +58,14 @@
 	<div class="min-h-screen bg-zinc-50">
 		<section class="relative overflow-hidden bg-brand-dark py-20 text-white md:py-28">
 			<div class="absolute inset-0">
-				<img src="/images/image06.jpeg" alt="BEP Hub background" class="h-full w-full object-cover opacity-25" />
+				<img
+					src="/images/image06.jpeg"
+					alt="BEP Hub background"
+					class="h-full w-full object-cover opacity-25"
+					fetchpriority="high"
+					loading="eager"
+					decoding="async"
+				/>
 				<div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/90 to-brand-dark/50"></div>
 			</div>
 			<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">

@@ -67,19 +67,15 @@ export function createEventService(db: Database) {
 			const whereClause = and(buildListingWhere(filters), publishedEventsOnly());
 			const orderBy = listingOrderBy(filters.sort);
 
-			const paginatedEvents = await db
-				.select()
-				.from(events)
-				.where(whereClause)
-				.orderBy(orderBy)
-				.limit(filters.limit)
-				.offset(offset);
-
-			const countResult = await db.select({ count: countSql() }).from(events).where(whereClause);
+			// The page of results, the total count, and the featured event are three
+			// independent queries — run them concurrently rather than one after another.
+			const [paginatedEvents, countResult, featuredEvent] = await Promise.all([
+				db.select().from(events).where(whereClause).orderBy(orderBy).limit(filters.limit).offset(offset),
+				db.select({ count: countSql() }).from(events).where(whereClause),
+				getFeaturedOrFallback()
+			]);
 			const totalEvents = countResult[0]?.count ?? 0;
 			const totalPages = Math.ceil(totalEvents / filters.limit);
-
-			const featuredEvent = await getFeaturedOrFallback();
 
 			return {
 				events: paginatedEvents.map(toEventCard),
