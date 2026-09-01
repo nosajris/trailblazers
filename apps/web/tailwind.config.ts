@@ -20,12 +20,15 @@ export default {
 				sans: ['Montserrat', 'sans-serif'],
 				serif: ['Playfair Display', 'serif']
 			},
+			// Read from packages/ui/src/tokens.css, the single definition of
+			// colour. The channel variables (not the hex ones) are used so that
+			// opacity modifiers like `text-brand-dark/75` keep working.
 			colors: {
-				'brand-primary': '#F95C4B',   // Algerian Coral
-				'brand-secondary': '#FF7A6B', // Soft Coral hover
-				'brand-dark': '#171616',      // Army Black
-				'brand-light': '#F9F9F8',     // Off-white light background
-				'brand-gold': '#FFB800'       // PAOZ Yellow/Gold
+				'brand-primary': 'rgb(var(--brand-primary-rgb) / <alpha-value>)',
+				'brand-secondary': 'rgb(var(--brand-secondary-rgb) / <alpha-value>)',
+				'brand-dark': 'rgb(var(--brand-dark-rgb) / <alpha-value>)',
+				'brand-light': 'rgb(var(--brand-light-rgb) / <alpha-value>)',
+				'brand-gold': 'rgb(var(--brand-gold-rgb) / <alpha-value>)'
 			},
 			backgroundImage: {
 				'hero-pattern': "url('/images/wallpaper01.jpg')"

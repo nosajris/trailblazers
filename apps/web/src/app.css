@@ -1,3 +1,5 @@
+/* Colour comes from the shared token file — see packages/ui/src/tokens.css. */
+@import "@trailblazers/ui/tokens.css";
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";

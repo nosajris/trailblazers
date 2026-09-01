@@ -1,3 +1,25 @@
+/**
+ * The single definition of colour for both apps.
+ *
+ * This file previously existed but was imported by nothing: the admin app
+ * re-declared every token inline in `app.css`, and the web app repeated the
+ * same hexes in `tailwind.config.ts`. Three copies, already drifting —
+ * `--brand-primary-hover` was #e04a39 here and #ff7a6b in admin.
+ *
+ * Both apps now import this file, and both Tailwind configs read the channel
+ * variables below, so a colour is defined exactly once.
+ *
+ * WHY EACH COLOUR APPEARS TWICE
+ * Tailwind's opacity modifiers (`bg-brand-primary/20`, `text-brand-dark/75`)
+ * need the colour as space-separated RGB channels so it can inject an alpha.
+ * A `var()` holding `#f95c4b` cannot carry one, and the modifier is silently
+ * dropped. So each colour has a `-rgb` channel triplet used by Tailwind, and a
+ * hex form used by hand-written `var(--…)` CSS.
+ *
+ * The two forms must agree. `tokens.test.ts` asserts that they do — do not
+ * edit one without the other.
+ */
+
 :root {
 	/* Neutral Grayscale (Linear Theme Tokens) */
 	--zinc-50: #fafafa;
@@ -12,11 +34,26 @@
 	--zinc-900: #18181b;
 	--zinc-950: #09090b;
 
-	/* Brand & Action Colors */
-	--brand-primary: #f95c4b;
-	--brand-primary-hover: #e04a39;
-	--brand-primary-muted: rgba(249, 92, 75, 0.15);
+	/*
+	 * Brand & Action Colors.
+	 * --brand-primary-hover resolves the drift in favour of #ff7a6b, which is
+	 * what both apps actually rendered: admin's .admin-btn-primary hovers to
+	 * brand-secondary, and web defines the same value as "Soft Coral hover".
+	 */
+	--brand-primary: #f95c4b; /* Algerian Coral */
+	--brand-primary-rgb: 249 92 75;
+	--brand-primary-hover: #ff7a6b;
+	--brand-secondary: #ff7a6b; /* Soft Coral hover */
+	--brand-secondary-rgb: 255 122 107;
+	--brand-dark: #171616; /* Army Black */
+	--brand-dark-rgb: 23 22 22;
+	--brand-light: #f9f9f8; /* Off-white background */
+	--brand-light-rgb: 249 249 248;
+	--brand-gold: #ffb800; /* PAOZ Yellow/Gold */
+	--brand-gold-rgb: 255 184 0;
 	--brand-fg: #ffffff;
+	--brand-fg-rgb: 255 255 255;
+	--brand-primary-muted: rgb(var(--brand-primary-rgb) / 0.15);
 
 	/* Functional System Tokens */
 	--color-border: var(--zinc-200);
@@ -28,6 +65,11 @@
 	--color-text-muted: var(--zinc-500);
 	--color-text-subtle: var(--zinc-400);
 
+	/* Focus ring. Keyboard users had no visible focus anywhere in either app. */
+	--focus-ring-color: var(--brand-primary);
+	--focus-ring-width: 3px;
+	--focus-ring-offset: 2px;
+
 	/* Status Colors */
 	--color-success-bg: #ecfdf5;
 	--color-success-fg: #047857;
@@ -38,4 +80,59 @@
 	--color-danger-bg: #fef2f2;
 	--color-danger-fg: #dc2626;
 	--color-danger-border: #fecaca;
+}
+
+/*
+ * Keyboard focus.
+ *
+ * Neither app defined a single :focus or :focus-visible style, so tabbing
+ * through either one was invisible — Tailwind's preflight removes the browser
+ * default outline and nothing replaced it. That makes the site unusable
+ * without a mouse and fails WCAG 2.4.7.
+ *
+ * :focus-visible rather than :focus, so a mouse click on a button does not
+ * leave a ring behind while keyboard navigation still shows one.
+ */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+	outline: var(--focus-ring-width) solid var(--focus-ring-color);
+	outline-offset: var(--focus-ring-offset);
+	border-radius: 2px;
+}
+
+/* Dark surfaces need a light ring; the coral disappears against near-black. */
+:where(.bg-brand-dark, .bg-zinc-900, [data-surface='dark'])
+	:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+	outline-color: #ffffff;
+}
+
+/**
+ * Skip link: the first thing a keyboard or screen-reader user meets, letting
+ * them jump past the navigation. Hidden until focused.
+ */
+.skip-link {
+	position: absolute;
+	left: -9999px;
+	top: 0;
+	z-index: 100;
+	padding: 0.75rem 1.25rem;
+	background: var(--brand-primary);
+	color: var(--brand-fg);
+	font-weight: 700;
+	border-radius: 0 0 0.5rem 0;
+}
+
+.skip-link:focus {
+	left: 0;
+}
+
+/* Respect a reduced-motion preference rather than animating regardless. */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
 }

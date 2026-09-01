@@ -8,7 +8,9 @@
 			"types": "./src/index.ts",
 			"svelte": "./src/index.ts",
 			"default": "./src/index.ts"
-		}
+		},
+		"./tokens.css": "./src/tokens.css",
+		"./*": "./src/*"
 	},
 	"peerDependencies": {
 		"@trailblazers/core": "*",

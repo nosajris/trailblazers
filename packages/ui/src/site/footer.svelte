@@ -28,6 +28,20 @@
 				>
 					<p class="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-gold">Stay connected</p>
 					<p class="mt-2 text-sm text-gray-400">Get updates on events and opportunities.</p>
+					<!--
+						Decoy field: hidden from people and assistive tech, but filled in by
+						form-spamming bots. The server drops any submission that carries it.
+					-->
+					<div class="hidden" aria-hidden="true">
+						<label for="footer-newsletter-website">Leave this field empty</label>
+						<input
+							id="footer-newsletter-website"
+							type="text"
+							name="website"
+							tabindex="-1"
+							autocomplete="off"
+						/>
+					</div>
 					<div class="mt-4 flex flex-col gap-3 sm:flex-row">
 						<label class="sr-only" for="footer-newsletter-email">Email address</label>
 						<input
@@ -46,6 +60,15 @@
 							Subscribe
 						</button>
 					</div>
+					<!--
+						The consent wording is stored verbatim with each subscription.
+						If you change it here, change NEWSLETTER_CONSENT_TEXT in
+						packages/core/src/modules/inquiries/service.ts to match.
+					-->
+					<p class="mt-3 text-xs leading-relaxed text-gray-500">
+						By subscribing you agree to receive email updates about Trailblazers events and
+						opportunities. You can unsubscribe at any time using the link in every email.
+					</p>
 				</form>
 			</div>
 			<div class="grid gap-10 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-2">
