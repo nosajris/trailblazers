@@ -4,7 +4,7 @@ trigger: always_on
 
 # Feature Development Workflow
 
-This document outlines the standard workflow for implementing new features in the Kura platform.
+This document outlines the standard workflow for implementing new features in the Trailblazers platform.
 
 ## Overview
 
@@ -40,9 +40,11 @@ We follow a **TDD-first, Plan-Execute-Verify** approach with comprehensive E2E t
      - Manual verification steps
      ```
 
-3. **Request user approval** via `notify_user` with `BlockedOnUser: true`
-   - Include paths to `implementation_plan.md`
-   - Wait for user feedback before proceeding
+3. **Request user approval before writing code**
+   - Summarise the plan in your reply and link `implementation_plan.md`
+   - Wait for a clear answer before proceeding
+   - (This step previously named a `notify_user` tool, which does not exist in
+     this setup. Just ask in your response.)
 
 ### Phase 2: Execution
 
@@ -59,7 +61,7 @@ We follow a **TDD-first, Plan-Execute-Verify** approach with comprehensive E2E t
 
 6. **Implement Frontend**
    - Create/update Svelte components
-   - Use `@kura/ui` components for consistency
+   - Use `@trailblazers/ui` components for consistency
    - Follow design system (Linear-style, Zinc colors)
    - Use vanilla CSS with CSS variables
 
@@ -128,10 +130,10 @@ We follow a **TDD-first, Plan-Execute-Verify** approach with comprehensive E2E t
     - [ ] No lint errors
     - [ ] User-facing changes documented
 
-12. **Notify user** via `notify_user` with completion summary
-    - Include paths to `walkthrough.md`
-    - Highlight key accomplishments
-    - Note any follow-up items
+12. **Report completion in your reply**
+    - Link `walkthrough.md`
+    - State what you actually ran to verify, not just what changed
+    - Note any follow-up items you deliberately left
 
 ## Testing Best Practices
 
@@ -188,4 +190,4 @@ We follow a **TDD-first, Plan-Execute-Verify** approach with comprehensive E2E t
 - **Incremental Progress**: Small, verifiable steps
 - **Continuous Verification**: Test early and often
 - **Documentation**: Keep artifacts updated in real-time
-- **User Communication**: Use `notify_user` for approvals and completions
+- **User Communication**: ask for approvals and report completion in your reply; there is no notification tool in this setup
