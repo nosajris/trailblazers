@@ -1,5 +1,6 @@
 import { services } from '$lib/server/services';
 import type { HomeSectionBlock } from '@trailblazers/core';
+import { cacheHeaders } from '$lib/server/cache';
 
 function buildFallbackBlocks(): HomeSectionBlock[] {
 	return [
@@ -17,7 +18,9 @@ function buildFallbackBlocks(): HomeSectionBlock[] {
 	];
 }
 
-export const load = async () => {
+export const load = async ({ setHeaders }) => {
+	setHeaders(cacheHeaders('content'));
+
 	// These three calls don't depend on each other's results — run them concurrently
 	// instead of sequentially to cut the homepage's server-side latency roughly 3x.
 	const [settings, initialBlocks, latestSermon] = await Promise.all([

@@ -61,6 +61,14 @@
 					<p class="mt-3 text-brand-dark/75">We typically respond within a few business days.</p>
 
 					<form method="POST" class="mt-10 space-y-6">
+						<!--
+							Decoy field: hidden from people and assistive tech, but filled in by
+							form-spamming bots. The server drops any submission that carries it.
+						-->
+						<div class="hidden" aria-hidden="true">
+							<label for="contact-website">Leave this field empty</label>
+							<input id="contact-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+						</div>
 						<div>
 							<label class="text-xs font-bold uppercase tracking-wide text-brand-dark/60" for="name">Name</label>
 							<input

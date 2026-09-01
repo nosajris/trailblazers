@@ -1,8 +1,11 @@
 <script lang="ts">
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 
-	let { data } = $props();
+	let { data, form } = $props();
 	let { event } = data;
+
+	/** Seat state for this event, or null when the event vanished mid-request. */
+	const availability = $derived(data.availability);
 
 	const formatDate = (date: Date) => {
 		return new Intl.DateTimeFormat('en-US', {
@@ -115,19 +118,93 @@
 							</div>
 						</div>
 
-						<div class="mt-8 space-y-3">
-							<a
-								class="btn btn-primary flex w-full items-center justify-center py-3 text-center"
-								href="/contact">Register / inquire</a
-							>
+						<div class="mt-8 space-y-4">
+							{#if form?.success}
+								<div
+									class="rounded-xl border border-[var(--color-success-border)] bg-[var(--color-success-bg)] p-4 text-sm"
+								>
+									{#if form.status === 'WAITLIST'}
+										<p class="font-bold text-[var(--color-success-fg)]">You are on the waitlist</p>
+										<p class="mt-1 text-[var(--color-success-fg)]">
+											This event is full. We will email you if a place opens up.
+										</p>
+									{:else if form.alreadyRegistered}
+										<p class="font-bold text-[var(--color-success-fg)]">You are already registered</p>
+										<p class="mt-1 text-[var(--color-success-fg)]">
+											We have you down for this one — no need to register again.
+										</p>
+									{:else}
+										<p class="font-bold text-[var(--color-success-fg)]">You are registered</p>
+										<p class="mt-1 text-[var(--color-success-fg)]">
+											We have emailed you a confirmation. See you there.
+										</p>
+									{/if}
+								</div>
+							{:else if availability && !availability.isOpen}
+								<p class="rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-center text-sm text-gray-600">
+									Registration for this event has closed.
+								</p>
+							{:else}
+								{#if form?.error}
+									<div
+										class="rounded-xl border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] p-3 text-sm font-semibold text-[var(--color-danger-fg)]"
+									>
+										{form.error}
+									</div>
+								{/if}
+								{#if availability?.willWaitlist}
+									<p class="rounded-xl border border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] p-3 text-xs text-[var(--color-warning-fg)]">
+										This event is full. You can still join the waitlist below.
+									</p>
+								{/if}
+								<form method="POST" action="?/register" class="space-y-3">
+									<!-- Decoy field for bots; see rate-limit.ts. -->
+									<div class="hidden" aria-hidden="true">
+										<label for="rsvp-website">Leave this field empty</label>
+										<input id="rsvp-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+									</div>
+									<label class="sr-only" for="rsvp-name">Your name</label>
+									<input
+										id="rsvp-name"
+										name="fullName"
+										required
+										placeholder="Your name"
+										autocomplete="name"
+										class="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+									/>
+									<label class="sr-only" for="rsvp-email">Email address</label>
+									<input
+										id="rsvp-email"
+										name="email"
+										type="email"
+										required
+										placeholder="Email address"
+										autocomplete="email"
+										class="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+									/>
+									<label class="sr-only" for="rsvp-phone">Phone number (optional)</label>
+									<input
+										id="rsvp-phone"
+										name="phone"
+										type="tel"
+										placeholder="Phone number (optional)"
+										autocomplete="tel"
+										class="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+									/>
+									<button type="submit" class="btn btn-primary flex w-full items-center justify-center py-3 text-center">
+										{availability?.willWaitlist ? 'Join the waitlist' : 'Register'}
+									</button>
+								</form>
+							{/if}
 							<a
 								class="block text-center text-sm font-semibold text-brand-primary underline-offset-2 hover:underline"
 								href={`/events/${event.id}/ics`}
 								download>Download calendar (.ics)</a
 							>
-							{#if event.capacity}
+							{#if availability && availability.seatsLeft !== null}
 								<p class="text-center text-xs text-gray-500">
-									{event.capacity - (event.registeredCount || 0)} spots remaining
+									{availability.seatsLeft}
+									{availability.seatsLeft === 1 ? 'place' : 'places'} remaining
 								</p>
 							{/if}
 						</div>

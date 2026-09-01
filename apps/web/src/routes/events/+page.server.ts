@@ -1,10 +1,13 @@
 import { services } from '$lib/server/services';
 import type { EventCardVm } from '@trailblazers/core';
 import type { PageServerLoad } from './$types';
+import { cacheHeaders } from '$lib/server/cache';
 
 const NO_EVENTS: EventCardVm[] = [];
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, setHeaders }) => {
+	setHeaders(cacheHeaders('dynamic'));
+
 	const search = url.searchParams.get('q') || '';
 	const type = url.searchParams.get('type') || 'ALL';
 	const sort = url.searchParams.get('sort') || 'date_asc';

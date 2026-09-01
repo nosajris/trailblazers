@@ -1,5 +1,3 @@
-import type { UserRole } from '@trailblazers/core';
-
-export function canAccessAdmin(role: UserRole | undefined): boolean {
-	return role === 'ADMIN' || role === 'SECRETARY';
-}
+// The policy lives in @trailblazers/core so the two apps cannot drift apart.
+// This file used to carry its own copy of the rule.
+export { canAccessAdmin } from '@trailblazers/core';

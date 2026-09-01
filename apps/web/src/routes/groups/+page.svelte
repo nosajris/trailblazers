@@ -2,7 +2,15 @@
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
 
-	let { data } = $props();
+	let { data, form } = $props();
+
+	/**
+	 * Which group's join form is expanded.
+	 *
+	 * The form is inline per card rather than a separate page, so someone can
+	 * act on the group they are reading about without losing their place.
+	 */
+	let openGroupId = $state<number | null>(null);
 </script>
 
 <svelte:head>
@@ -103,12 +111,77 @@
 							{#if g.description}
 								<p class="mt-4 text-sm leading-relaxed text-brand-dark/70">{g.description}</p>
 							{/if}
-							<a
-								class="mt-6 inline-flex rounded-full border border-brand-dark/15 px-6 py-2.5 text-xs font-bold uppercase tracking-wide text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
-								href="/contact?topic=group&group={encodeURIComponent(g.name)}"
-							>
-								Ask about this group
-							</a>
+							{#if form?.success && form.groupName === g.name}
+								<div class="mt-6 rounded-xl border border-[var(--color-success-border)] bg-[var(--color-success-bg)] p-4 text-sm">
+									<p class="font-bold text-[var(--color-success-fg)]">Thank you — we have your details</p>
+									<p class="mt-1 text-[var(--color-success-fg)]">
+										The group leader will be in touch about joining {g.name}.
+									</p>
+								</div>
+							{:else if openGroupId === g.id}
+								<form method="POST" action="?/joinGroup" class="mt-6 space-y-3">
+									<input type="hidden" name="groupId" value={g.id} />
+									<div class="hidden" aria-hidden="true">
+										<label for="join-website-{g.id}">Leave this field empty</label>
+										<input id="join-website-{g.id}" type="text" name="website" tabindex="-1" autocomplete="off" />
+									</div>
+									{#if form?.error}
+										<p class="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] p-2 text-xs font-semibold text-[var(--color-danger-fg)]">
+											{form.error}
+										</p>
+									{/if}
+									<label class="sr-only" for="join-name-{g.id}">Your name</label>
+									<input
+										id="join-name-{g.id}"
+										name="fullName"
+										required
+										placeholder="Your name"
+										autocomplete="name"
+										class="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+									/>
+									<label class="sr-only" for="join-email-{g.id}">Email address</label>
+									<input
+										id="join-email-{g.id}"
+										name="email"
+										type="email"
+										required
+										placeholder="Email address"
+										autocomplete="email"
+										class="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+									/>
+									<label class="sr-only" for="join-message-{g.id}">Anything you would like the leader to know</label>
+									<textarea
+										id="join-message-{g.id}"
+										name="message"
+										rows="2"
+										placeholder="Anything you would like the leader to know (optional)"
+										class="w-full resize-y rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+									></textarea>
+									<div class="flex items-center gap-3">
+										<button
+											type="submit"
+											class="rounded-full bg-brand-primary px-6 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition hover:brightness-105"
+										>
+											Send
+										</button>
+										<button
+											type="button"
+											class="text-xs font-semibold text-brand-dark/60 hover:text-brand-dark"
+											onclick={() => (openGroupId = null)}
+										>
+											Cancel
+										</button>
+									</div>
+								</form>
+							{:else}
+								<button
+									type="button"
+									class="mt-6 inline-flex rounded-full border border-brand-dark/15 px-6 py-2.5 text-xs font-bold uppercase tracking-wide text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
+									onclick={() => (openGroupId = g.id)}
+								>
+									I'd like to join
+								</button>
+							{/if}
 						</div>
 					</article>
 				{/each}

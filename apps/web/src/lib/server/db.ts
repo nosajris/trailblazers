@@ -12,11 +12,21 @@ const databaseUrl =
 	process.env.POSTGRES_PRISMA_URL ||
 	process.env.POSTGRES_URL_NON_POOLING;
 
-if (!databaseUrl && process.env.NODE_ENV === 'production') {
-	console.error('[DB Error] Missing DATABASE_URL / POSTGRES_URL environment variable in production deployment.');
-}
+export const LOCAL_FALLBACK_URL = 'postgresql://postgres:postgres@localhost:5432/trailblazers';
 
-const finalDatabaseUrl = databaseUrl || 'postgresql://postgres:postgres@localhost:5432/trailblazers';
-const { db, sql } = createDatabase(finalDatabaseUrl);
+/**
+ * Whether a connection string was actually supplied.
+ *
+ * The fallback below stays in place because this module is also evaluated
+ * where no database is expected: SvelteKit imports server modules during the
+ * build to read route options, and `npm run seed` loads it through vite-node.
+ * `postgres()` is lazy, so an unused fallback never opens a socket.
+ *
+ * The production guard that used to be missing now lives in `hooks.server.ts`,
+ * which only the running server loads — see the note there.
+ */
+export const isDatabaseUrlConfigured = Boolean(databaseUrl);
+
+const { db, sql } = createDatabase(databaseUrl || LOCAL_FALLBACK_URL);
 
 export { db, sql };

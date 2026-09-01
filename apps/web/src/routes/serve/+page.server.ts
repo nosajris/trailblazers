@@ -1,8 +1,17 @@
 import { fail } from '@sveltejs/kit';
 import { services } from '$lib/server/services';
+import { logger } from '@trailblazers/core';
+import {
+	consumeFormSubmission,
+	isHoneypotTripped,
+	throttleMessage
+} from '$lib/server/rate-limit';
 import type { PageServerLoad, Actions } from './$types';
+import { cacheHeaders } from '$lib/server/cache';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ setHeaders }) => {
+	setHeaders(cacheHeaders('content'));
+
 	const [settings, section] = await Promise.all([
 		services.settings.getBundle(),
 		services.serve.getPrimaryPublished()
@@ -11,8 +20,19 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	applyToServe: async ({ request }) => {
+	applyToServe: async ({ request, getClientAddress }) => {
 		const form = await request.formData();
+
+		if (isHoneypotTripped(form)) {
+			logger.warn('ServeApplication', 'honeypot tripped', { address: getClientAddress() });
+			return { success: true };
+		}
+
+		const throttle = consumeFormSubmission(getClientAddress(), 'serve');
+		if (!throttle.allowed) {
+			return fail(429, { error: throttleMessage(throttle.retryAfterSeconds) });
+		}
+
 		const fullName = form.get('fullName')?.toString().trim();
 		const email = form.get('email')?.toString().trim();
 		const team = form.get('team')?.toString().trim() || 'General Serving Team';
