@@ -1,0 +1,52 @@
+version: 2
+
+# Keeps dependency and action updates arriving on a schedule. There was no
+# config here, so nothing re-raised them: a security bump for esbuild/vite sat
+# open and unmerged from February 2025.
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      # Matches this repo's convention. Never a closing keyword — see CLAUDE.md.
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      # One PR per ecosystem area rather than a dozen, so review stays tractable.
+      sveltekit:
+        patterns:
+          - "@sveltejs/*"
+          - "svelte"
+          - "svelte-check"
+          - "vite"
+          - "@vitejs/*"
+      database:
+        patterns:
+          - "drizzle-orm"
+          - "drizzle-kit"
+          - "postgres"
+      tooling:
+        patterns:
+          - "typescript"
+          - "turbo"
+          - "prettier*"
+          - "@playwright/*"
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(ci)"

@@ -1,20 +1,23 @@
 name: "DB: Database Seeding & Verification"
 
+# DESTRUCTIVE. `npm run seed` begins by DELETE-ing every table, users included.
+#
+# This job used to run automatically on any push to main that touched seed.ts,
+# data.ts or a module schema, against `secrets.DATABASE_URL || <service
+# container>`. The service container was only a fallback, so with the secret
+# configured an ordinary schema commit would wipe and re-seed the real database.
+#
+# It is now pinned to the throwaway Postgres service container below, and only
+# ever runs when a human dispatches it and types the confirmation phrase. Do not
+# reintroduce a push trigger, and do not point DATABASE_URL at a secret here.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "apps/web/src/lib/server/seed.ts"
-      - "apps/web/src/lib/server/data.ts"
-      - "packages/core/src/modules/**/schema.*"
-      - ".github/workflows/db-seed.yml"
   workflow_dispatch:
     inputs:
       confirm_seed:
-        description: 'Confirm database re-seeding (destructive seed data wipe)'
+        description: 'Type SEED to confirm wiping and re-seeding the throwaway CI database'
         required: true
-        default: 'true'
-        type: boolean
+        default: ''
+        type: string
 
 concurrency:
   group: db-seed-${{ github.ref }}
@@ -42,9 +45,19 @@ jobs:
 
     env:
       CI: true
-      DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgres://postgres:postgrespassword@localhost:5432/trailblazers' }}
+      # Deliberately NOT secrets.DATABASE_URL — this job must never be able to
+      # reach a real database. The value is the ephemeral service container above.
+      DATABASE_URL: 'postgres://postgres:postgrespassword@localhost:5432/trailblazers'
 
     steps:
+      - name: Verify confirmation phrase
+        run: |
+          if [ "${{ inputs.confirm_seed }}" != "SEED" ]; then
+            echo "::error::Refusing to run. Re-dispatch with confirm_seed set to exactly: SEED"
+            exit 1
+          fi
+          echo "Confirmed — seeding the throwaway CI database."
+
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -60,8 +73,10 @@ jobs:
       - name: Check Database Connectivity & Health
         run: node scripts/db-health-check.js
 
-      - name: Push Schema Migrations
-        run: npm run db:push
+      # Tracked migrations, per .agents/rules/code-style.md. `db:push` is
+      # forbidden in this repo and was previously used here.
+      - name: Apply Migrations
+        run: npm run db:migrate
 
       - name: Execute Database Seed Script
         run: npm run seed
@@ -72,8 +87,7 @@ jobs:
       - name: Output Job Summary
         if: always()
         run: |
-          echo "### 🚀 Database Seeding Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- **Execution Status**: Success ✅" >> $GITHUB_STEP_SUMMARY
-          echo "- **Seeded Admin Email**: \`admin@paoz.test\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Seeded Admin Password**: \`password123\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Trigger**: \`${{ github.event_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "### Database Seeding Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target**: ephemeral CI service container (never a real database)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: manual dispatch by \`${{ github.actor }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Seeded credentials are defined in \`apps/web/src/lib/server/data.ts\` and are for local and CI use only." >> $GITHUB_STEP_SUMMARY

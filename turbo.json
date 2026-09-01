@@ -2,12 +2,22 @@
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
     "DATABASE_URL",
+    "POSTGRES_URL",
+    "POSTGRES_PRISMA_URL",
+    "POSTGRES_URL_NON_POOLING",
     "SECRET_KEY",
     "NODE_ENV",
     "VERCEL",
     "VERCEL_ENV",
     "WEB_PORT",
-    "ADMIN_PORT"
+    "ADMIN_PORT",
+    "DB_USER",
+    "DB_PASSWORD",
+    "DB_NAME",
+    "DB_PORT",
+    "RESEND_API_KEY",
+    "EMAIL_FROM",
+    "OFFICE_EMAIL"
   ],
   "tasks": {
     "build": {
@@ -17,6 +27,13 @@
     },
     "check": {
       "dependsOn": ["^check"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "lint": {
+      "outputs": []
     },
     "dev": {
       "cache": false,

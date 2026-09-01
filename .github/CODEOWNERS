@@ -1,0 +1,27 @@
+# Review routing.
+#
+# Replace @paoz-trailblazers/maintainers with the real team or usernames — a
+# CODEOWNERS file referencing a group that does not exist silently assigns
+# nobody. Ownership only takes effect once branch protection on `main` requires
+# a review; until then this file is documentation of who to ask.
+
+# Default owner for anything not matched below.
+*                           @paoz-trailblazers/maintainers
+
+# Security-sensitive. Changes here decide who can reach what, and how sessions
+# and tokens are protected.
+/packages/core/src/modules/iam/         @paoz-trailblazers/maintainers
+/apps/admin/src/lib/server/             @paoz-trailblazers/maintainers
+/apps/admin/src/hooks.server.ts         @paoz-trailblazers/maintainers
+/apps/web/src/hooks.server.ts           @paoz-trailblazers/maintainers
+
+# Destructive or deployment-affecting.
+/.github/workflows/         @paoz-trailblazers/maintainers
+/drizzle/                   @paoz-trailblazers/maintainers
+/packages/core/src/db/      @paoz-trailblazers/maintainers
+/apps/web/src/lib/server/seed.ts        @paoz-trailblazers/maintainers
+
+# The agent guides must stay identical to each other.
+/CLAUDE.md                  @paoz-trailblazers/maintainers
+/GEMINI.md                  @paoz-trailblazers/maintainers
+/.agents/                   @paoz-trailblazers/maintainers

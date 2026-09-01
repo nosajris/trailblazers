@@ -1,14 +1,25 @@
 services:
   db:
-    image: postgres
+    image: postgres:16-alpine
     restart: always
     ports:
-      - 5432:5432
+      - "${DB_PORT:-5432}:5432"
     environment:
-      POSTGRES_USER: env.DB_USER
-      POSTGRES_PASSWORD: env.DB_PASSWORD
-      POSTGRES_DB: env.DB_NAME
+      # These were previously the literal strings "env.DB_USER" etc., so the
+      # container came up with those as its actual credentials and DATABASE_URL
+      # never matched. ${VAR:-default} reads the repo-root .env.
+      POSTGRES_USER: "${DB_USER:-postgres}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-postgres}"
+      POSTGRES_DB: "${DB_NAME:-trailblazers}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-trailblazers}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
-      - pgdata:/var/lib/postgresql
+      # The data directory itself, not its parent — mounting
+      # /var/lib/postgresql leaves the actual data outside the volume.
+      - pgdata:/var/lib/postgresql/data
+
 volumes:
   pgdata:

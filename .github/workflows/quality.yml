@@ -1,0 +1,103 @@
+name: "CI: Quality"
+
+# Unit tests, linting and formatting had no CI gate at all — the only checks
+# were typecheck and build, per app. Playwright was configured but never run.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Unit tests, lint & format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          # 22.18+ required: the test suite runs TypeScript directly through
+          # Node's built-in type stripping, with no build step.
+          node-version: 22
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Lint
+        run: npx eslint .
+
+      - name: Format check
+        run: npx prettier --check .
+
+  e2e:
+    name: End-to-end
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: trailblazers
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      CI: true
+      # Ephemeral service container only. The suite seeds, which is destructive
+      # — never point this at a secret.
+      DATABASE_URL: 'postgres://postgres:postgrespassword@localhost:5432/trailblazers'
+      # Test-only value; the apps refuse to start without a usable SECRET_KEY.
+      SECRET_KEY: 'ci-only-secret-key-not-used-anywhere-else-000000'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply migrations
+        run: npm run db:migrate
+
+      - name: Seed the throwaway database
+        run: npm run seed
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # playwright.config.ts starts both apps itself (web on 5173, admin on
+      # 5174) — the admin specs use absolute 5174 URLs.
+      - name: Run end-to-end tests
+        run: npx playwright test
+
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
