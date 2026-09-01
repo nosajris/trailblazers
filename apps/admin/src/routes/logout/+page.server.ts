@@ -7,7 +7,7 @@ export const actions: Actions = {
 	default: async ({ cookies, locals }) => {
 		const token = cookies.get(SESSION_COOKIE);
 		if (token) {
-			await services.iam.deleteSession(token);
+			await services.iam.endSession(token);
 			if (locals.user) {
 				await services.auditLogs.logAction('LOGOUT', 'USER', String(locals.user.id), `Staff logged out: ${locals.user.email}`, locals.user.id, locals.user.fullName);
 			}

@@ -1,7 +1,40 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import { toCsvCell } from '$lib/csv.js';
+	import type { ActionData, PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	/**
+	 * The invite or reset link returned by the last action.
+	 *
+	 * It is shown once, here, because the email service is still a stub that
+	 * only logs — the administrator copies the link and passes it on. When real
+	 * email is wired up, send it instead and stop rendering it.
+	 */
+	const passwordLink = $derived(
+		form && 'inviteLink' in form && typeof form.inviteLink === 'string'
+			? {
+					inviteLink: form.inviteLink,
+					inviteFor: 'inviteFor' in form && typeof form.inviteFor === 'string' ? form.inviteFor : '',
+					inviteExpiresAt:
+						'inviteExpiresAt' in form && typeof form.inviteExpiresAt === 'string'
+							? form.inviteExpiresAt
+							: ''
+				}
+			: null
+	);
+
+	let copied = $state(false);
+
+	async function copyLink(link: string) {
+		try {
+			await navigator.clipboard.writeText(link);
+			copied = true;
+			setTimeout(() => (copied = false), 2000);
+		} catch {
+			copied = false;
+		}
+	}
 
 	let showModal = $state(false);
 	let editingUser = $state<any>(null);
@@ -38,15 +71,12 @@
 	}
 
 	function downloadCsv() {
+		// Uses the shared escaper: quoting alone still lets a cell beginning
+		// `=` or `@` execute when the file is opened in a spreadsheet.
 		const headers = ['ID', 'Full Name', 'Email', 'Role'];
-		const rows = data.users.map((u) => [
-			u.id,
-			`"${(u.fullName || '').replace(/"/g, '""')}"`,
-			`"${(u.email || '').replace(/"/g, '""')}"`,
-			u.role
-		]);
+		const rows = data.users.map((u) => [u.id, u.fullName, u.email, u.role].map(toCsvCell));
 
-		const csvStr = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+		const csvStr = [headers.map(toCsvCell).join(','), ...rows.map((r) => r.join(','))].join('\n');
 		const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
 		const url = URL.createObjectURL(blob);
 		const link = document.createElement('a');
@@ -69,6 +99,42 @@
 			<button onclick={openCreate} class="admin-btn-primary">+ Add Staff User</button>
 		</div>
 	</div>
+
+	{#if form && 'error' in form && form.error}
+		<div
+			class="rounded-xl border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] p-4 text-sm font-semibold text-[var(--color-danger-fg)]"
+		>
+			{form.error}
+		</div>
+	{/if}
+
+	{#if passwordLink}
+		<div
+			class="rounded-xl border border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] p-4"
+		>
+			<p class="text-sm font-bold text-[var(--color-warning-fg)]">
+				Password link for {passwordLink.inviteFor}
+			</p>
+			<p class="mt-1 text-xs text-[var(--color-warning-fg)]">
+				Send this to them over a channel you trust. It works once, expires in 48 hours, and is shown
+				only now — automated email is not configured yet.
+			</p>
+			<div class="mt-3 flex flex-wrap items-center gap-2">
+				<code
+					class="flex-1 overflow-x-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-surface)] px-3 py-2 text-xs text-[var(--zinc-700)]"
+				>
+					{passwordLink.inviteLink}
+				</code>
+				<button
+					type="button"
+					class="admin-btn-secondary shrink-0"
+					onclick={() => copyLink(passwordLink.inviteLink)}
+				>
+					{copied ? 'Copied' : 'Copy link'}
+				</button>
+			</div>
+		</div>
+	{/if}
 
 	<div class="flex items-center gap-4">
 		<input
@@ -126,6 +192,12 @@
 							</td>
 							<td class="text-right font-medium">
 								<button onclick={() => openEdit(user)} class="mr-3 text-[var(--brand-primary)] hover:underline">Edit</button>
+								<form action="?/resetPassword" method="POST" class="inline">
+									<input type="hidden" name="id" value={user.id} />
+									<button type="submit" class="mr-3 text-[var(--zinc-600)] hover:underline">
+										Password link
+									</button>
+								</form>
 								<form action="?/deleteUser" method="POST" class="inline">
 									<input type="hidden" name="id" value={user.id} />
 									<button type="submit" class="text-[var(--color-danger-fg)] hover:underline">Delete</button>

@@ -1,12 +1,24 @@
 import { fail, redirect } from '@sveltejs/kit';
 import bcrypt from 'bcryptjs';
+import { logger } from '@trailblazers/core';
 import type { Actions } from './$types';
 import { services } from '$lib/server/services.js';
 import { SESSION_COOKIE } from '$lib/server/auth-constants.js';
 import { canAccessAdmin } from '$lib/server/auth.js';
+import { clearLoginAttempts, consumeLoginAttempt } from '$lib/server/rate-limit.js';
+
+/**
+ * A real bcrypt hash of a throwaway string, compared against when no account
+ * matches. Without it, an unknown email returns far faster than a known one
+ * and the response time alone reveals which addresses exist.
+ */
+const TIMING_EQUALIZER_HASH = '$2a$10$id..FmaoTmccS57PmYrRVuFjRG4OUCrRJoQ9ZD9AVrsV74.TLFwKK';
+
+/** One message for both "no such account" and "wrong password". */
+const INVALID_CREDENTIALS = 'Invalid email or password.';
 
 export const actions: Actions = {
-	default: async ({ request, cookies }) => {
+	default: async ({ request, cookies, getClientAddress }) => {
 		const form = await request.formData();
 		const email = form.get('email')?.toString().trim();
 		const password = form.get('password')?.toString();
@@ -15,43 +27,73 @@ export const actions: Actions = {
 			return fail(400, { error: 'Email and password are required' });
 		}
 
+		const address = getClientAddress();
+		const throttle = consumeLoginAttempt(address, email);
+
+		if (!throttle.allowed) {
+			const minutes = Math.ceil(throttle.retryAfterSeconds / 60);
+			logger.warn('AdminLogin', 'rate limited', { address });
+			return fail(429, {
+				error: `Too many sign-in attempts. Try again in ${minutes} minute${minutes === 1 ? '' : 's'}.`
+			});
+		}
+
 		try {
 			const user = await services.iam.getUserByEmail(email);
-			if (!user) {
-				return fail(400, { error: 'Invalid credentials. Please ensure the database has been seeded.' });
-			}
 
-			const isValidPassword = user.passwordHash ? bcrypt.compareSync(password, user.passwordHash) : false;
-			if (!isValidPassword) {
-				return fail(400, { error: 'Invalid credentials' });
+			// Always run a comparison, even with no user, so both paths cost the
+			// same and the error below is the same.
+			const hash = user?.passwordHash || TIMING_EQUALIZER_HASH;
+			const passwordMatches = await bcrypt.compare(password, hash);
+
+			if (!user || !passwordMatches) {
+				logger.warn('AdminLogin', 'failed attempt', { address });
+				return fail(400, { error: INVALID_CREDENTIALS });
 			}
 
 			if (!canAccessAdmin(user.role || undefined)) {
+				logger.warn('AdminLogin', 'denied non-staff role', { userId: user.id });
 				return fail(403, { error: 'Access denied. Staff privileges required.' });
 			}
 
-			const sessionId = crypto.randomUUID();
-			const expiresAt = new Date(Date.now() + 86400000 * 7);
+			// A fresh token per sign-in — the identifier is never carried across an
+			// authentication boundary. Only its HMAC reaches the database.
+			const { token, expiresAt } = await services.iam.startSession(user.id);
 
-			await services.iam.createSession(user.id, sessionId, expiresAt);
-			await services.auditLogs.logAction('LOGIN', 'USER', String(user.id), `Staff logged in: ${user.email}`, user.id, user.fullName);
+			// Opportunistic sweep: expired rows used to accumulate forever, since
+			// nothing ever deleted them. Login is rare enough to carry this.
+			services.iam
+				.deleteExpiredSessions()
+				.catch((err) => logger.warn('AdminLogin', 'session sweep failed', { message: String(err) }));
 
-			cookies.set(SESSION_COOKIE, sessionId, {
+			await services.auditLogs.logAction(
+				'LOGIN',
+				'USER',
+				String(user.id),
+				`Staff logged in: ${user.email}`,
+				user.id,
+				user.fullName
+			);
+
+			clearLoginAttempts(address, email);
+
+			cookies.set(SESSION_COOKIE, token, {
 				path: '/',
 				httpOnly: true,
 				sameSite: 'lax',
 				secure: process.env.NODE_ENV === 'production',
 				expires: expiresAt
 			});
-		} catch (err: any) {
-			if (err?.status === 303 || err?.location) {
+		} catch (err) {
+			if (err && typeof err === 'object' && ('status' in err || 'location' in err)) {
 				throw err; // Re-throw SvelteKit redirects
 			}
-			console.error('[AdminLoginError]', err);
-			if (err?.code === 'ECONNREFUSED' || err?.cause?.code === 'ECONNREFUSED') {
-				return fail(500, { error: 'Database connection failed (ECONNREFUSED). Please set DATABASE_URL in your Vercel project environment variables.' });
-			}
-			return fail(500, { error: err?.message || 'Database connection error during login.' });
+			// Postgres errors carry host, database and role names — log them, never
+			// render them.
+			logger.error('AdminLogin', 'unexpected failure', {
+				message: err instanceof Error ? err.message : String(err)
+			});
+			return fail(500, { error: 'Sign-in is unavailable right now. Please try again shortly.' });
 		}
 
 		throw redirect(303, '/');

@@ -125,6 +125,25 @@
 			</tbody>
 		</table>
 	</div>
+
+	{#if data.pagination.totalPages > 1}
+		<nav class="flex items-center justify-between" aria-label="Event list pages">
+			<p class="text-sm text-[var(--zinc-500)]">
+				Page {data.pagination.page} of {data.pagination.totalPages}
+				<span class="text-[var(--zinc-400)]">({data.pagination.total} events)</span>
+			</p>
+			<div class="flex items-center gap-2">
+				{#if data.pagination.hasPrevious}
+					<a class="admin-btn-secondary" href="?page={data.pagination.page - 1}" rel="prev">
+						Previous
+					</a>
+				{/if}
+				{#if data.pagination.hasNext}
+					<a class="admin-btn-secondary" href="?page={data.pagination.page + 1}" rel="next">Next</a>
+				{/if}
+			</div>
+		</nav>
+	{/if}
 </div>
 
 {#if showModal}

@@ -1,14 +1,18 @@
-import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { services } from '$lib/server/services.js';
+import { requireSection } from '$lib/server/auth.js';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+	requireSection(locals.user, 'settings');
 	const settings = await services.settings.getBundle();
 	return { settings };
 };
 
 export const actions: Actions = {
 	saveSettings: async ({ request, locals }) => {
+		// Actions run before layout loads, so this guard is the real one.
+		requireSection(locals.user, 'settings');
+
 		const form = await request.formData();
 		const title = form.get('seoTitle')?.toString().trim();
 		const description = form.get('seoDescription')?.toString().trim();

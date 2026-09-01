@@ -1,37 +1,26 @@
 import type { PageServerLoad } from './$types';
 import { services } from '$lib/server/services.js';
+import { requireSection } from '$lib/server/auth.js';
 
-export const load: PageServerLoad = async () => {
-	const [sermons, events, groups, leaders, testimonials, faqs, inquiries, auditLogs, tasks, equipment, bep] = await Promise.all([
-		services.sermons.getAllSermons(),
-		services.events.getAllEventsForAdmin(),
-		services.groups.getAllForAdmin(),
-		services.leaders.getAllForAdmin(),
-		services.testimonials.getAllForAdmin(),
-		services.faq.getAllForAdmin(),
-		services.inquiries.listForAdmin(),
+/**
+ * Dashboard.
+ *
+ * This used to call eleven `getAllForAdmin()` methods and take `.length` of
+ * each — every row of eleven tables pulled across the wire to produce eleven
+ * integers, on every load. It is now three queries: the counts (issued in
+ * parallel), the recent audit entries, and a capped list of open tasks.
+ */
+export const load: PageServerLoad = async ({ locals, setHeaders }) => {
+	requireSection(locals.user, 'content');
+
+	const [stats, recentAuditLogs, tasks] = await Promise.all([
+		services.dashboard.getCounts(),
 		services.auditLogs.getRecentLogs(10),
-		services.tasks.getAllTasks(),
-		services.equipment.getAllForAdmin(),
-		services.bep.getAllForAdmin()
+		services.dashboard.listOpenTasks(10)
 	]);
 
-	return {
-		stats: {
-			totalSermons: sermons.length,
-			totalEvents: events.length,
-			totalGroups: groups.length,
-			totalLeaders: leaders.length,
-			totalTestimonials: testimonials.length,
-			totalFaqs: faqs.length,
-			totalInquiries: inquiries.length,
-			pendingInquiries: inquiries.filter((i) => i.status === 'PENDING').length,
-			pendingTasks: tasks.filter((t: { isCompleted: boolean }) => !t.isCompleted).length,
-			totalEquipment: equipment.length,
-			totalBep: bep.length
-		},
-		recentAuditLogs: auditLogs,
-		tasks
-	};
-};
+	// Staff-specific and quick to change: never cache it in a shared cache.
+	setHeaders({ 'cache-control': 'private, no-store' });
 
+	return { stats, recentAuditLogs, tasks };
+};
