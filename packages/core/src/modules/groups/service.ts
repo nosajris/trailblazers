@@ -1,7 +1,10 @@
 import { asc, desc, eq } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
-import { groups } from './schema.js';
+import { groups, groupInterests } from './schema.js';
 import { toGroupCard } from './mappers.js';
+import { PolicyError } from '../iam/permissions.js';
+import { Sanitizer } from '../../util/sanitizer.js';
+import { logger } from '../../logger.js';
 import type { GroupCardVm, GroupAdminVm } from './types.js';
 
 export function createGroupService(db: Database) {
@@ -13,6 +16,62 @@ export function createGroupService(db: Database) {
 				.where(eq(groups.status, 'PUBLISHED'))
 				.orderBy(asc(groups.sortOrder), asc(groups.name));
 			return rows.map(toGroupCard);
+		},
+
+		/**
+		 * Records someone asking to join a group.
+		 *
+		 * Groups were browse-only — a visitor could read about one and had no
+		 * way to act on it. Asking twice updates the same row rather than
+		 * queueing the leader twice.
+		 */
+		async expressInterest(input: {
+			groupId: number;
+			fullName: string;
+			email: string;
+			phone?: string;
+			message?: string;
+		}) {
+			const group = await db.query.groups.findFirst({ where: eq(groups.id, input.groupId) });
+			if (!group || group.status !== 'PUBLISHED') {
+				throw new PolicyError('That group is not currently open to new members.');
+			}
+
+			const email = Sanitizer.email(input.email);
+
+			await db
+				.insert(groupInterests)
+				.values({
+					groupId: input.groupId,
+					fullName: Sanitizer.text(input.fullName),
+					email,
+					phone: input.phone ? Sanitizer.phone(input.phone) : null,
+					message: input.message ? Sanitizer.text(input.message) : null
+				})
+				.onConflictDoUpdate({
+					target: [groupInterests.groupId, groupInterests.email],
+					set: {
+						fullName: Sanitizer.text(input.fullName),
+						phone: input.phone ? Sanitizer.phone(input.phone) : null,
+						message: input.message ? Sanitizer.text(input.message) : null,
+						status: 'NEW'
+					}
+				});
+
+			logger.info('GroupInterest', 'recorded', { groupId: input.groupId });
+
+			return { groupName: group.name };
+		},
+
+		/** Interest requests for the staff portal, newest first. */
+		async listInterests(status?: string) {
+			const query = db
+				.select()
+				.from(groupInterests)
+				.orderBy(desc(groupInterests.createdAt))
+				.limit(200);
+
+			return status ? query.where(eq(groupInterests.status, status)) : query;
 		},
 
 		async getAllForAdmin(): Promise<GroupAdminVm[]> {

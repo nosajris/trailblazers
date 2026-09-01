@@ -18,6 +18,7 @@ export * from '../modules/parents/schema.js';
 export * from '../modules/sermons/schema.js';
 export * from '../modules/audit-logs/schema.js';
 export * from '../modules/tasks/schema.js';
+export * from '../modules/prayer/schema.js';
 export { usersRelations } from './relations.js';
 
 
