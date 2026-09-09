@@ -8,6 +8,13 @@
       "when": 1784943274627,
       "tag": "0000_square_bill_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788944337843,
+      "tag": "0001_mighty_pet_avengers",
+      "breakpoints": true
     }
   ]
 }
