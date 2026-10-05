@@ -96,6 +96,14 @@ async function main() {
 		.returning();
 	console.log(`Inserted ${insertedUsers.length} users.`);
 
+	// The seeded accounts use weak, well-known passwords so a developer can sign
+	// in straight away. They are printed here on purpose: they are for local and
+	// CI databases only, and must never exist on a database real people can reach.
+	console.log('\nSeeded sign-in accounts (local/CI only — weak passwords):');
+	console.table(
+		usersData.map((u) => ({ email: u.email, password: u.password, role: u.role }))
+	);
+
 	// Sessions (10) — one live demo session per user, 30 days out.
 	const thirtyDaysFromNow = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 	await db.insert(sessions).values(
