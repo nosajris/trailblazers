@@ -170,10 +170,13 @@ Do not claim a change is verified because it compiles.
 - Dashboard tiles come from `services.dashboard.getCounts()`, which is
   `SELECT count(*)` per table in parallel. Do not go back to calling
   `getAllForAdmin()` and taking `.length`.
-- **Still outstanding:** `apps/web/static/images` is 86 MB, including a 31 MB
-  and a 15 MB MP4 served directly, and 46 MB of that is committed to git
-  history. No responsive sizes, WebP/AVIF, or transcoding. For an audience on
-  Zimbabwean mobile data this is the single most expensive thing on the site.
+- **Images, partly done:** the large JPEGs were recompressed in place (long edge
+  capped at 1920px, same filenames) and both MP4s re-encoded, taking
+  `apps/web/static/images` from about 86 MB to roughly 25 MB. **Still
+  outstanding:** the old 46 MB is still in git history, and there are no
+  responsive `srcset` sizes or WebP/AVIF variants. The hero photo is still one
+  1920px file for every screen. For an audience on Zimbabwean mobile data this
+  remains the most expensive thing on the site.
 
 ## Sensitive data
 
