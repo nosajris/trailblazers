@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import type { EventCardVm } from '@trailblazers/core';
 
@@ -34,8 +36,19 @@
 		return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' }).format(new Date(date));
 	};
 
+	// Search runs a navigation per keystroke otherwise; wait for a pause in typing.
+	let searchTimer: ReturnType<typeof setTimeout> | undefined;
+	function applyFiltersSoon() {
+		clearTimeout(searchTimer);
+		searchTimer = setTimeout(applyFilters, 300);
+	}
+
+	const spotsLeft = (e: EventCardVm) => Math.max(0, (e.capacity ?? 0) - (e.registeredCount ?? 0));
+	const fillPercent = (e: EventCardVm) =>
+		e.capacity ? Math.min(100, ((e.registeredCount ?? 0) / e.capacity) * 100) : 0;
+
 	function applyFilters() {
-		const params = new URLSearchParams($page.url.searchParams);
+		const params = new SvelteURLSearchParams($page.url.searchParams);
 		if (searchQuery) params.set('q', searchQuery);
 		else params.delete('q');
 		if (selectedType !== 'ALL') params.set('type', selectedType);
@@ -43,18 +56,18 @@
 		params.set('sort', selectedSort);
 		params.set('page', '1');
 		params.delete('view');
-		goto(`?${params.toString()}`, { keepFocus: true });
+		goto(resolve(`/events?${params.toString()}`), { keepFocus: true });
 	}
 
 	function changePage(newPage: number) {
-		const params = new URLSearchParams($page.url.searchParams);
+		const params = new SvelteURLSearchParams($page.url.searchParams);
 		params.set('page', newPage.toString());
 		params.delete('view');
-		goto(`?${params.toString()}`);
+		goto(resolve(`/events?${params.toString()}`));
 	}
 
 	function setView(view: 'list' | 'calendar') {
-		const params = new URLSearchParams();
+		const params = new SvelteURLSearchParams();
 		if (view === 'calendar') {
 			params.set('view', 'calendar');
 			params.set('y', String(data.calYear));
@@ -65,7 +78,7 @@
 			params.set('sort', data.filters.sort);
 			params.set('page', String(data.pagination.currentPage));
 		}
-		goto(`/events?${params}`, { replaceState: true });
+		goto(resolve(`/events?${params}`), { replaceState: true });
 	}
 
 	function shiftMonth(delta: number) {
@@ -79,7 +92,7 @@
 			nm = 1;
 			ny++;
 		}
-		goto(`/events?view=calendar&y=${ny}&m=${nm}`, { replaceState: true });
+		goto(resolve(`/events?view=calendar&y=${ny}&m=${nm}`), { replaceState: true });
 	}
 
 	const monthLabel = $derived(
@@ -162,7 +175,7 @@
 					</div>
 					<a
 						class="inline-flex items-center justify-center rounded-full bg-brand-primary px-8 py-3 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-lg transition hover:brightness-105"
-						href="/events/{data.featuredEvent.id}"
+						href={resolve('/events/[id]', { id: String(data.featuredEvent.id) })}
 					>
 						View & register
 					</a>
@@ -223,15 +236,17 @@
 				{#if data.view === 'list'}
 					<div class="flex flex-col items-stretch justify-between gap-4 md:flex-row md:items-center">
 						<div class="relative w-full md:w-96">
+							<label class="sr-only" for="event-search">Search events</label>
 							<input
-								type="text"
+								id="event-search"
+								type="search"
 								bind:value={searchQuery}
-								oninput={applyFilters}
+								oninput={applyFiltersSoon}
 								placeholder="Search events..."
 								class="w-full rounded-full border border-gray-300 py-2 pl-10 pr-4 outline-none ring-brand-primary focus:border-brand-primary focus:ring-1"
 							/>
 							<svg
-								class="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+								class="absolute left-3 top-2.5 h-5 w-5 text-gray-500"
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
@@ -246,6 +261,7 @@
 
 						<div class="flex w-full gap-4 overflow-x-auto pb-2 md:w-auto md:pb-0">
 							<select
+								aria-label="Event type"
 								bind:value={selectedType}
 								onchange={applyFilters}
 								class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 outline-none focus:border-brand-primary"
@@ -257,6 +273,7 @@
 							</select>
 
 							<select
+								aria-label="Sort events"
 								bind:value={selectedSort}
 								onchange={applyFilters}
 								class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 outline-none focus:border-brand-primary"
@@ -275,7 +292,7 @@
 			<section class="container mx-auto max-w-7xl px-6 py-12">
 				<div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
 					<div class="grid grid-cols-7 border-b border-gray-100 bg-brand-light/80 text-center text-[11px] font-bold uppercase tracking-wider text-brand-dark/60 md:text-xs">
-						{#each ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as wd}
+						{#each ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as wd (wd)}
 							<div class="py-3">{wd}</div>
 						{/each}
 					</div>
@@ -287,11 +304,11 @@
 									: 'bg-brand-light/30'}"
 							>
 								{#if cell}
-									<div class="text-xs font-bold text-brand-dark/50 md:text-sm">{cell.day}</div>
+									<div class="text-xs font-bold text-brand-dark/70 md:text-sm">{cell.day}</div>
 									<div class="mt-2 space-y-1">
 										{#each eventsForDay(data.calendarEvents, data.calYear, data.calMonth, cell.day) as ev (ev.id)}
 											<a
-												href="/events/{ev.id}"
+												href={resolve('/events/[id]', { id: String(ev.id) })}
 												class="block truncate rounded-md bg-brand-primary/10 px-1.5 py-1 text-[10px] font-semibold text-brand-primary transition hover:bg-brand-primary/20 md:text-xs"
 											>
 												{formatDayTime(ev.date)} · {ev.title}
@@ -329,7 +346,7 @@
 				<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 					{#each data.events as event (event.id)}
 						<a
-							href="/events/{event.id}"
+							href={resolve('/events/[id]', { id: String(event.id) })}
 							class="card flex h-full flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md transition duration-300 hover:shadow-xl"
 						>
 							<div class="relative h-48 overflow-hidden">
@@ -348,7 +365,7 @@
 										{event.type}
 									</span>
 									{#if event.isFeatured}
-										<span class="rounded bg-brand-gold px-2 py-1 text-xs font-bold uppercase text-white">
+										<span class="rounded bg-brand-gold px-2 py-1 text-xs font-bold uppercase text-brand-dark">
 											Featured
 										</span>
 									{/if}
@@ -385,12 +402,14 @@
 									<div class="mb-4">
 										<div class="mb-1 flex justify-between text-xs text-gray-500">
 											<span>{event.registeredCount ?? 0} registered</span>
-											<span>{event.capacity - (event.registeredCount ?? 0)} spots left</span>
+											<span class={spotsLeft(event) === 0 ? 'font-bold text-brand-dark' : ''}
+												>{spotsLeft(event) === 0 ? 'Full — waitlist open' : `${spotsLeft(event)} spots left`}</span
+											>
 										</div>
 										<div class="h-2 w-full rounded-full bg-gray-200">
 											<div
 												class="h-2 rounded-full bg-brand-secondary"
-												style="width: {((event.registeredCount ?? 0) / event.capacity) * 100}%"
+												style="width: {fillPercent(event)}%"
 											></div>
 										</div>
 									</div>
@@ -423,7 +442,7 @@
 					>
 						Previous
 					</button>
-					{#each Array(data.pagination.totalPages) as _, i}
+					{#each Array(data.pagination.totalPages) as _, i (i)}
 						<button
 							type="button"
 							onclick={() => changePage(i + 1)}

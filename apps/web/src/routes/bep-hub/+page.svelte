@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 
 	let { data } = $props();
@@ -114,21 +115,21 @@
 			</div>
 
 			<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
-				{#each filteredHubs as hub}
+				{#each filteredHubs as hub (hub.id)}
 					<div class="flex flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm transition hover:shadow-xl">
 						<div>
 							<div class="flex items-center justify-between">
 								<span class="rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-bold text-brand-primary uppercase tracking-wider">{hub.region.replace('_', ' ')}</span>
-								<span class="text-xs text-zinc-400 font-medium">Weekly Gathering</span>
+								<span class="text-xs text-zinc-500 font-medium">Weekly Gathering</span>
 							</div>
 							<h3 class="mt-4 text-2xl font-bold text-zinc-900">{hub.name}</h3>
 							<div class="mt-4 space-y-2 text-sm text-zinc-600">
 								<div class="flex items-center gap-2">
-									<svg class="h-4 w-4 text-zinc-400 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+									<svg class="h-4 w-4 text-zinc-500 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
 									<span>{hub.address}</span>
 								</div>
 								<div class="flex items-center gap-2">
-									<svg class="h-4 w-4 text-zinc-400 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+									<svg class="h-4 w-4 text-zinc-500 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
 									<span class="font-semibold text-zinc-800">{hub.meetingTimes}</span>
 								</div>
 								<div class="flex items-center gap-2 text-xs text-zinc-500">
@@ -138,8 +139,8 @@
 						</div>
 
 						<div class="mt-8 pt-6 border-t border-zinc-100 flex items-center justify-between">
-							<a href={hub.mapUrl} target="_blank" rel="noopener noreferrer" class="text-xs font-bold uppercase tracking-wider text-brand-primary hover:underline">Get Directions →</a>
-							<a href="/plan-a-visit" class="rounded-full bg-brand-dark px-5 py-2 text-xs font-bold text-white hover:bg-zinc-800 transition">Plan a Visit</a>
+							<a href={hub.mapUrl} target="_blank" rel="noopener noreferrer external" class="text-xs font-bold uppercase tracking-wider text-brand-primary hover:underline">Get Directions →</a>
+							<a href={resolve('/plan-a-visit')} class="rounded-full bg-brand-dark px-5 py-2 text-xs font-bold text-white hover:bg-zinc-800 transition">Plan a Visit</a>
 						</div>
 					</div>
 				{/each}

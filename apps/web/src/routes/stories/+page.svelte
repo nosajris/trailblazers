@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
 
@@ -44,7 +45,7 @@
 				<div class="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
 					{#each data.posts as post (post.id)}
 						<a
-							href="/stories/{post.id}"
+							href={resolve('/stories/[id]', { id: String(post.id) })}
 							class="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-sm ring-1 ring-black/[0.03] transition hover:-translate-y-1 hover:shadow-xl"
 						>
 							{#if post.imageUrl}
@@ -59,7 +60,7 @@
 								</div>
 							{/if}
 							<div class="flex flex-1 flex-col p-6 md:p-7">
-								<p class="text-xs text-brand-dark/50">{fmt(post.createdAt)}</p>
+								<p class="text-xs text-brand-dark/70">{fmt(post.createdAt)}</p>
 								{#if post.category}
 									<p class="mt-2 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-primary">
 										{post.category}

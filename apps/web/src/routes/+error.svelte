@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 
 	/**
@@ -45,13 +46,13 @@
 		<div class="mt-10 flex flex-wrap justify-center gap-4">
 			<a
 				class="inline-flex min-h-12 items-center justify-center rounded-full bg-brand-primary px-10 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-lg transition hover:brightness-105"
-				href="/"
+				href={resolve('/')}
 			>
 				Back to the homepage
 			</a>
 			<a
 				class="inline-flex min-h-12 items-center justify-center rounded-full border border-brand-dark/15 bg-white px-10 text-xs font-bold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-primary"
-				href="/contact"
+				href={resolve('/contact')}
 			>
 				Contact the office
 			</a>
@@ -59,14 +60,14 @@
 
 		{#if isNotFound}
 			<nav class="mt-12" aria-label="Popular pages">
-				<p class="text-xs font-bold uppercase tracking-[0.18em] text-brand-dark/50">
+				<p class="text-xs font-bold uppercase tracking-[0.18em] text-brand-dark/70">
 					Or try one of these
 				</p>
 				<ul class="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
-					<li><a class="text-brand-primary hover:underline" href="/events">Events</a></li>
-					<li><a class="text-brand-primary hover:underline" href="/watch">Watch</a></li>
-					<li><a class="text-brand-primary hover:underline" href="/groups">Groups</a></li>
-					<li><a class="text-brand-primary hover:underline" href="/plan-a-visit">Plan a visit</a></li>
+					<li><a class="text-brand-primary hover:underline" href={resolve('/events')}>Events</a></li>
+					<li><a class="text-brand-primary hover:underline" href={resolve('/watch')}>Watch</a></li>
+					<li><a class="text-brand-primary hover:underline" href={resolve('/groups')}>Groups</a></li>
+					<li><a class="text-brand-primary hover:underline" href={resolve('/plan-a-visit')}>Plan a visit</a></li>
 				</ul>
 			</nav>
 		{/if}

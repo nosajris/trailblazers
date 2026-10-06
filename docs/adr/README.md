@@ -34,3 +34,5 @@ What this costs, and what it now makes hard.
 | [0003](0003-per-section-authorization.md) | Authorize the staff portal per section | Accepted |
 | [0004](0004-single-source-design-tokens.md) | One definition of colour, with a ratchet | Accepted |
 | [0005](0005-zod-at-the-boundary.md) | Validate and sanitize at the boundary with zod | Accepted |
+| [0006](0006-homepage-first-visit-redesign.md) | Homepage redesign around the first-time visitor | Accepted |
+| [0007](0007-responsive-images.md) | Responsive WebP variants for local photos | Accepted |

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container } from '@trailblazers/ui/tb-layout';
 
@@ -19,9 +20,9 @@
 		<div class="{container} max-w-3xl">
 			<a
 				class="text-sm font-semibold text-brand-primary hover:underline"
-				href="/stories">← All stories</a
+				href={resolve('/stories')}>← All stories</a
 			>
-			<p class="mt-6 text-sm text-brand-dark/50">{fmt(p.createdAt)}</p>
+			<p class="mt-6 text-sm text-brand-dark/70">{fmt(p.createdAt)}</p>
 			{#if p.category}
 				<p class="mt-2 text-[11px] font-bold uppercase tracking-[0.2em] text-brand-primary">{p.category}</p>
 			{/if}

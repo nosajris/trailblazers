@@ -144,7 +144,7 @@
 					{#each data.wall as entry (entry.id)}
 						<li class="rounded-xl border border-neutral-200 bg-white p-5">
 							<p class="leading-relaxed text-brand-dark/85">{entry.request}</p>
-							<p class="mt-3 text-xs font-bold uppercase tracking-wide text-brand-dark/50">
+							<p class="mt-3 text-xs font-bold uppercase tracking-wide text-brand-dark/70">
 								{entry.name}
 							</p>
 						</li>
