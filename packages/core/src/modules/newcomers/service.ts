@@ -2,7 +2,6 @@ import { asc, eq } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { publicMediaUrl } from '../../util/public-media-url.js';
 import { newcomerContent } from './schema.js';
-import { toRichSectionVm } from '../serve/mappers.js';
 import type { RichSectionVm } from '../serve/types.js';
 
 export function createNewcomerService(db: Database) {

@@ -1,4 +1,4 @@
-import { asc, desc, eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { testimonials } from './schema.js';
 import { toTestimonialVm } from './mappers.js';

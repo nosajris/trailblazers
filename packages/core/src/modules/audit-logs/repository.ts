@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm';
+import { desc } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { auditLogs } from './schema.js';
 

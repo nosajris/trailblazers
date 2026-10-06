@@ -39,7 +39,7 @@ export function toCsvCell(value: unknown): string {
 
 export function createExportService() {
 	return {
-		arrayToCsv<T extends Record<string, any>>(data: T[]): string {
+		arrayToCsv<T extends Record<string, unknown>>(data: T[]): string {
 			if (!data || data.length === 0) return '';
 
 			const headers = Object.keys(data[0]);

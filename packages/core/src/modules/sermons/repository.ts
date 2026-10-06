@@ -1,4 +1,4 @@
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { sermons, sermonSeries } from './schema.js';
 
