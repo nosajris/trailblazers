@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { SiteExtras } from '@trailblazers/core';
 	import { container, sectionY } from '../tb-layout.js';
 
@@ -10,6 +11,8 @@
 	const watchHref = $derived(extras.watchUrl?.trim() ? extras.watchUrl : '/watch');
 	const messagesHref = $derived(extras.messagesUrl?.trim() ? extras.messagesUrl : '/messages');
 </script>
+
+<!-- eslint-disable svelte/no-navigation-without-resolve -- these hrefs come from the CMS / site settings and may be absolute external URLs, which resolve() cannot take -->
 
 <footer class="border-t border-white/10 bg-brand-dark text-gray-300">
 	<div class="{container} {sectionY} pb-12 pt-14 lg:pb-16 lg:pt-20">
@@ -88,11 +91,11 @@
 			<div class="lg:col-span-3">
 				<h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-gold">Join us</h3>
 				<ul class="mt-5 space-y-3 text-sm">
-					<li><a class="transition hover:text-white" href="/plan-a-visit">Plan a visit</a></li>
+					<li><a class="transition hover:text-white" href={resolve('/plan-a-visit')}>Plan a visit</a></li>
 					<li><a class="transition hover:text-white" href={watchHref}>Watch</a></li>
 					<li><a class="transition hover:text-white" href={messagesHref}>Messages</a></li>
 					<li><a class="transition hover:text-white" href={givingHref}>Give</a></li>
-					<li><a class="transition hover:text-white" href="/contact">Contact</a></li>
+					<li><a class="transition hover:text-white" href={resolve('/contact')}>Contact</a></li>
 				</ul>
 			</div>
 		</div>
@@ -106,9 +109,10 @@
 				{extras.organizationName ?? 'Trailblazers'}. All rights reserved.
 			</p>
 			<div class="flex flex-wrap justify-center gap-6 sm:justify-end">
-				<a class="transition hover:text-gray-300" href="/contact">Contact</a>
-				<a class="transition hover:text-gray-300" href="/events">Events</a>
-				<a class="transition hover:text-gray-300" href="/watch">Watch</a>
+				<a class="transition hover:text-gray-300" href={resolve('/contact')}>Contact</a>
+				<a class="transition hover:text-gray-300" href={resolve('/events')}>Events</a>
+				<a class="transition hover:text-gray-300" href={resolve('/watch')}>Watch</a>
+				<a class="transition hover:text-gray-300" href="https://trailblazersadmin.vercel.app/login">Staff portal</a>
 			</div>
 		</div>
 	</div>

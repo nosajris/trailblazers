@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onDestroy } from 'svelte';
 	import { container } from '../tb-layout.js';
 	import type { SiteExtras, SiteNavItem, SiteNavMega } from '@trailblazers/core';
+	import { realLanguageOptions } from './nav-utils.js';
 
 	function isMegaNavItem(item: SiteNavItem): item is SiteNavMega {
 		return (
@@ -28,6 +30,7 @@
 	let headerEl: HTMLDivElement | null = $state(null);
 	let mobilePanelEl: HTMLDivElement | null = $state(null);
 
+	const languages = $derived(realLanguageOptions(extras.languageOptions));
 	const givingHref = $derived(extras.givingUrl?.trim() ? extras.givingUrl : '/give');
 	const watchHref = $derived(extras.watchUrl?.trim() ? extras.watchUrl : '/watch');
 	const messagesHref = $derived(extras.messagesUrl?.trim() ? extras.messagesUrl : '/watch#messages');
@@ -88,6 +91,8 @@
 	});
 </script>
 
+<!-- eslint-disable svelte/no-navigation-without-resolve -- these hrefs come from the CMS / site settings and may be absolute external URLs, which resolve() cannot take -->
+
 <svelte:window onkeydown={onWinKey} />
 
 <div
@@ -118,12 +123,12 @@
 					</select>
 				</label>
 			{/if}
-			{#if extras.languageOptions && extras.languageOptions.length > 1}
+			{#if languages.length > 0}
 				<div class="flex gap-3 border-l border-white/20 pl-6">
-					{#each extras.languageOptions as lang (lang.code)}
+					{#each languages as lang (lang.code)}
 						<a
 							class="opacity-90 transition hover:text-brand-gold"
-							href={lang.href ?? '#'}
+							href={lang.href}
 							lang={lang.code}>{lang.label}</a
 						>
 					{/each}
@@ -135,7 +140,7 @@
 	<!-- Acrylic Header Container -->
 	<div class="{container} flex h-14 items-center justify-between gap-4 sm:h-16 lg:h-[4.25rem]">
 		<a
-			href="/"
+			href={resolve('/')}
 			class="font-sans text-lg font-black tracking-tight text-brand-dark sm:text-xl lg:text-2xl"
 		>
 			<span class="text-brand-primary">Trail</span><span class="text-brand-dark">blazers</span>
@@ -219,10 +224,6 @@
 				class="rounded-full bg-brand-primary px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-white shadow-[0_4px_20px_rgba(249,92,75,0.35)] transition hover:bg-brand-secondary hover:shadow-[0_6px_25px_rgba(249,92,75,0.45)] lg:px-6"
 				href={cta.href}>{cta.label}</a
 			>
-			<a
-				class="rounded-full border border-brand-dark/20 bg-white/40 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-brand-dark backdrop-blur-sm transition hover:border-brand-primary hover:bg-brand-primary/10 hover:text-brand-primary"
-				href="https://trailblazersadmin.vercel.app/login">Staff Portal</a
-			>
 		</div>
 
 		<div class="flex items-center gap-2 md:hidden">
@@ -281,7 +282,7 @@
 				</button>
 			</div>
 			<div class="flex flex-1 flex-col overflow-y-auto">
-				<div class="border-b border-zinc-100 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+				<div class="border-b border-zinc-100 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-zinc-500">
 					Quick links
 				</div>
 				<div class="grid gap-1 px-4 pb-3">
@@ -305,15 +306,15 @@
 					{#each navItems as item, mi (`mnav-${mi}`)}
 						{#if isMegaNavItem(item)}
 							<div class="py-2">
-								<p class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+								<p class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
 									{item.label}
 								</p>
-								{#each item.columns as col}
+								{#each item.columns as col (col.title)}
 									<p class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-brand-primary">
 										{col.title}
 									</p>
 									<ul class="mt-1 space-y-0.5">
-										{#each col.links as link}
+										{#each col.links as link (link.href)}
 											<li>
 												<a
 													class="block rounded-lg px-3 py-2 text-[15px] font-semibold text-brand-dark hover:bg-brand-primary/10 hover:text-brand-primary transition"
@@ -333,11 +334,6 @@
 							>
 						{/if}
 					{/each}
-					<a
-						class="mt-2 rounded-xl px-3 py-3 text-base font-semibold text-brand-primary hover:bg-brand-primary/10 transition"
-						href="https://trailblazersadmin.vercel.app/login"
-						onclick={closeMenu}>Staff Portal</a
-					>
 				</nav>
 			</div>
 		</div>

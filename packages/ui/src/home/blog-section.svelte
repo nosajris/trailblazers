@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { HomeBlogVm } from '@trailblazers/core';
 	import { container, sectionY, headline, eyebrow, railRow, railItem } from '../tb-layout.js';
+	import { responsiveSrcset } from '../site/responsive-images.js';
 
 	let { data }: { data: HomeBlogVm } = $props();
 </script>
@@ -17,13 +19,13 @@
 		<div class="mt-12 {railRow}">
 			{#each data.posts as post (post.id)}
 				<a
-					href="/stories/{post.id}"
+					href={resolve('/stories/[id]', { id: String(post.id) })}
 					class="{railItem} flex flex-col overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
 				>
 					{#if post.imageUrl}
 						<div class="aspect-[16/10] overflow-hidden bg-neutral-100">
 							<img
-								src={post.imageUrl}
+								src={post.imageUrl} srcset={responsiveSrcset(post.imageUrl)}
 								alt=""
 								class="h-full w-full object-cover"
 								loading="lazy"
@@ -51,7 +53,7 @@
 		<div class="mt-10 text-center">
 			<a
 				class="inline-flex rounded-full border border-brand-dark/15 px-8 py-3 text-xs font-bold uppercase tracking-[0.12em] text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
-				href="/stories">All stories</a
+				href={resolve('/stories')}>All stories</a
 			>
 		</div>
 	</div>

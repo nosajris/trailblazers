@@ -145,10 +145,9 @@ function countHardcodedHexes(): { total: number; byFile: Map<string, number> } {
  *
  * A failure here means a new hardcoded colour was added. The fix is to use a
  * token from `packages/ui/src/tokens.css` — not to edit this number. The
- * remaining literals are concentrated in `apps/admin/src/routes/+layout.svelte`
- * and `apps/web/src/routes/layout.css`.
+ * remaining literals are concentrated in `apps/admin/src/routes/+layout.svelte`.
  */
-const MAX_HARDCODED_HEXES = 63;
+const MAX_HARDCODED_HEXES = 56;
 
 test('the hardcoded colour count does not rise', () => {
 	const { total, byFile } = countHardcodedHexes();

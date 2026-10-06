@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { RichSectionVm } from '@trailblazers/core';
 	import { container, sectionY, headline, eyebrow as eyebrowClass } from '../tb-layout.js';
+	import { responsiveSrcset } from '../site/responsive-images.js';
 
 	let {
 		data,
@@ -30,17 +31,19 @@
 							{data.body}
 						</p>
 					{/if}
+					<!-- eslint-disable svelte/no-navigation-without-resolve -- these hrefs come from the CMS / site settings and may be absolute external URLs, which resolve() cannot take -->
 					{#if data.ctaLabel && data.ctaHref}
 						<a
 							class="mt-8 inline-flex min-h-[3rem] items-center justify-center rounded-full bg-brand-primary px-10 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-md transition hover:brightness-110"
 							href={data.ctaHref}>{data.ctaLabel}</a
 						>
 					{/if}
+					<!-- eslint-enable svelte/no-navigation-without-resolve -- these hrefs come from the CMS / site settings and may be absolute external URLs, which resolve() cannot take -->
 				</div>
 				<div class="order-1 lg:order-2">
 					{#if data.imageUrl}
 						<div class="overflow-hidden rounded-3xl shadow-2xl ring-1 ring-black/5">
-							<img src={data.imageUrl} alt="" class="aspect-[4/3] w-full object-cover md:aspect-[5/4]" loading="lazy" />
+							<img src={data.imageUrl} srcset={responsiveSrcset(data.imageUrl)} sizes="(max-width: 768px) 100vw, 50vw" alt="" class="aspect-[4/3] w-full object-cover md:aspect-[5/4]" loading="lazy" />
 						</div>
 					{:else}
 						<div

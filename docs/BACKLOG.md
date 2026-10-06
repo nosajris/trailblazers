@@ -53,9 +53,13 @@ the analytics origin added to `connect-src`.
 
 ### Image and video pipeline
 **Effort: M. No decision needed to start.**
-`apps/web/static/images` is 86 MB, including a 31 MB and a 15 MB MP4 served
-directly, and twelve images over 1.4 MB. 46 MB of that is in git history, which
-is why `.git` is 139 MB.
+*Partly done (see ADR 0006):* the large JPEGs were recompressed in place and
+both MP4s re-encoded, taking `apps/web/static/images` from about 86 MB to roughly
+25 MB. What remains is below.
+
+Originally `apps/web/static/images` was 86 MB, including a 31 MB and a 15 MB MP4
+served directly, and twelve images over 1.4 MB. 46 MB of that is in git history,
+which is why `.git` is 139 MB.
 
 For an audience paying by the megabyte this is the single most expensive thing
 on the site — more than every query and render decision combined.

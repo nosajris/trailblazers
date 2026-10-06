@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { HomeEventsRailVm } from '@trailblazers/core';
 	import { container, sectionY, headline, eyebrow, railRow, railItem } from '../tb-layout.js';
+	import { responsiveSrcset } from '../site/responsive-images.js';
 
 	let { data }: { data: HomeEventsRailVm } = $props();
 
@@ -24,7 +26,7 @@
 			</div>
 			<a
 				class="inline-flex shrink-0 items-center gap-2 text-sm font-bold text-brand-primary transition hover:gap-3"
-				href="/events"
+				href={resolve('/events')}
 			>
 				View all events
 				<span aria-hidden="true">→</span>
@@ -34,13 +36,13 @@
 		<div class="mt-12 {railRow}">
 			{#each data.events as event (event.id)}
 				<a
-					href="/events/{event.id}"
+					href={resolve('/events/[id]', { id: String(event.id) })}
 					class="{railItem} card group flex flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-brand-light shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
 				>
 					<div class="relative aspect-[16/10] overflow-hidden bg-neutral-200">
 						{#if event.imageUrl}
 							<img
-								src={event.imageUrl}
+								src={event.imageUrl} srcset={responsiveSrcset(event.imageUrl)} sizes="(max-width: 768px) 80vw, 320px"
 								alt=""
 								class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
 								loading="lazy"

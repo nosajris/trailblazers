@@ -9,13 +9,22 @@
 	import LeadersSection from './leaders-section.svelte';
 	import FaqSection from './faq-section.svelte';
 	import ContactSection from './contact-section.svelte';
+	import IntentTiles from './intent-tiles.svelte';
+	import { pickNextEvent } from './next-event.js';
 
 	let { blocks }: { blocks: HomeSectionBlock[] } = $props();
+
+	// The hero points at the soonest upcoming event from the events rail, when the page has one.
+	const nextEvent = $derived.by(() => {
+		const rail = blocks.find((b) => b.kind === 'EVENTS_RAIL');
+		return rail && rail.kind === 'EVENTS_RAIL' ? pickNextEvent(rail.data.events, new Date()) : null;
+	});
 </script>
 
 {#each blocks as block (`${block.kind}-${JSON.stringify(block.data).slice(0, 40)}`)}
 	{#if block.kind === 'HERO'}
-		<HeroSection data={block.data} />
+		<HeroSection data={block.data} {nextEvent} />
+		<IntentTiles />
 	{:else if block.kind === 'EVENTS_RAIL'}
 		<EventsRailSection data={block.data} />
 	{:else if block.kind === 'BLOG'}
@@ -44,15 +53,6 @@
 		</div>
 	{:else if block.kind === 'CONTACT'}
 		<ContactSection data={block.data} />
-	{:else if block.kind === 'CUSTOM'}
-		<section class="border-b border-gray-200 bg-brand-light py-12">
-			<div class="mx-auto max-w-7xl px-4">
-				<pre class="overflow-x-auto rounded-xl bg-white p-4 text-xs text-gray-600">{JSON.stringify(
-						block.data,
-						null,
-						2
-					)}</pre>
-			</div>
-		</section>
 	{/if}
+	<!-- CUSTOM blocks have no public design yet. They used to dump their raw JSON onto the page, so they render nothing. -->
 {/each}

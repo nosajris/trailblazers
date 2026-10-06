@@ -3,6 +3,10 @@
 	import { container, sectionY, eyebrowGoldOnDark } from '../tb-layout.js';
 
 	let { data }: { data: HomeTestimonialsVm } = $props();
+
+	// A few voices are enough on the homepage; nine in a row buried everything below.
+	const PREVIEW_LIMIT = 4;
+	const items = $derived(data.items.slice(0, PREVIEW_LIMIT));
 </script>
 
 <section class="border-b border-white/10 bg-brand-dark text-gray-200 {sectionY}">
@@ -16,7 +20,7 @@
 		<div
 			class="mt-14 grid gap-6 md:grid-cols-2 md:gap-8 lg:mt-16 lg:gap-10 max-md:flex max-md:snap-x max-md:snap-mandatory max-md:gap-4 max-md:overflow-x-auto max-md:pb-2 max-md:[-ms-overflow-style:none] max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden"
 		>
-			{#each data.items as t (t.id)}
+			{#each items as t (t.id)}
 				<figure
 					class="max-md:min-w-[min(22rem,calc(100vw-2.5rem))] max-md:shrink-0 max-md:snap-center rounded-2xl border border-white/10 bg-white/[0.04] p-8 backdrop-blur-sm md:min-w-0 md:snap-none"
 				>

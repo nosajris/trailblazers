@@ -1,8 +1,14 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { HomeGroupsVm } from '@trailblazers/core';
 	import { container, sectionY, headline, eyebrow, railRow, railItem } from '../tb-layout.js';
+	import { responsiveSrcset } from '../site/responsive-images.js';
 
 	let { data }: { data: HomeGroupsVm } = $props();
+
+	// The homepage is a preview; the full list lives on /groups (the button below).
+	const PREVIEW_LIMIT = 6;
+	const groups = $derived(data.groups.slice(0, PREVIEW_LIMIT));
 </script>
 
 <section class="border-b border-neutral-200/80 bg-white {sectionY}">
@@ -18,15 +24,15 @@
 		</div>
 
 		<div class="mt-12 {railRow}">
-			{#each data.groups as g (g.id)}
+			{#each groups as g (g.id)}
 				<a
-					href="/groups#group-{g.id}"
+					href={resolve(`/groups#group-${g.id}`)}
 					class="{railItem} flex flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-brand-light p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:p-7"
 				>
 					{#if g.imageUrl}
 						<div class="aspect-[16/10] overflow-hidden rounded-xl bg-neutral-200">
 							<img
-								src={g.imageUrl}
+								src={g.imageUrl} srcset={responsiveSrcset(g.imageUrl)}
 								alt=""
 								class="h-full w-full object-cover"
 								loading="lazy"
@@ -47,7 +53,7 @@
 		<div class="mt-10 text-center">
 			<a
 				class="inline-flex rounded-full bg-brand-primary px-8 py-3 text-xs font-bold uppercase tracking-[0.12em] text-white shadow-md transition hover:brightness-105"
-				href="/groups">Find a group</a
+				href={resolve('/groups')}>Find a group</a
 			>
 		</div>
 	</div>

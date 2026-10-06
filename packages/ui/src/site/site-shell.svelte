@@ -3,6 +3,7 @@
 	import type { SiteSettingsBundle } from '@trailblazers/core';
 	import Navbar from './navbar.svelte';
 	import Footer from './footer.svelte';
+	import MobileBottomNav from './mobile-bottom-nav.svelte';
 
 	type NavLink = { label: string; href: string };
 
@@ -36,4 +37,7 @@
 		{@render children()}
 	</main>
 	<Footer columns={settings.footerColumns} extras={settings.siteExtras} />
+	<!-- Spacer so the fixed phone nav never hides the end of the footer. -->
+	<div class="h-14 md:hidden" aria-hidden="true"></div>
+	<MobileBottomNav extras={settings.siteExtras} />
 </div>
