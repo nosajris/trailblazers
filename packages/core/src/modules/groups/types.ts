@@ -6,6 +6,7 @@ export type GroupCardVm = {
 	type: string;
 	imageUrl: string | null;
 	description: string | null;
+	whatsappUrl: string | null;
 };
 
 export type GroupAdminVm = GroupCardVm & {

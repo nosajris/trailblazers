@@ -1,6 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { services } from '$lib/server/services.js';
+import { parseWhatsappLink } from '@trailblazers/core';
 
 export const load: PageServerLoad = async () => {
 	const rows = await services.groups.getAllForAdmin();
@@ -17,11 +18,18 @@ export const actions: Actions = {
 		const type = (form.get('type')?.toString() || 'CAMPUS') as 'CAMPUS' | 'PRO' | 'INTEREST' | 'ONLINE';
 		const imageUrl = form.get('imageUrl')?.toString().trim();
 		const description = form.get('description')?.toString().trim();
+		const whatsapp = parseWhatsappLink(form.get('whatsappUrl')?.toString());
 		const status = form.get('status')?.toString().trim() || 'PUBLISHED';
 		const sortOrder = form.get('sortOrder') ? Number(form.get('sortOrder')) : 0;
 
 		if (!name || !leader || !dayTime) {
 			return fail(400, { error: 'Group name, leader, and meeting schedule are required' });
+		}
+
+		if (!whatsapp.ok) {
+			return fail(400, {
+				error: 'WhatsApp link must be a https://chat.whatsapp.com/… or https://wa.me/… address.'
+			});
 		}
 
 		const saved = await services.groups.saveGroup({
@@ -32,6 +40,7 @@ export const actions: Actions = {
 			type,
 			imageUrl,
 			description,
+			whatsappUrl: whatsapp.url,
 			status,
 			sortOrder
 		});

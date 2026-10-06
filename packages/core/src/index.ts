@@ -10,6 +10,7 @@ export type { EventCardVm, EventListingResult, EventListingFilters } from './mod
 export type { BlogPostVm } from './modules/blog/types.js';
 export { createBlogService } from './modules/blog/service.js';
 export { createGroupService } from './modules/groups/service.js';
+export { parseWhatsappLink } from './modules/groups/whatsapp.js';
 export { createTestimonialService } from './modules/testimonials/service.js';
 export { createLeaderService } from './modules/leaders/service.js';
 export { createFaqService } from './modules/faq/service.js';

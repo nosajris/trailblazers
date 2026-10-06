@@ -12,6 +12,7 @@ export function toGroupCard(row: Row): GroupCardVm {
 		dayTime: row.dayTime,
 		type: row.type,
 		imageUrl: publicMediaUrl(row.imageUrl),
-		description: row.description
+		description: row.description,
+		whatsappUrl: row.whatsappUrl
 	};
 }

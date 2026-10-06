@@ -21,6 +21,8 @@ export const groups = pgTable(
 		type: groupTypeEnum('type').notNull(),
 		imageUrl: text('image_url'),
 		description: text('description'),
+		/** Optional WhatsApp invite link (chat.whatsapp.com / wa.me), shown publicly on /groups. */
+		whatsappUrl: text('whatsapp_url'),
 		status: text('status').notNull().default('PUBLISHED'),
 		sortOrder: integer('sort_order').default(0)
 	},

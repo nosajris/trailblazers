@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form?: { error?: string } | null } = $props();
 
 	let showModal = $state(false);
 	let editingGroup = $state<any>(null);
@@ -25,6 +25,7 @@
 			type: 'CAMPUS',
 			imageUrl: '',
 			description: '',
+			whatsappUrl: '',
 			status: 'PUBLISHED',
 			sortOrder: 0
 		};
@@ -32,7 +33,7 @@
 	}
 
 	function openEdit(group: any) {
-		editingGroup = { ...group };
+		editingGroup = { ...group, whatsappUrl: group.whatsappUrl ?? '' };
 		showModal = true;
 	}
 
@@ -42,7 +43,7 @@
 	}
 
 	function downloadCsv() {
-		const headers = ['ID', 'Name', 'Leader', 'Schedule', 'Type', 'Status', 'Description'];
+		const headers = ['ID', 'Name', 'Leader', 'Schedule', 'Type', 'Status', 'Description', 'WhatsApp'];
 		const rows = data.groups.map((g) => [
 			g.id,
 			`"${(g.name || '').replace(/"/g, '""')}"`,
@@ -50,7 +51,8 @@
 			`"${(g.dayTime || '').replace(/"/g, '""')}"`,
 			g.type,
 			g.status,
-			`"${(g.description || '').replace(/"/g, '""')}"`
+			`"${(g.description || '').replace(/"/g, '""')}"`,
+			g.whatsappUrl || ''
 		]);
 
 		const csvStr = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
@@ -76,6 +78,12 @@
 			<button onclick={openCreate} class="admin-btn-primary">+ Add Group</button>
 		</div>
 	</div>
+
+	{#if form?.error}
+		<div class="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] p-3 text-sm font-semibold text-[var(--color-danger-fg)]" role="alert">
+			{form.error}
+		</div>
+	{/if}
 
 	<div class="flex items-center gap-4">
 		<input
@@ -106,7 +114,7 @@
 						</td>
 					</tr>
 				{:else}
-					{#each filteredGroups as group}
+					{#each filteredGroups as group (group.id)}
 						<tr>
 							<td class="font-medium text-[var(--zinc-900)]">
 								<div>{group.name}</div>
@@ -181,6 +189,12 @@
 				<div>
 					<label for="group-image" class="block text-xs font-semibold text-[var(--zinc-700)] uppercase mb-1">Image URL (Optional)</label>
 					<input id="group-image" type="text" name="imageUrl" bind:value={editingGroup.imageUrl} placeholder="https://..." class="admin-input" />
+				</div>
+
+				<div>
+					<label for="group-whatsapp" class="block text-xs font-semibold text-[var(--zinc-700)] uppercase mb-1">WhatsApp Group Link (Optional)</label>
+					<input id="group-whatsapp" type="url" name="whatsappUrl" bind:value={editingGroup.whatsappUrl} placeholder="https://chat.whatsapp.com/..." class="admin-input" />
+					<p class="mt-1 text-xs text-[var(--zinc-500)]">Shown publicly on the Groups page as a "Join the WhatsApp group" button.</p>
 				</div>
 
 				<div>

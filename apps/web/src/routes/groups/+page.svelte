@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
+	import { responsiveSrcset } from '@trailblazers/ui/site/responsive-images';
+	import { filterGroups, groupTypesPresent, GROUP_TYPE_LABELS } from '@trailblazers/ui/site/group-filter';
 
 	let { data, form } = $props();
 
@@ -11,6 +14,23 @@
 	 * act on the group they are reading about without losing their place.
 	 */
 	let openGroupId = $state<number | null>(null);
+
+	let typeFilter = $state('ALL');
+	let query = $state('');
+	const types = $derived(groupTypesPresent(data.groups));
+	const visible = $derived(filterGroups(data.groups, typeFilter, query));
+	// A card the visitor is acting on (open form or just-submitted) is never filtered out from under them.
+	const shown = $derived(
+		visible.length === data.groups.length || openGroupId === null
+			? visible
+			: [...visible, ...data.groups.filter((x) => x.id === openGroupId && !visible.includes(x))]
+	);
+	const chip = (active: boolean) =>
+		`min-h-11 rounded-full border px-4 text-xs font-bold uppercase tracking-wide transition ${
+			active
+				? 'border-brand-primary bg-brand-primary text-white'
+				: 'border-brand-dark/15 bg-white text-brand-dark hover:border-brand-primary'
+		}`;
 </script>
 
 <svelte:head>
@@ -43,7 +63,7 @@
 			</p>
 			<a
 				class="mt-10 inline-flex rounded-full bg-brand-primary px-10 py-4 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-lg transition hover:brightness-105"
-				href="/contact"
+				href={resolve('/contact')}
 			>
 				Find my group
 			</a>
@@ -87,8 +107,51 @@
 				Browse what is currently open — tap a card to reach out and we will help you take the next step.
 			</p>
 
-			<div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-				{#each data.groups as g (g.id)}
+			{#if data.groups.length > 3}
+				<div class="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+					<div class="flex flex-wrap gap-2" role="group" aria-label="Filter groups by type">
+						<button type="button" class={chip(typeFilter === 'ALL')} aria-pressed={typeFilter === 'ALL'} onclick={() => (typeFilter = 'ALL')}>All</button>
+						{#each types as t (t)}
+							<button type="button" class={chip(typeFilter === t)} aria-pressed={typeFilter === t} onclick={() => (typeFilter = t)}>
+								{GROUP_TYPE_LABELS[t] ?? t}
+							</button>
+						{/each}
+					</div>
+					<div class="md:w-72">
+						<label class="sr-only" for="group-search">Search groups</label>
+						<input
+							id="group-search"
+							type="search"
+							bind:value={query}
+							placeholder="Search by name, leader or day"
+							class="min-h-11 w-full rounded-full border border-neutral-200 bg-white px-5 text-sm outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+						/>
+					</div>
+				</div>
+				<p class="mt-4 text-sm text-brand-dark/60" role="status" aria-live="polite">
+					Showing {shown.length} of {data.groups.length} groups
+				</p>
+			{/if}
+
+			{#if shown.length === 0}
+				<div class="mt-8 rounded-2xl border border-neutral-200 bg-white p-8 text-center">
+					<p class="font-bold text-brand-dark">No groups match that.</p>
+					<p class="mt-2 text-sm text-brand-dark/70">
+						<button
+							type="button"
+							class="font-semibold text-brand-primary hover:underline"
+							onclick={() => {
+								typeFilter = 'ALL';
+								query = '';
+							}}>Clear filters</button
+						>
+						or <a class="font-semibold text-brand-primary hover:underline" href={resolve('/contact')}>ask us to help you find one</a>.
+					</p>
+				</div>
+			{/if}
+
+			<div class="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+				{#each shown as g (g.id)}
 					<article
 						id="group-{g.id}"
 						class="scroll-mt-28 overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-sm ring-1 ring-black/[0.03] transition hover:-translate-y-0.5 hover:shadow-lg"
@@ -97,6 +160,7 @@
 							<div class="aspect-[16/10] overflow-hidden bg-neutral-100">
 								<img
 									src={g.imageUrl}
+									srcset={responsiveSrcset(g.imageUrl)}
 									alt=""
 									class="h-full w-full object-cover"
 									loading="lazy"
@@ -105,11 +169,20 @@
 							</div>
 						{/if}
 						<div class="p-6 md:p-8">
-							<p class="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-primary">{g.type}</p>
+							<p class="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-primary">{GROUP_TYPE_LABELS[g.type] ?? g.type}</p>
 							<h3 class="mt-2 font-sans text-xl font-bold text-brand-dark">{g.name}</h3>
 							<p class="mt-2 text-sm font-medium text-brand-dark/70">{g.dayTime} · Led by {g.leader}</p>
 							{#if g.description}
 								<p class="mt-4 text-sm leading-relaxed text-brand-dark/70">{g.description}</p>
+							{/if}
+							{#if g.whatsappUrl && /^https:\/\/(chat\.whatsapp\.com|wa\.me)\//.test(g.whatsappUrl)}
+								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external WhatsApp link, host-checked on save and here -->
+								<a
+									class="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand-primary hover:underline"
+									href={g.whatsappUrl}
+									target="_blank"
+									rel="noopener noreferrer">Join the WhatsApp group →</a
+								>
 							{/if}
 							{#if form?.success && form.groupName === g.name}
 								<div class="mt-6 rounded-xl border border-[var(--color-success-border)] bg-[var(--color-success-bg)] p-4 text-sm">

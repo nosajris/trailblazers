@@ -15,6 +15,13 @@
       "when": 1788944337843,
       "tag": "0001_mighty_pet_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791253336009,
+      "tag": "0002_common_stardust",
+      "breakpoints": true
     }
   ]
 }

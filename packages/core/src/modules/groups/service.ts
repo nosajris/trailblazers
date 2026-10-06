@@ -94,6 +94,7 @@ export function createGroupService(db: Database) {
 			type: 'CAMPUS' | 'PRO' | 'INTEREST' | 'ONLINE';
 			imageUrl?: string;
 			description?: string;
+			whatsappUrl?: string | null;
 			status?: string;
 			sortOrder?: number;
 		}) {
@@ -104,6 +105,7 @@ export function createGroupService(db: Database) {
 				type: input.type,
 				imageUrl: input.imageUrl || null,
 				description: input.description || null,
+				whatsappUrl: input.whatsappUrl || null,
 				status: input.status || 'PUBLISHED',
 				sortOrder: input.sortOrder ?? 0
 			};
