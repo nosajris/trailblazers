@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
+	import { whatsappShareUrl } from '@trailblazers/ui/site/share';
 
 	let { data, form } = $props();
 	let { event } = data;
@@ -17,6 +20,10 @@
 			minute: '2-digit'
 		}).format(new Date(date));
 	};
+
+	const shareHref = $derived(
+		whatsappShareUrl(`${event.title} — ${formatDate(event.date)}, ${event.location}\n${page.url.href}`)
+	);
 
 	const formatPrice = (cents: number) => {
 		if (cents === 0) return 'Free';
@@ -198,8 +205,15 @@
 							{/if}
 							<a
 								class="block text-center text-sm font-semibold text-brand-primary underline-offset-2 hover:underline"
-								href={`/events/${event.id}/ics`}
+								href={resolve('/events/[id]/ics', { id: String(event.id) })}
 								download>Download calendar (.ics)</a
+							>
+							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external wa.me share link -->
+							<a
+								class="block text-center text-sm font-semibold text-brand-primary underline-offset-2 hover:underline"
+								href={shareHref}
+								target="_blank"
+								rel="noopener noreferrer">Share on WhatsApp</a
 							>
 							{#if availability && availability.seatsLeft !== null}
 								<p class="text-center text-xs text-gray-500">
