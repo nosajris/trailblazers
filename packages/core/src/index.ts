@@ -16,6 +16,11 @@ export { createFaqService } from './modules/faq/service.js';
 export { createInquiryService } from './modules/inquiries/service.js';
 export { createBepService } from './modules/bep/service.js';
 export { createSettingsService } from './modules/settings/service.js';
+export {
+	visitDetailsSchema,
+	MAX_VISIT_TIMES,
+	type VisitDetails
+} from './modules/settings/validation.js';
 export { createPageComposerService } from './modules/pages/composer.js';
 export { createServeService } from './modules/serve/service.js';
 export { createNewcomerService } from './modules/newcomers/service.js';

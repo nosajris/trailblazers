@@ -1,8 +1,19 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
 
-	let { data } = $props();
+	let { data, form } = $props();
+
+	const times = $derived(data.settings.siteExtras.visitTimes ?? []);
+	const address = $derived(data.settings.siteExtras.visitAddress);
+	const notes = $derived(data.settings.siteExtras.visitNotes);
+	// Checked again here as well as on save, because this value goes into an href.
+	const mapUrl = $derived.by(() => {
+		const url = data.settings.siteExtras.visitMapUrl?.trim();
+		return url && /^https?:\/\//i.test(url) ? url : undefined;
+	});
+	const hasVisitDetails = $derived(times.length > 0 || !!address || !!notes || !!mapUrl);
 </script>
 
 <svelte:head>
@@ -36,6 +47,49 @@
 			</p>
 		</div>
 	</section>
+
+	{#if hasVisitDetails}
+		<section class="border-b border-neutral-200/80 bg-brand-light py-12 md:py-16" aria-labelledby="visit-details-title">
+			<div class="{container} max-w-4xl">
+				<p class="text-[11px] font-bold uppercase tracking-[0.22em] text-brand-primary">Before you come</p>
+				<h2 id="visit-details-title" class="mt-3 font-sans text-2xl font-black text-brand-dark md:text-4xl">
+					When and where
+				</h2>
+				<div class="mt-8 grid gap-8 md:grid-cols-2">
+					{#if times.length > 0}
+						<div>
+							<h3 class="text-sm font-bold uppercase tracking-wide text-brand-dark/60">Gatherings</h3>
+							<ul class="mt-3 space-y-2 text-base font-semibold text-brand-dark md:text-lg">
+								{#each times as time, i (i)}
+									<li>{time}</li>
+								{/each}
+							</ul>
+						</div>
+					{/if}
+					{#if address || mapUrl}
+						<div>
+							<h3 class="text-sm font-bold uppercase tracking-wide text-brand-dark/60">Where</h3>
+							{#if address}
+								<p class="mt-3 text-base font-semibold text-brand-dark md:text-lg">{address}</p>
+							{/if}
+							{#if mapUrl}
+								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external map link from site settings, validated as http(s) -->
+								<a
+									class="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-brand-primary hover:underline"
+									href={mapUrl}
+									target="_blank"
+									rel="noopener noreferrer">Open in maps →</a
+								>
+							{/if}
+						</div>
+					{/if}
+				</div>
+				{#if notes}
+					<p class="mt-8 max-w-2xl whitespace-pre-line text-base leading-relaxed text-brand-dark/75">{notes}</p>
+				{/if}
+			</div>
+		</section>
+	{/if}
 
 	<section class="bg-white {sectionY}">
 		<div class="{container} grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
@@ -101,20 +155,86 @@
 		</div>
 	</section>
 
-	<section class="border-t border-neutral-200/80 bg-white py-16 md:py-20">
-		<div class="{container} max-w-2xl text-center">
-			<h2 class="font-sans text-2xl font-black text-brand-dark md:text-3xl">Ready?</h2>
-			<p class="mt-4 text-brand-dark/75">Send a quick note and we will look for you — or jump to upcoming events.</p>
-			<div class="mt-10 flex flex-wrap justify-center gap-4">
-				<a
-					class="inline-flex rounded-full bg-brand-primary px-10 py-4 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-md transition hover:brightness-105"
-					href="/contact">Let us know you are coming</a
+	<section id="register" class="border-t border-neutral-200/80 bg-white py-16 md:py-20">
+		<div class="{container} max-w-xl">
+			<h2 class="text-center font-sans text-2xl font-black text-brand-dark md:text-3xl">Let us look for you</h2>
+			<p class="mt-4 text-center text-brand-dark/75">
+				Tell us you are coming and a real person will say hello when you arrive.
+			</p>
+
+			{#if form?.success}
+				<div
+					class="mt-8 rounded-xl border border-[var(--color-success-border)] bg-[var(--color-success-bg)] p-5 text-sm"
+					role="status"
 				>
-				<a
-					class="inline-flex rounded-full border border-brand-dark/15 px-10 py-4 text-xs font-bold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-primary"
-					href="/events">See events</a
-				>
-			</div>
+					<p class="font-bold text-[var(--color-success-fg)]">Thank you — we have your details</p>
+					<p class="mt-1 text-[var(--color-success-fg)]">Someone from the team will be in touch before your visit.</p>
+				</div>
+			{:else}
+				{#if form?.error}
+					<div
+						class="mt-8 rounded-xl border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] p-3 text-sm font-semibold text-[var(--color-danger-fg)]"
+						role="alert"
+					>
+						{form.error}
+					</div>
+				{/if}
+				<form method="POST" action="?/registerVipVisit" class="mt-8 space-y-3">
+					<!-- Decoy field for bots; see rate-limit.ts. -->
+					<div class="hidden" aria-hidden="true">
+						<label for="visit-website">Leave this field empty</label>
+						<input id="visit-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+					</div>
+					<label class="sr-only" for="visit-name">Your name</label>
+					<input
+						id="visit-name"
+						name="fullName"
+						required
+						placeholder="Your name"
+						autocomplete="name"
+						class="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+					/>
+					<label class="sr-only" for="visit-email">Email address</label>
+					<input
+						id="visit-email"
+						name="email"
+						type="email"
+						required
+						placeholder="Email address"
+						autocomplete="email"
+						class="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+					/>
+					<label class="sr-only" for="visit-phone">Phone number (optional)</label>
+					<input
+						id="visit-phone"
+						name="phone"
+						type="tel"
+						placeholder="Phone number (optional)"
+						autocomplete="tel"
+						class="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+					/>
+					<label class="block text-xs font-bold uppercase tracking-wide text-brand-dark/60" for="visit-date"
+						>Day you plan to come (optional)</label
+					>
+					<input
+						id="visit-date"
+						name="preferredDate"
+						type="date"
+						class="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+					/>
+					<button
+						type="submit"
+						class="w-full rounded-full bg-brand-primary px-10 py-4 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-md transition hover:brightness-105"
+					>
+						Let us know you are coming
+					</button>
+				</form>
+			{/if}
+
+			<p class="mt-8 text-center text-sm text-brand-dark/70">
+				Prefer to write? <a class="font-semibold text-brand-primary hover:underline" href={resolve('/contact')}>Send a note</a>
+				or <a class="font-semibold text-brand-primary hover:underline" href={resolve('/events')}>see events</a>.
+			</p>
 		</div>
 	</section>
 </SiteShell>

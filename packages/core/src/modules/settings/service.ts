@@ -30,6 +30,12 @@ export type SiteExtras = {
 	campuses?: { id: string; label: string; href?: string }[];
 	languageOptions?: { code: string; label: string; href?: string }[];
 	organizationName?: string;
+	/** First-visit details shown on /plan-a-visit. All optional; the page shows only what is filled in. */
+	visitTimes?: string[];
+	visitAddress?: string;
+	visitNotes?: string;
+	/** http(s) only: validated by `visitDetailsSchema` when saved. */
+	visitMapUrl?: string;
 	/** Canonical base URL for structured data; otherwise inferred per request. */
 	siteUrl?: string;
 };
