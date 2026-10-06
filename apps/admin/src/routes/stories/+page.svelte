@@ -103,7 +103,7 @@
 						</td>
 					</tr>
 				{:else}
-					{#each filteredPosts as post}
+					{#each filteredPosts as post (post.id)}
 						<tr>
 							<td class="font-medium text-[var(--zinc-900)]">{post.title}</td>
 							<td>

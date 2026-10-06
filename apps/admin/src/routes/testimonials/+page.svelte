@@ -104,7 +104,7 @@
 						</td>
 					</tr>
 				{:else}
-					{#each filteredTestimonials as item}
+					{#each filteredTestimonials as item (item.id)}
 						<tr>
 							<td>
 								<div class="font-medium text-[var(--zinc-900)]">{item.name}</div>

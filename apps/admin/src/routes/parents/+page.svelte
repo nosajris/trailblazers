@@ -104,7 +104,7 @@
 						</td>
 					</tr>
 				{:else}
-					{#each filteredItems as item}
+					{#each filteredItems as item (item.id)}
 						<tr>
 							<td class="font-medium text-[var(--zinc-900)]">{item.headline}</td>
 							<td class="text-sm text-[var(--zinc-600)] max-w-md line-clamp-1">{item.subheadline || item.body || 'N/A'}</td>

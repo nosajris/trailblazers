@@ -104,7 +104,7 @@
 						</td>
 					</tr>
 				{:else}
-					{#each filteredProfiles as profile}
+					{#each filteredProfiles as profile (profile.id)}
 						<tr>
 							<td class="font-medium text-[var(--zinc-900)]">
 								<div>{profile.businessName}</div>
@@ -115,7 +115,7 @@
 							</td>
 							<td class="text-sm text-[var(--zinc-600)]">
 								{#if profile.websiteUrl}
-									<a href={profile.websiteUrl} target="_blank" class="text-[var(--brand-primary)] hover:underline truncate block max-w-xs">{profile.websiteUrl}</a>
+									<a href={profile.websiteUrl} target="_blank" rel="noopener noreferrer external" class="text-[var(--brand-primary)] hover:underline truncate block max-w-xs">{profile.websiteUrl}</a>
 								{:else}
 									<span class="text-[var(--zinc-400)]">N/A</span>
 								{/if}

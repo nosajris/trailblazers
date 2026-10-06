@@ -76,7 +76,7 @@
 				</div>
 			{:else}
 				<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-					{#each data.sermons as sermon}
+					{#each data.sermons as sermon (sermon.id)}
 						<div class="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm transition hover:shadow-xl hover:-translate-y-1">
 							<div class="relative aspect-video bg-zinc-900 overflow-hidden">
 								<img

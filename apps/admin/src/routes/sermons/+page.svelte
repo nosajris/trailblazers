@@ -90,7 +90,7 @@
 			<p class="text-sm text-[var(--zinc-500)] py-4 text-center">No sermon series created yet.</p>
 		{:else}
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-				{#each data.series as item}
+				{#each data.series as item (item.id)}
 					<div class="p-4 rounded-xl border border-[var(--zinc-200)] bg-[var(--zinc-50)] flex items-center justify-between">
 						<div>
 							<div class="font-bold text-sm text-[var(--zinc-900)]">{item.title}</div>
@@ -126,7 +126,7 @@
 						<td colspan="5" class="py-8 text-center text-sm text-[var(--zinc-500)]">No sermons added yet. Click "+ Add Sermon" to create your first message.</td>
 					</tr>
 				{:else}
-					{#each data.sermons as sermon}
+					{#each data.sermons as sermon (sermon.id)}
 						<tr>
 							<td>
 								<div class="font-medium text-[var(--zinc-900)]">{sermon.title}</div>

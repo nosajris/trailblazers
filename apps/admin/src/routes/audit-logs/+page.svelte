@@ -85,7 +85,7 @@
 						<td colspan="5" class="py-8 text-center text-sm text-[var(--zinc-500)]">No audit activity matching filter.</td>
 					</tr>
 				{:else}
-					{#each filteredLogs as log}
+					{#each filteredLogs as log (log.id)}
 						<tr class="text-sm">
 							<td class="text-[var(--zinc-400)] font-mono text-xs">{new Date(log.createdAt).toLocaleString()}</td>
 							<td class="font-semibold text-[var(--zinc-900)]">{log.userName || 'System'}</td>

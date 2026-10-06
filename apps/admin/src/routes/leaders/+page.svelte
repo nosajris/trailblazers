@@ -99,7 +99,7 @@
 						</td>
 					</tr>
 				{:else}
-					{#each filteredLeaders as leader}
+					{#each filteredLeaders as leader (leader.id)}
 						<tr>
 							<td class="font-medium text-[var(--zinc-900)]">
 								<div class="flex items-center gap-3">

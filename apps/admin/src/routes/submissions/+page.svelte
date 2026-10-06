@@ -61,7 +61,7 @@
 			<p class="text-sm text-[var(--zinc-500)] text-center py-4">No pending follow-up tasks.</p>
 		{:else}
 			<div class="space-y-3">
-				{#each data.tasks as task}
+				{#each data.tasks as task (task.id)}
 					<div class="flex items-center justify-between p-3.5 rounded-lg border border-[var(--zinc-200)] bg-[var(--zinc-50)]">
 						<div>
 							<div class="font-semibold text-sm text-[var(--zinc-900)] {task.isCompleted ? 'line-through text-[var(--zinc-400)]' : ''}">{task.title}</div>
@@ -112,7 +112,7 @@
 							<td colspan="6" class="py-8 text-center text-sm text-[var(--zinc-500)]">No contact inquiries received yet.</td>
 						</tr>
 					{:else}
-						{#each data.inquiries as item}
+						{#each data.inquiries as item (item.id)}
 							<tr>
 								<td>
 									<div class="font-medium text-[var(--zinc-900)]">{item.fullName}</div>

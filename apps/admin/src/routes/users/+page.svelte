@@ -162,7 +162,7 @@
 						</td>
 					</tr>
 				{:else}
-					{#each filteredUsers as user}
+					{#each filteredUsers as user (user.id)}
 						<tr>
 							<td class="font-medium text-[var(--zinc-900)]">
 								<div class="flex items-center gap-3">

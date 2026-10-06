@@ -98,7 +98,7 @@
 						</td>
 					</tr>
 				{:else}
-					{#each filteredFaqs as faq}
+					{#each filteredFaqs as faq (faq.id)}
 						<tr>
 							<td class="font-medium text-[var(--zinc-900)] max-w-xs">{faq.question}</td>
 							<td class="text-sm text-[var(--zinc-600)] max-w-md line-clamp-2">{faq.answer}</td>

@@ -121,7 +121,7 @@
 						</td>
 					</tr>
 				{:else}
-					{#each filteredRecords as record}
+					{#each filteredRecords as record (record.id)}
 						<tr>
 							<td class="font-medium text-[var(--zinc-900)]">{record.districtName}</td>
 							<td class="text-sm font-mono text-[var(--zinc-600)]">{record.date}</td>

@@ -95,7 +95,7 @@
 						</td>
 					</tr>
 				{:else}
-					{#each filteredPages as item}
+					{#each filteredPages as item (item.id)}
 						<tr>
 							<td class="font-medium text-[var(--zinc-900)]">{item.title}</td>
 							<td class="text-sm font-mono text-[var(--brand-primary)]">/{item.slug}</td>
