@@ -8,6 +8,11 @@
 	const structuredDataJson = $derived(
 		JSON.stringify([data.jsonLdOrganization, data.jsonLdWebsite]).replace(/</g, '\\u003c')
 	);
+	// The tag is assembled here, with its name split, because a literal script tag
+	// inside the template confuses the Svelte parser (and the linter).
+	const structuredDataTag = $derived(
+		'<scr' + 'ipt type="application/ld+json">' + structuredDataJson + '</scr' + 'ipt>'
+	);
 
 	onMount(() => {
 		// Registered after load so it never competes with the first render.
@@ -33,7 +38,8 @@
 	<link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-title" content="Trailblazers" />
-	{@html `<script type="application/ld+json">${structuredDataJson}</script>`}
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -- JSON-LD built from our own data with every "<" escaped to \u003c, so it cannot close the tag -->
+	{@html structuredDataTag}
 </svelte:head>
 
 {@render children()}
