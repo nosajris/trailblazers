@@ -1,4 +1,4 @@
-import { test, expect, request as playwrightRequest } from '@playwright/test';
+import { test, expect, request as playwrightRequest, type Page } from '@playwright/test';
 
 /**
  * Security regressions for the staff portal and the public write endpoints.
@@ -19,7 +19,7 @@ const SECRETARY = { email: 'secretary@paoz.org', password: 'secret' };
 
 const ADMIN_ONLY_PATHS = ['/users', '/settings', '/audit-logs'];
 
-async function login(page: any, who: { email: string; password: string }) {
+async function login(page: Page, who: { email: string; password: string }) {
 	await page.goto(`${ADMIN_ORIGIN}/login`);
 	await page.locator('#admin-email-input').fill(who.email);
 	await page.locator('#admin-password-input').fill(who.password);

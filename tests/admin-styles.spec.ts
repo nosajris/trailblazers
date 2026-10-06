@@ -1,7 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 test.describe('Admin App Styling & Linear Design System Verification', () => {
-	async function loginAsAdmin(page: any) {
+	async function loginAsAdmin(page: Page) {
 		await page.goto('http://localhost:5174/login');
 		await page.locator('#admin-email-input').fill('admin@paoz.test');
 		await page.locator('#admin-password-input').fill('password123');
