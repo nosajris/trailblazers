@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 
 	let { data } = $props();
@@ -23,13 +24,13 @@
 			<div class="mt-10 flex flex-wrap justify-center gap-4">
 				<a
 					class="inline-flex min-h-[3rem] items-center justify-center rounded-full bg-brand-primary px-10 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-lg transition hover:brightness-105"
-					href="/contact"
+					href={resolve('/contact')}
 				>
 					Contact us
 				</a>
 				<a
 					class="inline-flex min-h-[3rem] items-center justify-center rounded-full border border-brand-dark/15 bg-white px-10 text-xs font-bold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-primary"
-					href="/events"
+					href={resolve('/events')}
 				>
 					Join an event
 				</a>

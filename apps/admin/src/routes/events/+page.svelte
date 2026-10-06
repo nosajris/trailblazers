@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -92,7 +93,7 @@
 						<td colspan="5" class="py-8 text-center text-sm text-[var(--zinc-500)]">No events found. Click "+ Add Event" to publish an upcoming gathering.</td>
 					</tr>
 				{:else}
-					{#each data.events as event}
+					{#each data.events as event (event.id)}
 						<tr>
 							<td>
 								<div class="font-medium text-[var(--zinc-900)]">{event.title}</div>
@@ -134,12 +135,12 @@
 			</p>
 			<div class="flex items-center gap-2">
 				{#if data.pagination.hasPrevious}
-					<a class="admin-btn-secondary" href="?page={data.pagination.page - 1}" rel="prev">
+					<a class="admin-btn-secondary" href={resolve(`/events?page=${data.pagination.page - 1}`)} rel="prev">
 						Previous
 					</a>
 				{/if}
 				{#if data.pagination.hasNext}
-					<a class="admin-btn-secondary" href="?page={data.pagination.page + 1}" rel="next">Next</a>
+					<a class="admin-btn-secondary" href={resolve(`/events?page=${data.pagination.page + 1}`)} rel="next">Next</a>
 				{/if}
 			</div>
 		</nav>

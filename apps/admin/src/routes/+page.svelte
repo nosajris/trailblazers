@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { PageData } from './$types';
 	let { data }: { data: PageData } = $props();
 
@@ -20,15 +21,15 @@
 		</div>
 
 		<div class="dashboard-quick-actions flex flex-wrap items-center gap-2.5">
-			<a href="/sermons" class="admin-btn-primary text-xs py-2 px-3">
+			<a href={resolve('/sermons')} class="admin-btn-primary text-xs py-2 px-3">
 				<svg class="mr-1.5 h-3.5 w-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
 				+ New Sermon
 			</a>
-			<a href="/events" class="admin-btn-secondary text-xs py-2 px-3">
+			<a href={resolve('/events')} class="admin-btn-secondary text-xs py-2 px-3">
 				<svg class="mr-1.5 h-3.5 w-3.5 text-brand-primary fill-none stroke-current stroke-2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
 				+ New Event
 			</a>
-			<a href="/submissions" class="admin-btn-secondary text-xs py-2 px-3">
+			<a href={resolve('/submissions')} class="admin-btn-secondary text-xs py-2 px-3">
 				<svg class="mr-1.5 h-3.5 w-3.5 text-zinc-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
 				View Leads
 			</a>
@@ -50,7 +51,7 @@
 				<span class="text-xs text-zinc-400 font-medium">messages published</span>
 			</div>
 			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
-				<a href="/sermons" class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
+				<a href={resolve('/sermons')} class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
 					Manage Sermons & Series
 					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
@@ -70,7 +71,7 @@
 				<span class="text-xs text-zinc-400 font-medium">upcoming gatherings</span>
 			</div>
 			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
-				<a href="/events" class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
+				<a href={resolve('/events')} class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
 					Manage Events
 					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
@@ -90,7 +91,7 @@
 				<span class="text-xs text-zinc-400 font-medium">active hubs</span>
 			</div>
 			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
-				<a href="/groups" class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
+				<a href={resolve('/groups')} class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
 					Manage Groups
 					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
@@ -110,7 +111,7 @@
 				<span class="text-xs text-zinc-400 font-medium">team directors</span>
 			</div>
 			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
-				<a href="/leaders" class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
+				<a href={resolve('/leaders')} class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
 					Manage Leaders
 					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
@@ -130,7 +131,7 @@
 				<span class="text-xs text-zinc-400 font-medium">unresolved ({data.stats.totalInquiries} total)</span>
 			</div>
 			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
-				<a href="/submissions" class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
+				<a href={resolve('/submissions')} class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
 					View Visitor Leads
 					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
@@ -150,7 +151,7 @@
 				<span class="text-xs text-zinc-400 font-medium">registered items</span>
 			</div>
 			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
-				<a href="/equipment" class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
+				<a href={resolve('/equipment')} class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
 					View Equipment Inventory
 					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
@@ -168,7 +169,7 @@
 					<h2 class="text-base font-bold text-zinc-900">Recent Audit Activity</h2>
 					<p class="text-xs text-zinc-500">Real-time system logging tracking staff operations.</p>
 				</div>
-				<a href="/audit-logs" class="admin-btn-secondary text-xs py-1.5 px-3">
+				<a href={resolve('/audit-logs')} class="admin-btn-secondary text-xs py-1.5 px-3">
 					View All Logs →
 				</a>
 			</div>
@@ -179,7 +180,7 @@
 				</div>
 			{:else}
 				<div class="divide-y divide-zinc-100">
-					{#each data.recentAuditLogs as log}
+					{#each data.recentAuditLogs as log (log.id)}
 						<div class="py-3.5 flex items-center justify-between text-xs group hover:bg-zinc-50 px-2 rounded-lg transition">
 							<div class="flex items-center gap-3">
 								<div class="h-7 w-7 rounded-full bg-zinc-100 text-zinc-700 flex items-center justify-center font-bold text-[11px] border border-zinc-200">
@@ -231,7 +232,7 @@
 				<p class="text-xs text-zinc-500 leading-relaxed mb-4">
 					Access site branding settings or update homepage banners directly from settings.
 				</p>
-				<a href="/settings" class="admin-btn-secondary w-full text-xs text-center justify-center">
+				<a href={resolve('/settings')} class="admin-btn-secondary w-full text-xs text-center justify-center">
 					Open Site Settings
 				</a>
 			</div>

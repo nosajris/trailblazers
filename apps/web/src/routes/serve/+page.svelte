@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import RichSection from '@trailblazers/ui/home/rich-section.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
@@ -69,7 +70,7 @@
 				</p>
 				<a
 					class="mt-8 inline-flex rounded-full bg-brand-primary px-10 py-4 text-xs font-bold uppercase tracking-[0.12em] text-white shadow-md transition hover:brightness-105"
-					href="/contact?topic=serve">Start the conversation</a
+					href={resolve('/contact?topic=serve')}>Start the conversation</a
 				>
 			</div>
 		</div>

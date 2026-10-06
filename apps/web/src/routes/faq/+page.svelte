@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import FaqSection from '@trailblazers/ui/home/faq-section.svelte';
 
@@ -41,7 +42,7 @@
 			<p class="mt-3 text-brand-dark/70">Our team would love to help you take your next step.</p>
 			<a
 				class="mt-8 inline-flex rounded-full bg-brand-primary px-10 py-3 text-xs font-bold uppercase tracking-[0.12em] text-white shadow-md transition hover:brightness-105"
-				href="/contact">Contact us</a
+				href={resolve('/contact')}>Contact us</a
 			>
 		</div>
 	</section>

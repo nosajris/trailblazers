@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 
 	/**
@@ -53,7 +54,7 @@
 		<p class="mt-3 text-sm leading-relaxed text-[var(--zinc-500)]">{detail}</p>
 
 		<div class="mt-8 flex flex-wrap justify-center gap-3">
-			<a class="admin-btn-primary" href="/">Back to the dashboard</a>
+			<a class="admin-btn-primary" href={resolve('/')}>Back to the dashboard</a>
 			<button class="admin-btn-secondary" onclick={() => history.back()}>Go back</button>
 		</div>
 	</div>

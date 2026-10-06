@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import '../app.css';
 
@@ -37,7 +38,7 @@
 				<!-- Nav Links -->
 				<nav class="p-4 space-y-1 text-sm font-medium">
 					<a
-						href="/"
+						href={resolve('/')}
 						data-active={isActive('/') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -45,7 +46,7 @@
 						Dashboard
 					</a>
 					<a
-						href="/sermons"
+						href={resolve('/sermons')}
 						data-active={isActive('/sermons') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/sermons') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -53,7 +54,7 @@
 						Sermons & Media
 					</a>
 					<a
-						href="/events"
+						href={resolve('/events')}
 						data-active={isActive('/events') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/events') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -61,7 +62,7 @@
 						Events CMS
 					</a>
 					<a
-						href="/groups"
+						href={resolve('/groups')}
 						data-active={isActive('/groups') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/groups') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -69,7 +70,7 @@
 						Connect Groups
 					</a>
 					<a
-						href="/stories"
+						href={resolve('/stories')}
 						data-active={isActive('/stories') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/stories') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -77,7 +78,7 @@
 						Stories & Articles
 					</a>
 					<a
-						href="/leaders"
+						href={resolve('/leaders')}
 						data-active={isActive('/leaders') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/leaders') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -85,7 +86,7 @@
 						Ministry Leaders
 					</a>
 					<a
-						href="/testimonials"
+						href={resolve('/testimonials')}
 						data-active={isActive('/testimonials') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/testimonials') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -93,7 +94,7 @@
 						Testimonials
 					</a>
 					<a
-						href="/bep"
+						href={resolve('/bep')}
 						data-active={isActive('/bep') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/bep') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -101,7 +102,7 @@
 						BEP Marketplace
 					</a>
 					<a
-						href="/equipment"
+						href={resolve('/equipment')}
 						data-active={isActive('/equipment') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/equipment') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -109,7 +110,7 @@
 						Equipment Inventory
 					</a>
 					<a
-						href="/pages"
+						href={resolve('/pages')}
 						data-active={isActive('/pages') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/pages') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -117,7 +118,7 @@
 						Landing Pages CMS
 					</a>
 					<a
-						href="/parents"
+						href={resolve('/parents')}
 						data-active={isActive('/parents') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/parents') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -125,7 +126,7 @@
 						Parents Portal
 					</a>
 					<a
-						href="/newcomers"
+						href={resolve('/newcomers')}
 						data-active={isActive('/newcomers') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/newcomers') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -134,7 +135,7 @@
 					</a>
 
 					<a
-						href="/faq"
+						href={resolve('/faq')}
 						data-active={isActive('/faq') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/faq') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -142,7 +143,7 @@
 						FAQ Portal
 					</a>
 					<a
-						href="/serve"
+						href={resolve('/serve')}
 						data-active={isActive('/serve') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/serve') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -150,7 +151,7 @@
 						Volunteer Serve
 					</a>
 					<a
-						href="/submissions"
+						href={resolve('/submissions')}
 						data-active={isActive('/submissions') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/submissions') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -158,7 +159,7 @@
 						Visitor & Serve Leads
 					</a>
 					<a
-						href="/statistics"
+						href={resolve('/statistics')}
 						data-active={isActive('/statistics') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/statistics') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -167,7 +168,7 @@
 					</a>
 					{#if canManage}
 					<a
-						href="/users"
+						href={resolve('/users')}
 						data-active={isActive('/users') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/users') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -175,7 +176,7 @@
 						Staff Accounts
 					</a>
 					<a
-						href="/audit-logs"
+						href={resolve('/audit-logs')}
 						data-active={isActive('/audit-logs') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/audit-logs') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>
@@ -183,7 +184,7 @@
 						Audit Activity Logs
 					</a>
 					<a
-						href="/settings"
+						href={resolve('/settings')}
 						data-active={isActive('/settings') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/settings') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
 					>

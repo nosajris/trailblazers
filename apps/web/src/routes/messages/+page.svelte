@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
 
@@ -9,25 +10,25 @@
 			title: 'Ignited for impact',
 			subtitle: 'Young adults · current emphasis',
 			image: '/images/sermon1.jpg',
-			href: '/watch'
+			href: '/watch' as const
 		},
 		{
 			title: 'Catalyst nights',
 			subtitle: 'Worship & word',
 			image: '/images/slider03.jpeg',
-			href: '/watch'
+			href: '/watch' as const
 		},
 		{
 			title: 'Marketplace faith',
 			subtitle: 'Work as worship',
 			image: '/images/wallpaper02.jpg',
-			href: '/watch'
+			href: '/watch' as const
 		},
 		{
 			title: 'Leadership tables',
 			subtitle: 'Character that scales',
 			image: '/images/wallpaper07.jpg',
-			href: '/stories'
+			href: '/stories' as const
 		}
 	];
 </script>
@@ -61,11 +62,11 @@
 			<div class="mt-10 flex flex-wrap gap-4">
 				<a
 					class="inline-flex rounded-full bg-brand-primary px-10 py-4 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-lg transition hover:brightness-105"
-					href="/watch">Watch now</a
+					href={resolve('/watch')}>Watch now</a
 				>
 				<a
 					class="inline-flex rounded-full border border-white/35 px-10 py-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-white/10"
-					href="/stories">Read stories</a
+					href={resolve('/stories')}>Read stories</a
 				>
 			</div>
 		</div>
@@ -86,7 +87,7 @@
 			<div class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
 				{#each series as s (s.title)}
 					<a
-						href={s.href}
+						href={resolve(s.href)}
 						class="group overflow-hidden rounded-2xl border border-neutral-200/90 bg-brand-light shadow-sm ring-1 ring-black/[0.03] transition hover:-translate-y-1 hover:shadow-lg"
 					>
 						<div class="aspect-[4/3] overflow-hidden">
@@ -119,7 +120,7 @@
 			</p>
 			<a
 				class="mt-8 inline-flex rounded-full border border-brand-dark/15 bg-white px-10 py-4 text-xs font-bold uppercase tracking-[0.12em] text-brand-dark transition hover:border-brand-primary"
-				href="/contact">Ask the team</a
+				href={resolve('/contact')}>Ask the team</a
 			>
 		</div>
 	</section>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import type { ActionData, PageData } from './$types';
 
@@ -34,7 +35,7 @@
 				</p>
 			</div>
 			<a
-				href="/login"
+				href={resolve('/login')}
 				class="mt-6 block text-center text-xs font-semibold uppercase tracking-wider text-[var(--zinc-500)] hover:text-[var(--brand-primary)]"
 			>
 				Back to sign in
