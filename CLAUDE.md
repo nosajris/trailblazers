@@ -190,6 +190,40 @@ sensitive table in the schema:
 - never log request text or who submitted it, and never put it in an email.
   The office notification says only that something arrived.
 
+## Site content that belongs to the church
+
+Service times, addresses, campuses, giving details and the WhatsApp number are
+**site settings**, not markup — see ADR 0008. They are edited in the staff
+portal, validated by the zod schemas in
+`packages/core/src/modules/settings/validation.ts`, and every section that uses
+them renders nothing when they are empty.
+
+**Never hardcode a plausible value for one of these.** A wrong service time or
+a stale bank detail costs someone a Sunday morning or a payment. If a section
+has no data, it does not render.
+
+List-shaped settings (giving methods, campuses) are edited as one record per
+line and parsed by the pure functions in
+`packages/core/src/modules/settings/site-content.ts`, which are unit tested and
+are the single definition of each format.
+
+## Pages, sections and metadata
+
+CMS pages live in `pages` + `page_sections`; `composePublicPage(slug)` turns
+them into blocks and `@trailblazers/ui/home/home-blocks.svelte` renders them.
+Sections are edited at `/pages/[id]` in the staff portal. `section-types.ts` is
+the one definition of which fields each section type takes — add a type there
+and the editor grows the right inputs. Section config is `jsonb`, so it is
+validated by `pageSectionSchema` before it is stored.
+
+The public homepage still falls back to `buildFallbackBlocks()` when no page
+exists at `/`. That is a safety net, not the intended path.
+
+**Every public page renders `SeoMeta`.** It supplies the canonical URL, Open
+Graph and Twitter tags, and optional JSON-LD. A page without it shares into
+WhatsApp as a bare URL, which is a reach problem rather than a cosmetic one —
+see ADR 0009.
+
 ## Documentation
 
 - `docs/DEPLOYMENT.md` — environment variables, migration ordering, rollback,

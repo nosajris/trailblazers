@@ -124,3 +124,71 @@ the staff auth surface was only just hardened.
 
 Blocked on it: group signup tied to a person rather than an email, giving
 history, serving schedules, BEP self-service claim.
+
+---
+
+## Needs content, not code
+
+These are built and waiting on someone with the facts. Each renders nothing
+until it is filled in (ADR 0008).
+
+| Item | Where |
+|---|---|
+| Service times, address, map link | Staff portal → Settings → Plan a Visit Details |
+| Campuses (id, name, times, address, map) | Staff portal → Settings → Campuses |
+| Giving methods and what giving pays for | Staff portal → Settings → Giving Details |
+| WhatsApp number and greeting | Staff portal → Settings → WhatsApp |
+| Real testimonials | Staff portal → Testimonials. The placeholders should be unpublished — a fake quote is the fastest way to lose a first-time visitor. |
+
+## Deliberately not done in the Elevation pass
+
+### Consolidate the ministry bands into one card grid
+**Effort: M.** `IM_NEW`, `SERVE` and `PARENTS` each render as a full-width
+`RichSection`, so three near-identical bands stack up. Elevation uses a single
+six-card ministry grid. Doing this properly needs a new CMS block kind and a
+page-builder change, not a styling tweak.
+
+### Real event reminders
+**Effort: M, plus a decision.** "Remind me on WhatsApp" prefills a message the
+person sends themselves. Sending an actual reminder later needs a messaging
+provider, a schedule, and consent records of the same standard as the
+newsletter (see `newsletter_subscribers`).
+
+### File sizes on downloads
+**Effort: S.** Worth doing for anything we host and can measure. Not done
+because the only download today is a generated `.ics` of a couple of
+kilobytes, and sermon note links are external URLs whose size we cannot know
+without fetching them.
+
+### Delete the unused background videos
+**Effort: S.** `apps/web/static/images/camp-video.mp4` (9.5 MB) and
+`camp02.mp4` (7.9 MB) are referenced nowhere in the codebase. They are 17.5 MB
+of the 30.4 MB static total. Confirm nothing external links to them, delete
+them, and lower `MAX_TOTAL` in `packages/ui/src/page-weight.test.ts` to about
+14 MB to lock the saving in.
+
+## From the all-pages audit — still open
+
+### Rich text for stories
+**Effort: M.** A story's body renders as one `<p>` with `whitespace-pre-line`,
+inside a `prose` container that has nothing to style. No headings, links, lists
+or inline images are possible. Needs a decision on the editing format
+(Markdown is the obvious one) plus sanitisation on render, which is why it was
+not bundled with the audit fixes.
+
+### Safeguarding information for parents
+**Effort: S, plus policy.** A parent deciding about a youth camp has no page
+answering who supervises, what the ratios are, or who to call. The content is a
+policy question for the leadership, not a code question; the page is small once
+the answers exist.
+
+### Past events and camp photos
+**Effort: M.** `/events` shows upcoming events only, so the proof that camps are
+good — photos and recaps of previous ones — is nowhere. Needs a decision on
+whether past events stay listed and where galleries are stored.
+
+### A page at `/` in the CMS
+**Effort: S.** With the section editor in place, the homepage can finally be
+built in the portal. Until someone creates a page with slug `/` and adds
+sections, `buildFallbackBlocks()` supplies a hero nobody can edit. Build it,
+check the public homepage matches, then consider removing the fallback.

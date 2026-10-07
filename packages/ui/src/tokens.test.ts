@@ -147,7 +147,7 @@ function countHardcodedHexes(): { total: number; byFile: Map<string, number> } {
  * token from `packages/ui/src/tokens.css` — not to edit this number. The
  * remaining literals are concentrated in `apps/admin/src/routes/+layout.svelte`.
  */
-const MAX_HARDCODED_HEXES = 56;
+const MAX_HARDCODED_HEXES = 50;
 
 test('the hardcoded colour count does not rise', () => {
 	const { total, byFile } = countHardcodedHexes();

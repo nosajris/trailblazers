@@ -36,3 +36,5 @@ What this costs, and what it now makes hard.
 | [0005](0005-zod-at-the-boundary.md) | Validate and sanitize at the boundary with zod | Accepted |
 | [0006](0006-homepage-first-visit-redesign.md) | Homepage redesign around the first-time visitor | Accepted |
 | [0007](0007-responsive-images.md) | Responsive WebP variants for local photos | Accepted |
+| [0008](0008-settings-driven-site-content.md) | Church-specific content lives in settings, not in the markup | Accepted |
+| [0009](0009-page-sections-and-message-pages.md) | Editable page sections, and a page per message | Accepted |
