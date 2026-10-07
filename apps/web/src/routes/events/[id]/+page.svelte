@@ -1,11 +1,15 @@
 <script lang="ts">
+	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
-	import { whatsappShareUrl } from '@trailblazers/ui/site/share';
+	import { eventReminderText, whatsappShareUrl } from '@trailblazers/ui/site/share';
 
 	let { data, form } = $props();
-	let { event } = data;
+
+	// SvelteKit reuses this component when only the [id] parameter changes, so a
+	// plain `let { event } = data` kept showing the previous event.
+	const event = $derived(data.event);
 
 	/** Seat state for this event, or null when the event vanished mid-request. */
 	const availability = $derived(data.availability);
@@ -25,11 +29,61 @@
 		whatsappShareUrl(`${event.title} — ${formatDate(event.date)}, ${event.location}\n${page.url.href}`)
 	);
 
+	/**
+	 * A reminder the person sends to themselves (or a friend) in WhatsApp.
+	 *
+	 * Sending real reminders would need a messaging provider and consent
+	 * records; this needs neither, and most of this audience lives in WhatsApp
+	 * rather than in a calendar app.
+	 */
+	const reminderHref = $derived(
+		whatsappShareUrl(
+			eventReminderText(
+				{ title: event.title, when: formatDate(event.date), where: event.location },
+				page.url.href
+			)
+		)
+	);
+
+	/**
+	 * Event data for search engines, so a camp can show its date, place and
+	 * price directly in results rather than as a generic blue link.
+	 */
+	const eventJsonLd = $derived({
+		'@context': 'https://schema.org',
+		'@type': 'Event',
+		name: event.title,
+		description: event.description,
+		startDate: new Date(event.date).toISOString(),
+		eventStatus: 'https://schema.org/EventScheduled',
+		eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+		location: { '@type': 'Place', name: event.location, address: event.location },
+		...(event.imageUrl ? { image: event.imageUrl } : {}),
+		organizer: { '@type': 'Organization', name: 'PAOZ Trailblazers' },
+		offers: {
+			'@type': 'Offer',
+			price: ((event.price ?? 0) / 100).toFixed(2),
+			priceCurrency: 'USD',
+			url: page.url.href,
+			availability:
+				availability && !availability.isOpen
+					? 'https://schema.org/SoldOut'
+					: 'https://schema.org/InStock'
+		}
+	});
+
 	const formatPrice = (cents: number) => {
 		if (cents === 0) return 'Free';
 		return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
 	};
 </script>
+
+<SeoMeta
+	title={`${event.title} — Trailblazers`}
+	description={event.description.slice(0, 180)}
+	image={event.imageUrl ?? '/images/wallpaper04.jpg'}
+	jsonLd={eventJsonLd}
+/>
 
 <SiteShell settings={data.settings}>
 	<div class="min-h-screen bg-brand-light pb-24">
@@ -207,6 +261,13 @@
 								class="block text-center text-sm font-semibold text-brand-primary underline-offset-2 hover:underline"
 								href={resolve('/events/[id]/ics', { id: String(event.id) })}
 								download>Download calendar (.ics)</a
+							>
+							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external wa.me share link -->
+							<a
+								class="block text-center text-sm font-semibold text-brand-primary underline-offset-2 hover:underline"
+								href={reminderHref}
+								target="_blank"
+								rel="noopener noreferrer">Remind me on WhatsApp</a
 							>
 							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external wa.me share link -->
 							<a

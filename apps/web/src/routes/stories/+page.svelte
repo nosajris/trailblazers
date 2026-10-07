@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
@@ -9,10 +10,11 @@
 		new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(d));
 </script>
 
-<svelte:head>
-	<title>Stories — Trailblazers</title>
-	<meta name="description" content="Articles, recaps, and leadership insights from the Trailblazers community." />
-</svelte:head>
+<SeoMeta
+	title="Stories — Trailblazers"
+	description="Articles, recaps, and leadership insights from the Trailblazers community."
+	image="/images/slider01.jpeg"
+/>
 
 <SiteShell settings={data.settings}>
 	<section class="relative overflow-hidden bg-brand-dark py-16 text-white md:py-24">

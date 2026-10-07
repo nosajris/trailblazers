@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { page } from '$app/state';
+
 	/**
 	 * Page metadata, including Open Graph and Twitter cards.
 	 *
@@ -27,6 +29,11 @@
 		modifiedTime?: string;
 		/** Keeps a page out of search results — use for token-driven pages. */
 		noindex?: boolean;
+		/**
+		 * Schema.org data for this page, as a plain object — an Event, a
+		 * FAQPage, an Article. Rendered as ld+json next to the meta tags.
+		 */
+		jsonLd?: unknown;
 	};
 
 	let {
@@ -40,15 +47,38 @@
 		siteUrl = '',
 		publishedTime,
 		modifiedTime,
-		noindex = false
+		noindex = false,
+		jsonLd
 	}: Props = $props();
+
+	/**
+	 * Every page needs an absolute canonical and og:url, and passing them in by
+	 * hand on twenty pages is how they end up wrong. They default to the
+	 * current page, minus the query string so a filtered or paginated view does
+	 * not become a second canonical URL for the same content.
+	 */
+	const origin = $derived(siteUrl || page.url.origin);
+	const canonicalUrl = $derived(canonical ?? `${origin}${page.url.pathname}`);
 
 	/** og:image must be absolute — relative paths are ignored by most crawlers. */
 	const absoluteImage = $derived(
-		image.startsWith('http') ? image : `${siteUrl}${image.startsWith('/') ? '' : '/'}${image}`
+		image.startsWith('http') ? image : `${origin}${image.startsWith('/') ? '' : '/'}${image}`
 	);
 
-	const canonicalUrl = $derived(canonical ?? siteUrl);
+	/**
+	 * A literal script tag inside the template confuses the Svelte parser, so
+	 * the tag is assembled here with its name split, exactly as the root layout
+	 * does for the site-wide Organization data.
+	 */
+	const jsonLdTag = $derived(
+		jsonLd
+			? '<scr' +
+				'ipt type="application/ld+json">' +
+				JSON.stringify(jsonLd).replace(/</g, '\\u003c') +
+				'</scr' +
+				'ipt>'
+			: ''
+	);
 </script>
 
 <svelte:head>
@@ -90,5 +120,10 @@
 	{#if absoluteImage}
 		<meta name="twitter:image" content={absoluteImage} />
 		<meta name="twitter:image:alt" content={imageAlt ?? title} />
+	{/if}
+
+	{#if jsonLdTag}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- JSON-LD built from our own data with every "<" escaped to \u003c, so it cannot close the tag -->
+		{@html jsonLdTag}
 	{/if}
 </svelte:head>

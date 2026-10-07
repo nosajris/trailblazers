@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
@@ -16,13 +17,11 @@
 	const hasVisitDetails = $derived(times.length > 0 || !!address || !!notes || !!mapUrl);
 </script>
 
-<svelte:head>
-	<title>Plan a visit — Trailblazers</title>
-	<meta
-		name="description"
-		content="What to expect on your first visit — parking, atmosphere, and next steps."
-	/>
-</svelte:head>
+<SeoMeta
+	title="Plan a visit — Trailblazers"
+	description="What to expect on your first visit — parking, atmosphere, and next steps."
+	image="/images/slider04.jpeg"
+/>
 
 <SiteShell settings={data.settings}>
 	<section class="relative min-h-[22rem] overflow-hidden bg-brand-dark py-20 text-white md:min-h-[26rem] md:py-28">

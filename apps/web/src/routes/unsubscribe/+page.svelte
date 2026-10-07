@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 
@@ -26,10 +27,7 @@
 	const copy = $derived(COPY[data.status]);
 </script>
 
-<svelte:head>
-	<title>Unsubscribe — Trailblazers</title>
-	<meta name="robots" content="noindex" />
-</svelte:head>
+<SeoMeta title="Unsubscribe — Trailblazers" description="Manage your Trailblazers email updates." noindex />
 
 <SiteShell settings={data.settings}>
 	<section class="border-b border-neutral-200/80 bg-brand-light py-20 md:py-28">

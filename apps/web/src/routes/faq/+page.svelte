@@ -1,15 +1,36 @@
 <script lang="ts">
+	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import FaqSection from '@trailblazers/ui/home/faq-section.svelte';
 
 	let { data } = $props();
+
+	/**
+	 * FAQPage data, so these answers can appear directly in search results.
+	 * Google wants the question and the answer in plain text.
+	 */
+	const faqJsonLd = $derived(
+		data.items.length > 0
+			? {
+					'@context': 'https://schema.org',
+					'@type': 'FAQPage',
+					mainEntity: data.items.map((item) => ({
+						'@type': 'Question',
+						name: item.question,
+						acceptedAnswer: { '@type': 'Answer', text: item.answer }
+					}))
+				}
+			: undefined
+	);
 </script>
 
-<svelte:head>
-	<title>FAQ — Trailblazers</title>
-	<meta name="description" content="Answers about Trailblazers young adults ministry, groups, events, and more." />
-</svelte:head>
+<SeoMeta
+	title="FAQ — Trailblazers"
+	description="Answers about Trailblazers young adults ministry, groups, events, and more."
+	image="/images/wallpaper03.jpg"
+	jsonLd={faqJsonLd}
+/>
 
 <SiteShell settings={data.settings}>
 	<section class="relative overflow-hidden bg-brand-dark py-14 text-white md:py-20">

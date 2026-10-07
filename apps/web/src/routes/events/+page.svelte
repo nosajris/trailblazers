@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -121,6 +122,12 @@
 	}
 </script>
 
+<SeoMeta
+	title="Events — Trailblazers"
+	description="Camps, workshops and meetups coming up at Trailblazers. Register online."
+	image={data.featuredEvent?.imageUrl ?? '/images/wallpaper04.jpg'}
+/>
+
 <SiteShell settings={data.settings}>
 	<div class="min-h-screen bg-brand-light">
 		{#if data.featuredEvent}
@@ -184,7 +191,7 @@
 		{/if}
 
 		<section
-			class="sticky top-[4.5rem] z-40 border-b border-gray-200 bg-white/95 py-4 shadow-sm backdrop-blur-md lg:top-[7.25rem]"
+			class="sticky top-14 z-40 border-b border-gray-200 bg-white/95 py-4 shadow-sm backdrop-blur-md sm:top-16 lg:top-[4.25rem]"
 		>
 			<div class="container mx-auto flex max-w-7xl flex-col gap-4 px-6 md:px-6">
 				<div class="flex flex-wrap items-center justify-between gap-3">

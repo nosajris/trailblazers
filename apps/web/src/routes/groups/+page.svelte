@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
@@ -33,13 +34,11 @@
 		}`;
 </script>
 
-<svelte:head>
-	<title>Groups — Trailblazers</title>
-	<meta
-		name="description"
-		content="Find a Trailblazers group — campus circles, creatives, and professionals meeting weekly."
-	/>
-</svelte:head>
+<SeoMeta
+	title="Groups — Trailblazers"
+	description="Find a Trailblazers group — campus circles, creatives, and professionals meeting weekly."
+	image="/images/wallpaper04.jpg"
+/>
 
 <SiteShell settings={data.settings}>
 	<section class="relative overflow-hidden bg-brand-dark py-20 text-white md:py-28">
