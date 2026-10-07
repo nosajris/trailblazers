@@ -4,6 +4,8 @@
 	import Navbar from './navbar.svelte';
 	import Footer from './footer.svelte';
 	import MobileBottomNav from './mobile-bottom-nav.svelte';
+	import WhatsappFab from './whatsapp-fab.svelte';
+	import Omnibar from '../components/Omnibar.svelte';
 
 	type NavLink = { label: string; href: string };
 
@@ -17,6 +19,9 @@
 		children: Snippet;
 	} = $props();
 
+	/** The search overlay lives here so every page gets it, and Ctrl/Cmd+K works anywhere. */
+	let searchOpen = $state(false);
+
 	const ctaResolved = $derived(
 		cta ?? {
 			label: 'Plan a visit',
@@ -25,14 +30,19 @@
 	);
 </script>
 
-<div class="min-h-screen overflow-x-hidden bg-brand-light text-brand-dark antialiased">
+<div class="min-h-screen overflow-x-clip bg-brand-light text-brand-dark antialiased">
 	<!--
 		First stop for keyboard and screen-reader users: jumps past the whole
 		navigation, which is a mega-menu with dozens of links. Visually hidden
 		until it receives focus (see .skip-link in tokens.css).
 	-->
 	<a class="skip-link" href="#main-content">Skip to main content</a>
-	<Navbar navItems={settings.navLinks} extras={settings.siteExtras} cta={ctaResolved} />
+	<Navbar
+		navItems={settings.navLinks}
+		extras={settings.siteExtras}
+		cta={ctaResolved}
+		onSearch={() => (searchOpen = true)}
+	/>
 	<main id="main-content" tabindex="-1">
 		{@render children()}
 	</main>
@@ -40,4 +50,6 @@
 	<!-- Spacer so the fixed phone nav never hides the end of the footer. -->
 	<div class="h-14 md:hidden" aria-hidden="true"></div>
 	<MobileBottomNav extras={settings.siteExtras} />
+	<WhatsappFab number={settings.siteExtras.whatsappNumber} greeting={settings.siteExtras.whatsappGreeting ?? ''} />
+	<Omnibar bind:isOpen={searchOpen} />
 </div>

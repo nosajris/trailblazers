@@ -3,7 +3,6 @@
 	import { onDestroy } from 'svelte';
 	import { container } from '../tb-layout.js';
 	import type { SiteExtras, SiteNavItem, SiteNavMega } from '@trailblazers/core';
-	import { realLanguageOptions } from './nav-utils.js';
 
 	function isMegaNavItem(item: SiteNavItem): item is SiteNavMega {
 		return (
@@ -18,11 +17,14 @@
 	let {
 		navItems,
 		extras,
-		cta = { label: 'Plan a visit', href: '/plan-a-visit' }
+		cta = { label: 'Plan a visit', href: '/plan-a-visit' },
+		onSearch
 	}: {
 		navItems: SiteNavItem[];
 		extras: SiteExtras;
 		cta?: NavLink;
+		/** Opens the search overlay owned by the site shell. */
+		onSearch?: () => void;
 	} = $props();
 
 	let menuOpen = $state(false);
@@ -30,8 +32,8 @@
 	let headerEl: HTMLDivElement | null = $state(null);
 	let mobilePanelEl: HTMLDivElement | null = $state(null);
 
-	const languages = $derived(realLanguageOptions(extras.languageOptions));
 	const givingHref = $derived(extras.givingUrl?.trim() ? extras.givingUrl : '/give');
+	const givingIsExternal = $derived(/^https?:\/\//i.test(extras.givingUrl?.trim() ?? ''));
 	const watchHref = $derived(extras.watchUrl?.trim() ? extras.watchUrl : '/watch');
 	const messagesHref = $derived(extras.messagesUrl?.trim() ? extras.messagesUrl : '/watch#messages');
 
@@ -97,46 +99,8 @@
 
 <div
 	bind:this={headerEl}
-	class="sticky top-0 z-50 border-b border-zinc-200/60 bg-white/80 shadow-[0_8px_32px_0_rgba(23,22,22,0.06)] backdrop-blur-xl"
+	class="sticky top-0 z-50 border-b border-white/40 bg-white/65 shadow-[0_8px_32px_0_rgba(23,22,22,0.08)] backdrop-blur-xl backdrop-saturate-150 supports-[not(backdrop-filter)]:bg-white/95"
 >
-	<!-- Acrylic Dark Utility Bar -->
-	<div
-		class="hidden border-b border-white/10 bg-[#171616]/95 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/90 backdrop-blur-md lg:block"
-	>
-		<div class="{container} flex flex-wrap items-center justify-end gap-x-6 gap-y-2 py-2">
-			<a class="transition hover:text-brand-gold" href={watchHref}>Watch</a>
-			<a class="transition hover:text-brand-gold" href={messagesHref}>Messages</a>
-			<a class="transition hover:text-brand-gold" href={givingHref}>Give</a>
-			{#if extras.campuses && extras.campuses.length > 1}
-				<label class="inline-flex items-center gap-2 text-white/80">
-					<span class="sr-only">Campus</span>
-					<select
-						class="max-w-[10rem] cursor-pointer rounded-md border border-white/20 bg-white/10 px-2 py-1 text-[11px] font-bold tracking-wide text-white outline-none backdrop-blur-sm focus:border-brand-primary"
-						onchange={(e) => {
-							const opt = extras.campuses?.[e.currentTarget.selectedIndex];
-							if (opt?.href) window.location.href = opt.href;
-						}}
-					>
-						{#each extras.campuses as c (c.id)}
-							<option value={c.id} class="bg-[#171616] text-white">{c.label}</option>
-						{/each}
-					</select>
-				</label>
-			{/if}
-			{#if languages.length > 0}
-				<div class="flex gap-3 border-l border-white/20 pl-6">
-					{#each languages as lang (lang.code)}
-						<a
-							class="opacity-90 transition hover:text-brand-gold"
-							href={lang.href}
-							lang={lang.code}>{lang.label}</a
-						>
-					{/each}
-				</div>
-			{/if}
-		</div>
-	</div>
-
 	<!-- Acrylic Header Container -->
 	<div class="{container} flex h-14 items-center justify-between gap-4 sm:h-16 lg:h-[4.25rem]">
 		<a
@@ -219,14 +183,41 @@
 			{/each}
 		</nav>
 
-		<div class="hidden items-center gap-3 md:flex">
+		<div class="hidden items-center gap-1 md:flex lg:gap-2">
+			<button
+				type="button"
+				class="inline-flex h-11 w-11 items-center justify-center rounded-full text-brand-dark/80 transition hover:bg-black/5 hover:text-brand-primary"
+				onclick={onSearch}
+			>
+				<span class="sr-only">Search this site</span>
+				<svg class="h-5 w-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
+					<circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+				</svg>
+			</button>
+			<!-- Giving stays one click away on every page; it used to live in the removed top bar. -->
 			<a
-				class="rounded-full bg-brand-primary px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-white shadow-[0_4px_20px_rgba(249,92,75,0.35)] transition hover:bg-brand-secondary hover:shadow-[0_6px_25px_rgba(249,92,75,0.45)] lg:px-6"
+				class="rounded-full px-3 py-2 text-[13px] font-semibold text-brand-dark/90 transition hover:bg-black/5 hover:text-brand-primary xl:px-4 xl:text-sm"
+				href={givingHref}
+				target={givingIsExternal ? '_blank' : undefined}
+				rel={givingIsExternal ? 'noopener noreferrer' : undefined}>Give</a
+			>
+			<a
+				class="ml-1 rounded-full bg-brand-primary px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-white shadow-[0_4px_20px_rgb(var(--brand-primary-rgb)/0.35)] transition hover:bg-[var(--brand-primary-hover)] hover:shadow-[0_6px_25px_rgb(var(--brand-primary-rgb)/0.45)] lg:px-6"
 				href={cta.href}>{cta.label}</a
 			>
 		</div>
 
-		<div class="flex items-center gap-2 md:hidden">
+		<div class="flex items-center gap-1 md:hidden">
+			<button
+				type="button"
+				class="inline-flex h-11 w-11 items-center justify-center rounded-full text-brand-dark transition hover:bg-black/5"
+				onclick={onSearch}
+			>
+				<span class="sr-only">Search this site</span>
+				<svg class="h-5 w-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
+					<circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+				</svg>
+			</button>
 			<a
 				class="rounded-full bg-brand-primary px-4 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-md"
 				href={cta.href}>{cta.label}</a
