@@ -105,9 +105,17 @@
 	<div class="{container} flex h-14 items-center justify-between gap-4 sm:h-16 lg:h-[4.25rem]">
 		<a
 			href={resolve('/')}
-			class="font-sans text-lg font-black tracking-tight text-brand-dark sm:text-xl lg:text-2xl"
+			class="flex items-center gap-2.5 font-sans text-lg font-black tracking-tight text-brand-dark sm:text-xl lg:text-2xl"
 		>
-			<span class="text-brand-primary">Trail</span><span class="text-brand-dark">blazers</span>
+			<img
+				src="/images/logo-96.png"
+				srcset="/images/logo-96.png 1x, /images/logo-192.png 2x"
+				width="96"
+				height="87"
+				alt=""
+				class="h-8 w-auto sm:h-9 lg:h-10"
+			/>
+			<span><span class="text-brand-primary">Trail</span><span class="text-brand-dark">blazers</span></span>
 		</a>
 
 		<nav class="hidden items-center gap-0.5 lg:flex xl:gap-1" aria-label="Primary">
