@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import '../app.css';
-	import favicon from '$lib/assets/favicon.svg';
 
 	let { data, children } = $props();
 
@@ -26,7 +25,7 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" type="image/png" href="/images/icon-192.png" />
 	<!--
 		theme_color lives in manifest.webmanifest, not in a meta tag here.
 		A meta tag would mean a second copy of the brand hex outside tokens.css,

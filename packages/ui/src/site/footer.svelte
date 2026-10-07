@@ -22,8 +22,16 @@
 	<div class="{container} {sectionY} pb-12 pt-14 lg:pb-16 lg:pt-20">
 		<div class="grid gap-12 lg:grid-cols-12 lg:gap-10">
 			<div class="lg:col-span-4">
-				<p class="font-sans text-xl font-black tracking-tight text-white lg:text-2xl">
-					<span class="text-brand-gold">Trail</span><span class="text-white">blazers</span>
+				<p class="flex items-center gap-3 font-sans text-xl font-black tracking-tight text-white lg:text-2xl">
+					<img
+						src="/images/logo-96.png"
+						srcset="/images/logo-96.png 1x, /images/logo-192.png 2x"
+						width="96"
+						height="87"
+						alt=""
+						class="h-12 w-auto"
+					/>
+					<span><span class="text-brand-gold">Trail</span><span class="text-white">blazers</span></span>
 				</p>
 				<p class="mt-4 max-w-sm text-sm leading-relaxed text-gray-400">
 					A transformational leadership ecosystem for young adults — worship, community, and growth.
