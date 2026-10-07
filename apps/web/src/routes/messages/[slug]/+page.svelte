@@ -29,7 +29,7 @@
 />
 
 <SiteShell settings={data.settings}>
-	<section class="relative overflow-hidden bg-brand-dark py-16 text-white md:py-24">
+	<section class="relative hero-fill flex flex-col justify-center overflow-hidden bg-brand-dark py-16 text-white md:py-24">
 		{#if series.coverImageUrl}
 			<div class="absolute inset-0">
 				<img

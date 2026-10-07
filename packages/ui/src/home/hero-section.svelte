@@ -70,7 +70,7 @@
 		}).format(new Date(d));
 </script>
 
-<section class="relative min-h-[min(82svh,46rem)] overflow-hidden bg-brand-dark text-white">
+<section class="hero-fill relative flex flex-col overflow-hidden bg-brand-dark text-white">
 	<div class="absolute inset-0">
 		{#if embed && videoAllowed}
 			<!-- The video is desktop only: on mobile data a hidden lazy iframe never loads, so the photo carries the hero. -->
@@ -115,7 +115,7 @@
 		<div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/60 to-transparent"></div>
 	</div>
 
-	<div class="{container} relative flex min-h-[min(82svh,46rem)] flex-col justify-end pb-10 pt-24 md:pb-16 lg:justify-center lg:pb-24 lg:pt-28">
+	<div class="{container} relative flex flex-1 flex-col justify-end pb-10 pt-24 md:pb-16 lg:justify-center lg:pb-24 lg:pt-28">
 		<div class="max-w-3xl">
 			<p class="text-[11px] font-bold uppercase tracking-[0.22em] text-brand-gold">
 				Young adults &amp; students

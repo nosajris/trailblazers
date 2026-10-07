@@ -131,7 +131,7 @@
 <SiteShell settings={data.settings}>
 	<div class="min-h-screen bg-brand-light">
 		{#if data.featuredEvent}
-			<section class="group relative flex h-[min(56vh,28rem)] w-full items-end overflow-hidden md:h-[60vh]">
+			<section class="hero-fill group relative flex w-full items-end overflow-hidden">
 				<div class="absolute inset-0 bg-brand-dark">
 					<img
 						src={data.featuredEvent.imageUrl ?? '/images/wallpaper01.jpg'}

@@ -27,7 +27,7 @@
 
 <SiteShell settings={data.settings}>
 	<!-- Elevation-style Hero section -->
-	<section class="relative overflow-hidden border-b border-white/10 bg-brand-dark py-16 text-white md:py-24">
+	<section class="relative hero-fill flex flex-col justify-center overflow-hidden border-b border-white/10 bg-brand-dark py-16 text-white md:py-24">
 		<div class="absolute inset-0 opacity-30">
 			<img
 				src="/images/sermon1.jpg"

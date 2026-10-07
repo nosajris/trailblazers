@@ -41,7 +41,7 @@
 />
 
 <SiteShell settings={data.settings}>
-	<section class="relative overflow-hidden bg-brand-dark py-20 text-white md:py-28">
+	<section class="relative hero-fill flex flex-col justify-center overflow-hidden bg-brand-dark py-20 text-white md:py-28">
 		<div class="absolute inset-0">
 			<img
 				src="/images/image06.jpeg"

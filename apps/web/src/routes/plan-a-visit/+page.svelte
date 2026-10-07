@@ -24,7 +24,7 @@
 />
 
 <SiteShell settings={data.settings}>
-	<section class="relative min-h-[22rem] overflow-hidden bg-brand-dark py-20 text-white md:min-h-[26rem] md:py-28">
+	<section class="relative hero-fill flex flex-col justify-center overflow-hidden bg-brand-dark py-20 text-white md:py-28">
 		<div class="absolute inset-0">
 			<img
 				src="/images/slider04.jpeg"
