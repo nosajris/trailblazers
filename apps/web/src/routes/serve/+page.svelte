@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import { resolve } from '$app/paths';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import RichSection from '@trailblazers/ui/home/rich-section.svelte';
@@ -7,13 +8,11 @@
 	let { data } = $props();
 </script>
 
-<svelte:head>
-	<title>Serve — Trailblazers</title>
-	<meta
-		name="description"
-		content="Volunteer with Trailblazers — hospitality, production, groups, and more ways to build the church."
-	/>
-</svelte:head>
+<SeoMeta
+	title="Serve — Trailblazers"
+	description="Volunteer with Trailblazers — hospitality, production, groups, and more ways to build the church."
+	image="/images/wallpaper01.jpg"
+/>
 
 <SiteShell settings={data.settings}>
 	<section class="relative overflow-hidden bg-brand-dark py-16 text-white md:py-24">
@@ -44,9 +43,15 @@
 	{:else}
 		<section class="bg-white {sectionY}">
 			<div class="{container} max-w-3xl text-center">
-				<p class="text-brand-dark/75">
-					Serve team content is managed in the CMS. Contact us to find a team while this page is being configured.
+				<h2 class="font-sans text-2xl font-black text-brand-dark">Tell us what you are good at</h2>
+				<p class="mt-4 text-brand-dark/75">
+					Media, worship, hosting, logistics, driving, admin — if you can do it, there is a team that
+					needs it. Send a note and we will put you with the right people.
 				</p>
+				<a
+					class="mt-8 inline-flex min-h-12 items-center rounded-full bg-brand-primary px-10 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-md transition hover:brightness-105"
+					href={resolve('/contact')}>Start the conversation</a
+				>
 			</div>
 		</section>
 	{/if}
