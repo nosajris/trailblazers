@@ -5,7 +5,7 @@
 	let { data }: { data: HomeFaqVm } = $props();
 </script>
 
-<section class="border-b border-neutral-200/80 bg-white {sectionY}">
+<section class="bg-brand-light {sectionY}">
 	<div class="{container}">
 		<div class="mx-auto max-w-3xl lg:mx-0">
 			<p class={eyebrow}>FAQ</p>
@@ -13,12 +13,12 @@
 				{data.title ?? 'Questions'}
 			</h2>
 		</div>
-		<div class="mx-auto mt-10 max-w-3xl space-y-3 lg:mx-0">
+		<div class="mt-10 lg:columns-2 lg:gap-x-6">
 			{#each data.items as item (item.id)}
 				<details
 					id={`faq-${item.id}`}
 					name="faq"
-					class="group rounded-2xl border border-neutral-200/90 bg-[#fafaf8] px-5 py-1 transition hover:border-brand-primary/25"
+					class="group mb-3 break-inside-avoid rounded-2xl border border-neutral-200/90 bg-[#fafaf8] px-5 py-1 transition hover:border-brand-primary/25"
 				>
 					<summary
 						class="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-sans text-base font-semibold text-brand-dark md:text-lg [&::-webkit-details-marker]:hidden"
