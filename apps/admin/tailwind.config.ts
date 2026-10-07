@@ -1,4 +1,6 @@
 import type { Config } from 'tailwindcss';
+import typography from '@tailwindcss/typography';
+import forms from '@tailwindcss/forms';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -49,5 +51,5 @@ export default {
 			}
 		}
 	},
-	plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')]
+	plugins: [typography, forms]
 } satisfies Config;
