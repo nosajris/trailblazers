@@ -33,7 +33,6 @@
 	let mobilePanelEl: HTMLDivElement | null = $state(null);
 
 	const givingHref = $derived(extras.givingUrl?.trim() ? extras.givingUrl : '/give');
-	const givingIsExternal = $derived(/^https?:\/\//i.test(extras.givingUrl?.trim() ?? ''));
 	const watchHref = $derived(extras.watchUrl?.trim() ? extras.watchUrl : '/watch');
 	const messagesHref = $derived(extras.messagesUrl?.trim() ? extras.messagesUrl : '/watch#messages');
 
@@ -202,13 +201,6 @@
 					<circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
 				</svg>
 			</button>
-			<!-- Giving stays one click away on every page; it used to live in the removed top bar. -->
-			<a
-				class="rounded-full px-3 py-2 text-[13px] font-semibold text-brand-dark/90 transition hover:bg-black/5 hover:text-brand-primary xl:px-4 xl:text-sm"
-				href={givingHref}
-				target={givingIsExternal ? '_blank' : undefined}
-				rel={givingIsExternal ? 'noopener noreferrer' : undefined}>Give</a
-			>
 			<a
 				class="ml-1 rounded-full bg-brand-primary px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-white shadow-[0_4px_20px_rgb(var(--brand-primary-rgb)/0.35)] transition hover:bg-[var(--brand-primary-hover)] hover:shadow-[0_6px_25px_rgb(var(--brand-primary-rgb)/0.45)] lg:px-6"
 				href={cta.href}>{cta.label}</a
