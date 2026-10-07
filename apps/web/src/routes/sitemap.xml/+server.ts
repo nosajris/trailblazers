@@ -45,10 +45,13 @@ function toEntry(origin: string, entry: SitemapEntry): string {
 export const GET: RequestHandler = async ({ url, setHeaders }) => {
 	const origin = url.origin;
 
-	const [sermons, events, posts] = await Promise.all([
+	const [sermons, series, events, posts, settings, cmsSlugs] = await Promise.all([
 		services.sermons.getAllSermons(),
+		services.sermons.listSeriesCards(),
 		services.events.listUpcomingForHome(50),
-		services.blog.listPublished(100)
+		services.blog.listPublished(100),
+		services.settings.getBundle(),
+		services.pages.listPublishedSlugs()
 	]);
 
 	const staticPages: SitemapEntry[] = [
@@ -56,6 +59,11 @@ export const GET: RequestHandler = async ({ url, setHeaders }) => {
 		{ path: '/watch', changefreq: 'weekly', priority: '0.9' },
 		{ path: '/events', changefreq: 'daily', priority: '0.9' },
 		{ path: '/plan-a-visit', changefreq: 'monthly', priority: '0.8' },
+		...(settings.siteExtras.campuses ?? []).map((campus) => ({
+			path: `/campus/${campus.id}`,
+			changefreq: 'monthly' as const,
+			priority: '0.7'
+		})),
 		{ path: '/groups', changefreq: 'weekly', priority: '0.8' },
 		{ path: '/serve', changefreq: 'monthly', priority: '0.7' },
 		{ path: '/stories', changefreq: 'weekly', priority: '0.7' },
@@ -68,9 +76,9 @@ export const GET: RequestHandler = async ({ url, setHeaders }) => {
 		{ path: '/messages', changefreq: 'weekly', priority: '0.6' }
 	];
 
-	// One entry per event and per story. Sermons have no page of their own, so
-	// they contribute their most recent publish date to /watch rather than
-	// repeating that URL once per sermon.
+	// One entry per event, story, message and series. Messages now have their
+	// own pages at /watch/<slug>; /watch keeps the most recent publish date as
+	// its lastmod so the index is recrawled when a message is added.
 	const latestSermonDate = sermons.reduce<Date | null>((latest, sermon) => {
 		const published = sermon.publishedAt ? new Date(sermon.publishedAt) : null;
 		if (!published) return latest;
@@ -92,7 +100,29 @@ export const GET: RequestHandler = async ({ url, setHeaders }) => {
 			changefreq: 'monthly' as const,
 			priority: '0.6',
 			lastmod: null
-		}))
+		})),
+		...sermons.map((sermon) => ({
+			path: `/watch/${sermon.slug}`,
+			changefreq: 'monthly' as const,
+			priority: '0.7',
+			lastmod: sermon.publishedAt ? new Date(sermon.publishedAt) : null
+		})),
+		...series.map((item) => ({
+			path: `/messages/${item.slug}`,
+			changefreq: 'monthly' as const,
+			priority: '0.7',
+			lastmod: item.latestPublishedAt
+		})),
+		// Pages staff build in the portal, such as /about. '/' and anything with
+		// a route of its own are already listed above.
+		...cmsSlugs
+			.filter((slug) => slug !== '/' && !staticPages.some((page) => page.path === slug))
+			.map((slug) => ({
+				path: slug,
+				changefreq: 'monthly' as const,
+				priority: '0.6',
+				lastmod: null
+			}))
 	];
 
 	const body =

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
 
@@ -17,10 +18,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Watch & Messages — PAOZ Trailblazers</title>
-	<meta name="description" content="Watch latest sermons, video messages, and series from PAOZ Trailblazers." />
-</svelte:head>
+<SeoMeta
+	title="Watch & Messages — PAOZ Trailblazers"
+	description="Watch latest sermons, video messages, and series from PAOZ Trailblazers."
+	image={data.featuredSermon?.thumbnailUrl ?? '/images/sermon1.jpg'}
+/>
 
 <SiteShell settings={data.settings}>
 	<!-- Elevation-style Hero section -->
@@ -72,53 +74,52 @@
 
 			{#if data.sermons.length === 0}
 				<div class="rounded-2xl border border-zinc-200 bg-white p-12 text-center shadow-sm">
-					<p class="text-zinc-500">No video messages available yet. Staff can publish sermons via the Staff Admin CMS.</p>
+					<p class="text-zinc-500">
+						The first messages are on their way. In the meantime, come and hear one in person —
+						<a class="font-semibold text-brand-primary hover:underline" href={resolve('/plan-a-visit')}
+							>plan a visit</a
+						>.
+					</p>
 				</div>
 			{:else}
 				<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
 					{#each data.sermons as sermon (sermon.id)}
-						<div class="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm transition hover:shadow-xl hover:-translate-y-1">
-							<div class="relative aspect-video bg-zinc-900 overflow-hidden">
+						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- internal path built from the message slug -->
+						<a
+							href={sermon.watchHref}
+							class="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+						>
+							<div class="relative aspect-video overflow-hidden bg-zinc-900">
 								<img
 									src={sermon.thumbnailUrl || '/images/sermon2.jpg'}
-									alt={sermon.title}
+									alt=""
 									class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+									loading="lazy"
+									sizes="(max-width: 1024px) 100vw, 33vw"
 								/>
-								{#if sermon.youtubeId}
-									<button
-										onclick={() => openVideo(sermon.youtubeId)}
-										class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100"
-										aria-label="Play video"
-									>
-										<div class="flex h-14 w-14 items-center justify-center rounded-full bg-brand-primary text-white shadow-lg">
-											<svg class="h-6 w-6 fill-current ml-0.5" viewBox="0 0 24 24">
-												<path d="M8 5v14l11-7z" />
-											</svg>
-										</div>
-									</button>
-								{/if}
+								<span
+									class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100"
+									aria-hidden="true"
+								>
+									<span class="flex h-14 w-14 items-center justify-center rounded-full bg-brand-primary text-white shadow-lg">
+										<svg class="ml-0.5 h-6 w-6 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+									</span>
+								</span>
 							</div>
 							<div class="flex flex-1 flex-col p-6">
 								<p class="text-xs font-semibold text-brand-primary">{sermon.speaker}</p>
-								<h3 class="mt-2 text-xl font-bold text-zinc-900 leading-snug">{sermon.title}</h3>
+								<h3 class="mt-2 text-xl font-bold leading-snug text-zinc-900">{sermon.title}</h3>
 								{#if sermon.scripture}
-									<p class="mt-1 text-xs text-zinc-500 font-medium">{sermon.scripture}</p>
+									<p class="mt-1 text-xs font-medium text-zinc-500">{sermon.scripture}</p>
 								{/if}
 								{#if sermon.summary}
-									<p class="mt-3 text-sm text-zinc-600 line-clamp-2">{sermon.summary}</p>
+									<p class="mt-3 line-clamp-2 text-sm text-zinc-600">{sermon.summary}</p>
 								{/if}
-								<div class="mt-auto pt-6">
-									{#if sermon.youtubeId}
-										<button
-											onclick={() => openVideo(sermon.youtubeId)}
-											class="text-xs font-bold uppercase tracking-wider text-brand-primary hover:underline"
-										>
-											Watch Message →
-										</button>
-									{/if}
-								</div>
+								<span class="mt-auto pt-6 text-xs font-bold uppercase tracking-wider text-brand-primary"
+									>Open this message →</span
+								>
 							</div>
-						</div>
+						</a>
 					{/each}
 				</div>
 			{/if}

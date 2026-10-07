@@ -4,5 +4,12 @@ import { cacheHeaders } from '$lib/server/cache';
 
 export const load: PageServerLoad = async ({ setHeaders }) => {
 	setHeaders(cacheHeaders('content'));
-	return { settings: await services.settings.getBundle() };
+
+	const [settings, series, latest] = await Promise.all([
+		services.settings.getBundle(),
+		services.sermons.listSeriesCards(),
+		services.sermons.getLatestCard()
+	]);
+
+	return { settings, series, latest };
 };
