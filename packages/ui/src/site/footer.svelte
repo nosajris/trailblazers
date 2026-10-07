@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import type { SiteExtras } from '@trailblazers/core';
+	import { telHref, type SiteExtras } from '@trailblazers/core';
 	import { container, sectionY } from '../tb-layout.js';
 
 	type FooterColumn = { title: string; links: { label: string; href: string }[] };
@@ -10,6 +10,8 @@
 	const givingHref = $derived(extras.givingUrl?.trim() ? extras.givingUrl : '/give');
 	const watchHref = $derived(extras.watchUrl?.trim() ? extras.watchUrl : '/watch');
 	const messagesHref = $derived(extras.messagesUrl?.trim() ? extras.messagesUrl : '/messages');
+	const phoneHref = $derived(telHref(extras.contactPhone));
+	const socials = $derived(extras.socialLinks ?? []);
 </script>
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -- these hrefs come from the CMS / site settings and may be absolute external URLs, which resolve() cannot take -->
@@ -24,6 +26,49 @@
 				<p class="mt-4 max-w-sm text-sm leading-relaxed text-gray-400">
 					A transformational leadership ecosystem for young adults — worship, community, and growth.
 				</p>
+
+				<!--
+					Contact details, from site settings. The site previously carried no
+					phone number, email or address on any page, so anyone who wanted to
+					speak to a person had only the contact form.
+				-->
+				{#if extras.postalAddress || phoneHref || extras.contactEmail || extras.officeHours}
+					<address class="mt-6 space-y-1.5 text-sm not-italic text-gray-400">
+						{#if extras.postalAddress}
+							<p class="max-w-sm">{extras.postalAddress}</p>
+						{/if}
+						{#if phoneHref}
+							<p>
+								<a class="transition hover:text-white" href={phoneHref}>{extras.contactPhone}</a>
+							</p>
+						{/if}
+						{#if extras.contactEmail}
+							<p>
+								<a class="transition hover:text-white" href={`mailto:${extras.contactEmail}`}
+									>{extras.contactEmail}</a
+								>
+							</p>
+						{/if}
+						{#if extras.officeHours}
+							<p class="text-gray-400/80">{extras.officeHours}</p>
+						{/if}
+					</address>
+				{/if}
+
+				{#if socials.length > 0}
+					<ul class="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+						{#each socials as social (social.url)}
+							<li>
+								<a
+									class="transition hover:text-white"
+									href={social.url}
+									target="_blank"
+									rel="noopener noreferrer">{social.label}</a
+								>
+							</li>
+						{/each}
+					</ul>
+				{/if}
 				<form
 					method="POST"
 					action="/api/newsletter"

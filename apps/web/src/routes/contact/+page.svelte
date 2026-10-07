@@ -1,15 +1,25 @@
 <script lang="ts">
+	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
-	import type { SiteSettingsBundle } from '@trailblazers/core';
+	import { telHref, type SiteSettingsBundle } from '@trailblazers/core';
+	import { whatsappChatUrl } from '@trailblazers/ui/site/share';
 
 	let { data }: { data: { settings: SiteSettingsBundle } } = $props();
+
+	const extras = $derived(data.settings.siteExtras);
+	const phoneHref = $derived(telHref(extras.contactPhone));
+	const chatHref = $derived(whatsappChatUrl(extras.whatsappNumber, 'Hello! I have a question.'));
+	const hasDetails = $derived(
+		!!(phoneHref || extras.contactEmail || extras.postalAddress || extras.officeHours || chatHref)
+	);
 </script>
 
-<svelte:head>
-	<title>Contact — Trailblazers</title>
-	<meta name="description" content="Reach the Trailblazers team — questions, prayer, groups, and next steps." />
-</svelte:head>
+<SeoMeta
+	title="Contact — Trailblazers"
+	description="Reach the Trailblazers team — questions, prayer, groups, and next steps."
+	image="/images/slider02.jpeg"
+/>
 
 <SiteShell settings={data.settings}>
 	<section class="relative overflow-hidden bg-brand-dark py-14 text-white md:py-20">
@@ -39,7 +49,7 @@
 		<div class="{container}">
 			<div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
 				<div class="lg:col-span-5">
-					<div class="sticky top-28 overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/[0.06]">
+					<div class="sticky top-24 overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/[0.06]">
 						<img
 							src="/images/image08.jpeg"
 							alt=""
@@ -49,10 +59,48 @@
 						/>
 					</div>
 					<div class="mt-8 rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-sm">
-						<p class="text-sm font-bold text-brand-dark">Visit us</p>
-						<p class="mt-2 text-sm leading-relaxed text-brand-dark/70">
-							Weekend gatherings and mid-week groups — ask for times and locations when you write in.
-						</p>
+						{#if hasDetails}
+							<p class="text-sm font-bold text-brand-dark">Reach us directly</p>
+							<ul class="mt-4 space-y-3 text-sm">
+								{#if phoneHref}
+									<li>
+										<a class="font-semibold text-brand-primary hover:underline" href={phoneHref}
+											>{extras.contactPhone}</a
+										>
+									</li>
+								{/if}
+								{#if chatHref}
+									<li>
+										<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external wa.me link built from the settings number -->
+										<a
+											class="font-semibold text-brand-primary hover:underline"
+											href={chatHref}
+											target="_blank"
+											rel="noopener noreferrer">Message us on WhatsApp</a
+										>
+									</li>
+								{/if}
+								{#if extras.contactEmail}
+									<li>
+										<a
+											class="font-semibold text-brand-primary hover:underline"
+											href={`mailto:${extras.contactEmail}`}>{extras.contactEmail}</a
+										>
+									</li>
+								{/if}
+								{#if extras.postalAddress}
+									<li class="leading-relaxed text-brand-dark/70">{extras.postalAddress}</li>
+								{/if}
+								{#if extras.officeHours}
+									<li class="text-brand-dark/60">{extras.officeHours}</li>
+								{/if}
+							</ul>
+						{:else}
+							<p class="text-sm font-bold text-brand-dark">Visit us</p>
+							<p class="mt-2 text-sm leading-relaxed text-brand-dark/70">
+								Weekend gatherings and mid-week groups — ask for times and locations when you write in.
+							</p>
+						{/if}
 					</div>
 				</div>
 				<div class="lg:col-span-7">
