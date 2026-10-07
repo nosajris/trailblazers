@@ -36,6 +36,8 @@ export type DashboardCounts = {
 	totalFaqs: number;
 	totalInquiries: number;
 	pendingInquiries: number;
+	/** Plan-a-visit registrations from the last seven days. */
+	newVisitorsThisWeek: number;
 	pendingTasks: number;
 	totalEquipment: number;
 	totalBep: number;
@@ -66,6 +68,7 @@ export function createDashboardService(db: Database) {
 				faqRows,
 				inquiryRows,
 				pendingInquiryRows,
+				newVisitorRows,
 				pendingTaskRows,
 				equipmentRows,
 				bepRows
@@ -79,6 +82,13 @@ export function createDashboardService(db: Database) {
 				countOf(faqs),
 				countOf(inquiries),
 				countOf(inquiries, eq(inquiries.status, 'PENDING')),
+				countOf(
+					inquiries,
+					and(
+						eq(inquiries.type, 'VISITOR'),
+						gt(inquiries.createdAt, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+					)
+				),
 				countOf(tasks, eq(tasks.isCompleted, false)),
 				countOf(equipment),
 				countOf(bepProfiles)
@@ -96,6 +106,7 @@ export function createDashboardService(db: Database) {
 				totalFaqs: value(faqRows),
 				totalInquiries: value(inquiryRows),
 				pendingInquiries: value(pendingInquiryRows),
+				newVisitorsThisWeek: value(newVisitorRows),
 				pendingTasks: value(pendingTaskRows),
 				totalEquipment: value(equipmentRows),
 				totalBep: value(bepRows)

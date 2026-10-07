@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { visitDetailsSchema, MAX_VISIT_TIMES } from './validation.js';
+import { campusesSchema, contactChannelsSchema, givingDetailsSchema, visitDetailsSchema, MAX_VISIT_TIMES } from './validation.js';
 
 test('an empty form is valid and produces no details', () => {
 	const r = visitDetailsSchema.parse({});
@@ -31,4 +31,42 @@ test('address and notes are trimmed and tag-stripped; blank becomes undefined', 
 	const r = visitDetailsSchema.parse({ visitAddress: '  12 Samora Machel <script>x</script> ', visitNotes: '   ' });
 	assert.equal(r.visitAddress, '12 Samora Machel x');
 	assert.equal(r.visitNotes, undefined);
+});
+
+test('contact channels store the WhatsApp number as digits', () => {
+	const ok = contactChannelsSchema.safeParse({ whatsappNumber: '+263 77 123 4567', whatsappGreeting: 'Hi!' });
+	assert.equal(ok.success, true);
+	if (ok.success) assert.deepEqual(ok.data, { whatsappNumber: '263771234567', whatsappGreeting: 'Hi!' });
+});
+
+test('an unusable WhatsApp number fails validation with advice', () => {
+	const bad = contactChannelsSchema.safeParse({ whatsappNumber: '0771234567' });
+	assert.equal(bad.success, false);
+	if (!bad.success) assert.match(bad.error.issues[0].message, /country code/);
+});
+
+test('an empty WhatsApp number leaves the setting unset', () => {
+	const empty = contactChannelsSchema.safeParse({ whatsappNumber: '' });
+	assert.equal(empty.success, true);
+	if (empty.success) assert.equal(empty.data.whatsappNumber, undefined);
+});
+
+test('giving methods and campuses arrive as structured lists', () => {
+	const giving = givingDetailsSchema.safeParse({ givingMethods: 'EcoCash | *151#', givingNote: 'Thank you' });
+	assert.equal(giving.success, true);
+	if (giving.success) assert.deepEqual(giving.data.givingMethods, [{ label: 'EcoCash', detail: '*151#' }]);
+
+	const campuses = campusesSchema.safeParse({ campuses: 'harare | Harare | Sundays 09:00' });
+	assert.equal(campuses.success, true);
+	if (campuses.success) {
+		assert.deepEqual(campuses.data.campuses, [
+			{ id: 'harare', label: 'Harare', href: '/campus/harare', times: ['Sundays 09:00'] }
+		]);
+	}
+});
+
+test('a malformed list is reported as a field error, not silently dropped', () => {
+	const bad = givingDetailsSchema.safeParse({ givingMethods: 'Bank transfer' });
+	assert.equal(bad.success, false);
+	if (!bad.success) assert.equal(bad.error.issues[0].path[0], 'givingMethods');
 });

@@ -11,6 +11,19 @@ export type { BlogPostVm } from './modules/blog/types.js';
 export { createBlogService } from './modules/blog/service.js';
 export { createGroupService } from './modules/groups/service.js';
 export { parseWhatsappLink } from './modules/groups/whatsapp.js';
+export { toSeriesCard, toSermonCard, toSermonDetail } from './modules/sermons/mappers.js';
+export type { SeriesCardVm, SermonCardVm, SermonDetailVm } from './modules/sermons/mappers.js';
+export {
+	campusesToText,
+	givingMethodsToText,
+	normalizeWhatsappNumber,
+	parseCampuses,
+	parseGivingMethods,
+	parseSocialLinks,
+	socialLinksToText,
+	telHref
+} from './modules/settings/site-content.js';
+export type { CampusDetail, GivingMethod, SocialLink } from './modules/settings/site-content.js';
 export { createTestimonialService } from './modules/testimonials/service.js';
 export { createLeaderService } from './modules/leaders/service.js';
 export { createFaqService } from './modules/faq/service.js';
@@ -19,10 +32,34 @@ export { createBepService } from './modules/bep/service.js';
 export { createSettingsService } from './modules/settings/service.js';
 export {
 	visitDetailsSchema,
+	contactChannelsSchema,
+	contactDetailsSchema,
+	givingDetailsSchema,
+	campusesSchema,
 	MAX_VISIT_TIMES,
-	type VisitDetails
+	MAX_GIVING_METHODS,
+	MAX_SOCIAL_LINKS,
+	MAX_CAMPUSES,
+	type VisitDetails,
+	type ContactChannels,
+	type ContactDetails,
+	type GivingDetails,
+	type Campuses
 } from './modules/settings/validation.js';
 export { createPageComposerService } from './modules/pages/composer.js';
+export {
+	PAGE_SECTION_TYPES,
+	SECTION_TYPE_INFO,
+	isPageSectionType
+} from './modules/pages/section-types.js';
+export type { PageSectionType, SectionFieldSet } from './modules/pages/section-types.js';
+export {
+	MAX_EVENTS_RAIL_LIMIT,
+	pageSchema,
+	pageSectionSchema,
+	toSectionConfig
+} from './modules/pages/validation.js';
+export type { PageSectionInput } from './modules/pages/validation.js';
 export { createServeService } from './modules/serve/service.js';
 export { createNewcomerService } from './modules/newcomers/service.js';
 export { createParentService } from './modules/parents/service.js';

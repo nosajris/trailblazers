@@ -1,5 +1,13 @@
 import type { Database } from '../../db/client.js';
 import { createSermonRepository } from './repository.js';
+import {
+	toSeriesCard,
+	toSermonCard,
+	toSermonDetail,
+	type SeriesCardVm,
+	type SermonCardVm,
+	type SermonDetailVm
+} from './mappers.js';
 import type { sermons } from './schema.js';
 
 export function createSermonService(db: Database) {
@@ -17,8 +25,65 @@ export function createSermonService(db: Database) {
 			return all[0] || null;
 		},
 
+		/**
+		 * The newest message, as a card for the homepage.
+		 *
+		 * Returning a view model rather than the row keeps staff-only fields
+		 * (notes, discussion guide) off the public page.
+		 */
+		async getLatestCard(): Promise<SermonCardVm | null> {
+			const featured = await repo.findFeatured();
+			const row = featured[0] ?? (await repo.findAll())[0];
+			return row ? toSermonCard(row) : null;
+		},
+
 		async getSermonBySlug(slug: string) {
 			return repo.findBySlug(slug);
+		},
+
+		/** Every published message as a card, newest first, for listings. */
+		async listCards(): Promise<SermonCardVm[]> {
+			const rows = await repo.findAll();
+			return rows.map(toSermonCard);
+		},
+
+		/**
+		 * One message's own page, or null when the slug is unknown.
+		 *
+		 * `slug` was populated on every row and used nowhere public, so no
+		 * message could be shared, bookmarked or indexed.
+		 */
+		async getMessagePage(slug: string): Promise<SermonDetailVm | null> {
+			const row = await repo.findBySlugWithSeries(slug);
+			if (!row) return null;
+			return toSermonDetail(
+				row.sermon,
+				row.series ? { title: row.series.title, slug: row.series.slug } : null
+			);
+		},
+
+		/** Series that actually hold messages, for the Messages page. */
+		async listSeriesCards(): Promise<SeriesCardVm[]> {
+			const rows = await repo.findSeriesWithCounts();
+			return rows.map(toSeriesCard);
+		},
+
+		/** One series and its messages, or null when the slug is unknown. */
+		async getSeriesPage(
+			slug: string
+		): Promise<{ series: SeriesCardVm; messages: SermonCardVm[] } | null> {
+			const series = await repo.findSeriesBySlug(slug);
+			if (!series) return null;
+
+			const rows = await repo.findBySeriesId(series.id);
+			return {
+				series: toSeriesCard({
+					...series,
+					messageCount: rows.length,
+					latestPublishedAt: rows[0]?.publishedAt ?? null
+				}),
+				messages: rows.map(toSermonCard)
+			};
 		},
 
 		async getSermonById(id: number) {

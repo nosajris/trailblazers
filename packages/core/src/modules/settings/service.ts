@@ -1,5 +1,6 @@
 import type { Database } from '../../db/client.js';
 import { siteSettings } from './schema.js';
+import type { CampusDetail, GivingMethod, SocialLink } from './site-content.js';
 
 export type SiteNavLink = { label: string; href: string };
 export type SiteNavColumn = { title: string; links: SiteNavLink[] };
@@ -27,7 +28,8 @@ export type SiteExtras = {
 	watchEmbedUrl?: string;
 	messagesUrl?: string;
 	planVisitHref?: string;
-	campuses?: { id: string; label: string; href?: string }[];
+	/** Each campus gets a public page at /campus/<id>; details are optional. */
+	campuses?: CampusDetail[];
 	languageOptions?: { code: string; label: string; href?: string }[];
 	organizationName?: string;
 	/** First-visit details shown on /plan-a-visit. All optional; the page shows only what is filled in. */
@@ -36,6 +38,18 @@ export type SiteExtras = {
 	visitNotes?: string;
 	/** http(s) only: validated by `visitDetailsSchema` when saved. */
 	visitMapUrl?: string;
+	/** Shown as typed; the tel: href is derived from the digits. */
+	contactPhone?: string;
+	contactEmail?: string;
+	postalAddress?: string;
+	officeHours?: string;
+	socialLinks?: SocialLink[];
+	/** Digits only (no "+"), so every wa.me link is built the same way. Empty hides the chat button. */
+	whatsappNumber?: string;
+	whatsappGreeting?: string;
+	/** Giving instructions shown on /give; empty hides the section rather than promising online giving. */
+	givingMethods?: GivingMethod[];
+	givingNote?: string;
 	/** Canonical base URL for structured data; otherwise inferred per request. */
 	siteUrl?: string;
 };
@@ -54,7 +68,7 @@ const DEFAULT_EXTRAS: SiteExtras = {
 	watchUrl: '/watch',
 	watchEmbedUrl: '',
 	messagesUrl: '/messages',
-	campuses: [{ id: 'main', label: 'Gather with us', href: '/contact' }],
+	campuses: [],
 	languageOptions: [
 		{ code: 'en', label: 'English', href: '#' },
 		{ code: 'es', label: 'Español', href: '#' }
