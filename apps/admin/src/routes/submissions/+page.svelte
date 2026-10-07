@@ -139,6 +139,16 @@
 								</td>
 								<td class="text-sm text-[var(--zinc-400)]">{new Date(item.createdAt).toLocaleDateString()}</td>
 								<td class="text-right font-medium">
+									{#if item.status === 'PENDING'}
+										<!-- The common case is one tap after a phone call; the dropdown stays for the rest. -->
+										<form action="?/updateInquiryStatus" method="POST" class="inline">
+											<input type="hidden" name="id" value={item.id} />
+											<input type="hidden" name="status" value="CONTACTED" />
+											<button type="submit" class="mr-3 text-xs font-semibold text-brand-primary hover:underline"
+												>Mark contacted</button
+											>
+										</form>
+									{/if}
 									<form action="?/deleteInquiry" method="POST" class="inline">
 										<input type="hidden" name="id" value={item.id} />
 										<button type="submit" class="text-[var(--color-danger-fg)] text-xs hover:underline">Delete</button>

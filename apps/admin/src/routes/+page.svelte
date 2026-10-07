@@ -42,7 +42,7 @@
 		<div class="stat-card admin-card admin-card-hover p-5 relative overflow-hidden group bg-white border border-zinc-200 rounded-xl shadow-sm">
 			<div class="flex items-center justify-between">
 				<div class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Sermons & Media</div>
-				<div class="h-8 w-8 rounded-lg bg-[var(--brand-primary-muted,rgba(249,92,75,0.15))] text-brand-primary flex items-center justify-center">
+				<div class="h-8 w-8 rounded-lg bg-brand-primary/15 text-brand-primary flex items-center justify-center">
 					<svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
 				</div>
 			</div>
@@ -62,7 +62,7 @@
 		<div class="stat-card admin-card admin-card-hover p-5 relative overflow-hidden group bg-white border border-zinc-200 rounded-xl shadow-sm">
 			<div class="flex items-center justify-between">
 				<div class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Scheduled Events</div>
-				<div class="h-8 w-8 rounded-lg bg-[var(--brand-primary-muted,rgba(249,92,75,0.15))] text-brand-primary flex items-center justify-center">
+				<div class="h-8 w-8 rounded-lg bg-brand-primary/15 text-brand-primary flex items-center justify-center">
 					<svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
 				</div>
 			</div>
@@ -113,6 +113,29 @@
 			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
 				<a href={resolve('/leaders')} class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
 					Manage Leaders
+					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+				</a>
+			</div>
+		</div>
+
+		<!-- Stat Card: new visitors. The Plan a Visit form creates these, and a
+		     registration nobody follows up on is worse than no form at all. -->
+		<div class="stat-card admin-card admin-card-hover p-5 relative overflow-hidden group bg-white border border-zinc-200 rounded-xl shadow-sm">
+			<div class="flex items-center justify-between">
+				<div class="text-xs font-semibold uppercase tracking-wider text-zinc-500">New Visitors This Week</div>
+				<div class="h-8 w-8 rounded-lg bg-brand-primary/15 text-brand-primary flex items-center justify-center">
+					<svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+				</div>
+			</div>
+			<div class="mt-3 flex items-baseline gap-2">
+				<span class="text-3xl font-bold text-zinc-900">{data.stats.newVisitorsThisWeek}</span>
+				<span class="text-xs text-zinc-400 font-medium">
+					{data.stats.newVisitorsThisWeek === 1 ? 'registration' : 'registrations'} in the last 7 days
+				</span>
+			</div>
+			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
+				<a href={resolve('/submissions')} class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
+					Follow up with visitors
 					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
 			</div>
