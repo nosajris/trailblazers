@@ -36,24 +36,25 @@
 
 	/*
 	 * Brand & Action Colors.
-	 * --brand-primary was #f95c4b (3.15:1 against white), which fails WCAG AA for
-	 * the small white button labels and coral links used across the site. It is
-	 * now a slightly deeper coral: 4.78:1 against white and 4.53:1 against the
-	 * off-white page. The hover state darkens (6.06:1 with white text); it used to
-	 * lighten to #ff7a6b, which was worse still. brand-secondary keeps the soft
-	 * coral for tints and gradients only, never for text.
+	 * Brand colours come from the PAOZ logo (apps/web/static/images/PAOZLOGO.png):
+	 * its green (#09a059), red (#ec3237) and yellow (#fff213).
+	 * The logo green is only 3.4:1 against white, which fails WCAG AA for small
+	 * white button labels and links, so --brand-primary is the same hue deepened:
+	 * 4.83:1 against white and 4.58:1 against the off-white page. The hover state
+	 * darkens further. --brand-secondary is the logo red, deepened to 4.86:1 against
+	 * white; --brand-gold is the logo yellow, used as an accent on dark surfaces.
 	 */
-	--brand-primary: #d43828; /* Algerian Coral, AA-safe */
-	--brand-primary-rgb: 212 56 40;
-	--brand-primary-hover: #b82f20;
-	--brand-secondary: #ff7a6b; /* Soft Coral hover */
-	--brand-secondary-rgb: 255 122 107;
+	--brand-primary: #078349; /* Logo green, AA-safe */
+	--brand-primary-rgb: 7 131 73;
+	--brand-primary-hover: #066a3b;
+	--brand-secondary: #d92a30; /* Logo red */
+	--brand-secondary-rgb: 217 42 48;
 	--brand-dark: #171616; /* Army Black */
 	--brand-dark-rgb: 23 22 22;
 	--brand-light: #f9f9f8; /* Off-white background */
 	--brand-light-rgb: 249 249 248;
-	--brand-gold: #ffb800; /* PAOZ Yellow/Gold */
-	--brand-gold-rgb: 255 184 0;
+	--brand-gold: #fff213; /* Logo yellow */
+	--brand-gold-rgb: 255 242 19;
 	--brand-fg: #ffffff;
 	--brand-fg-rgb: 255 255 255;
 	--brand-primary-muted: rgb(var(--brand-primary-rgb) / 0.15);
