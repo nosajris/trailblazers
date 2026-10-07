@@ -16,7 +16,15 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	const [event, settings, availability] = await Promise.all([
 		services.events.getById(eventId),
 		services.settings.getBundle(),
-		services.eventRegistrations.getAvailability(eventId)
+		// Seat counts are a nicety. If that query fails (for example a missing
+		// migration) the event page should still render, without the counter.
+		services.eventRegistrations.getAvailability(eventId).catch((err: unknown) => {
+			logger.error('EventPage', 'availability lookup failed', {
+				eventId,
+				message: err instanceof Error ? err.message : String(err)
+			});
+			return null;
+		})
 	]);
 
 	if (!event) throw error(404, 'Event not found');
