@@ -262,20 +262,22 @@
 								href={resolve('/events/[id]/ics', { id: String(event.id) })}
 								download>Download calendar (.ics)</a
 							>
-							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external wa.me share link -->
+							<!-- eslint-disable svelte/no-navigation-without-resolve -- external wa.me share link -->
 							<a
 								class="block text-center text-sm font-semibold text-brand-primary underline-offset-2 hover:underline"
 								href={reminderHref}
 								target="_blank"
 								rel="noopener noreferrer">Remind me on WhatsApp</a
 							>
-							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external wa.me share link -->
+							<!-- eslint-enable svelte/no-navigation-without-resolve -->
+							<!-- eslint-disable svelte/no-navigation-without-resolve -- external wa.me share link -->
 							<a
 								class="block text-center text-sm font-semibold text-brand-primary underline-offset-2 hover:underline"
 								href={shareHref}
 								target="_blank"
 								rel="noopener noreferrer">Share on WhatsApp</a
 							>
+							<!-- eslint-enable svelte/no-navigation-without-resolve -->
 							{#if availability && availability.seatsLeft !== null}
 								<p class="text-center text-xs text-gray-500">
 									{availability.seatsLeft}

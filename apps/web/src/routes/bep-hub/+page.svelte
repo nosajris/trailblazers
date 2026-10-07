@@ -100,13 +100,14 @@
 									href={resolve('/campus/[id]', { id: campus.id })}>Campus details →</a
 								>
 								{#if campus.mapUrl}
-									<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external map link from site settings, validated as http(s) on save -->
+									<!-- eslint-disable svelte/no-navigation-without-resolve -- external map link from site settings, validated as http(s) on save -->
 									<a
 										class="text-xs font-bold uppercase tracking-wider text-brand-dark/70 hover:text-brand-primary"
 										href={campus.mapUrl}
 										target="_blank"
 										rel="noopener noreferrer">Get directions</a
 									>
+									<!-- eslint-enable svelte/no-navigation-without-resolve -->
 								{/if}
 							</div>
 						</div>
@@ -148,13 +149,14 @@
 							<h3 class="mt-2 font-sans text-lg font-bold text-brand-dark">{business.businessName}</h3>
 							<p class="mt-3 flex-1 text-sm leading-relaxed text-brand-dark/70">{business.description}</p>
 							{#if business.websiteUrl}
-								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- business website supplied by its owner -->
+								<!-- eslint-disable svelte/no-navigation-without-resolve -- business website supplied by its owner -->
 								<a
 									class="mt-5 inline-flex min-h-11 items-center text-sm font-bold text-brand-primary hover:underline"
 									href={business.websiteUrl}
 									target="_blank"
 									rel="noopener noreferrer external">Visit website →</a
 								>
+								<!-- eslint-enable svelte/no-navigation-without-resolve -->
 							{/if}
 						</li>
 					{/each}

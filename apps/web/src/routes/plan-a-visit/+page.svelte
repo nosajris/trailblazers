@@ -72,13 +72,14 @@
 								<p class="mt-3 text-base font-semibold text-brand-dark md:text-lg">{address}</p>
 							{/if}
 							{#if mapUrl}
-								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external map link from site settings, validated as http(s) -->
+								<!-- eslint-disable svelte/no-navigation-without-resolve -- external map link from site settings, validated as http(s) -->
 								<a
 									class="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-brand-primary hover:underline"
 									href={mapUrl}
 									target="_blank"
 									rel="noopener noreferrer">Open in maps →</a
 								>
+								<!-- eslint-enable svelte/no-navigation-without-resolve -->
 							{/if}
 						</div>
 					{/if}

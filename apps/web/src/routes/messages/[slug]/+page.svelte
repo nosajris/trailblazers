@@ -66,7 +66,7 @@
 			<ol class="space-y-4">
 				{#each messages as message, i (message.id)}
 					<li>
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- internal path built from the message slug -->
+						<!-- eslint-disable svelte/no-navigation-without-resolve -- internal path built from the message slug -->
 						<a
 							href={message.watchHref}
 							class="group flex items-center gap-5 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-brand-primary hover:shadow-md md:p-5"
@@ -97,6 +97,7 @@
 							</span>
 							<span class="shrink-0 text-sm font-bold text-brand-primary" aria-hidden="true">→</span>
 						</a>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					</li>
 				{/each}
 			</ol>

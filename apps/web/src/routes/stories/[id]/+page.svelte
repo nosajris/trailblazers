@@ -79,13 +79,14 @@
 		</div>
 
 		<div class="{container} mt-12 max-w-3xl border-t border-neutral-200/80 pt-6">
-			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external wa.me share link -->
+			<!-- eslint-disable svelte/no-navigation-without-resolve -- external wa.me share link -->
 			<a
 				class="text-sm font-semibold text-brand-primary hover:underline"
 				href={shareHref}
 				target="_blank"
 				rel="noopener noreferrer">Share this on WhatsApp</a
 			>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>
 
 		{#if data.more.length > 0}

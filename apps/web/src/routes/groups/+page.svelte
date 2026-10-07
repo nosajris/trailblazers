@@ -175,13 +175,14 @@
 								<p class="mt-4 text-sm leading-relaxed text-brand-dark/70">{g.description}</p>
 							{/if}
 							{#if g.whatsappUrl && /^https:\/\/(chat\.whatsapp\.com|wa\.me)\//.test(g.whatsappUrl)}
-								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external WhatsApp link, host-checked on save and here -->
+								<!-- eslint-disable svelte/no-navigation-without-resolve -- external WhatsApp link, host-checked on save and here -->
 								<a
 									class="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand-primary hover:underline"
 									href={g.whatsappUrl}
 									target="_blank"
 									rel="noopener noreferrer">Join the WhatsApp group →</a
 								>
+								<!-- eslint-enable svelte/no-navigation-without-resolve -->
 							{/if}
 							{#if form?.success && form.groupName === g.name}
 								<div class="mt-6 rounded-xl border border-[var(--color-success-border)] bg-[var(--color-success-bg)] p-4 text-sm">

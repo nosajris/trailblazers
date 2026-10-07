@@ -46,11 +46,12 @@
 			</p>
 			<div class="mt-10 flex flex-wrap gap-4">
 				{#if latest}
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- internal path built from the message slug -->
+					<!-- eslint-disable svelte/no-navigation-without-resolve -- internal path built from the message slug -->
 					<a
 						class="inline-flex min-h-12 items-center rounded-full bg-brand-primary px-10 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-lg transition hover:brightness-105"
 						href={latest.watchHref}>Watch the latest</a
 					>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				{/if}
 				<a
 					class="inline-flex min-h-12 items-center rounded-full border border-white/35 px-10 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-white/10"

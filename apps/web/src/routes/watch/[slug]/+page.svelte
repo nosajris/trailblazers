@@ -119,30 +119,33 @@
 			{/if}
 
 			<div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 border-y border-neutral-200/80 py-4">
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external wa.me share link -->
+				<!-- eslint-disable svelte/no-navigation-without-resolve -- external wa.me share link -->
 				<a
 					class="text-sm font-semibold text-brand-primary hover:underline"
 					href={shareHref}
 					target="_blank"
 					rel="noopener noreferrer">Share on WhatsApp</a
 				>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				{#if message.notesUrl}
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- notes file supplied by staff, may be hosted elsewhere -->
+					<!-- eslint-disable svelte/no-navigation-without-resolve -- notes file supplied by staff, may be hosted elsewhere -->
 					<a
 						class="text-sm font-semibold text-brand-primary hover:underline"
 						href={message.notesUrl}
 						target="_blank"
 						rel="noopener noreferrer">Download the notes</a
 					>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				{/if}
 				{#if message.audioUrl}
-					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- audio file supplied by staff, may be hosted elsewhere -->
+					<!-- eslint-disable svelte/no-navigation-without-resolve -- audio file supplied by staff, may be hosted elsewhere -->
 					<a
 						class="text-sm font-semibold text-brand-primary hover:underline"
 						href={message.audioUrl}
 						target="_blank"
 						rel="noopener noreferrer">Listen to the audio</a
 					>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				{/if}
 			</div>
 

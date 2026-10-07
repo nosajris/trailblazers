@@ -85,7 +85,7 @@
 			{:else}
 				<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
 					{#each data.sermons as sermon (sermon.id)}
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- internal path built from the message slug -->
+						<!-- eslint-disable svelte/no-navigation-without-resolve -- internal path built from the message slug -->
 						<a
 							href={sermon.watchHref}
 							class="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
@@ -121,6 +121,7 @@
 								>
 							</div>
 						</a>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					{/each}
 				</div>
 			{/if}

@@ -62,26 +62,28 @@
 
 				<div class="mt-8 flex flex-wrap gap-3">
 					{#if campus.mapUrl}
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external map link from site settings, validated as http(s) on save -->
+						<!-- eslint-disable svelte/no-navigation-without-resolve -- external map link from site settings, validated as http(s) on save -->
 						<a
 							class="inline-flex min-h-12 items-center rounded-full bg-brand-primary px-8 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-md transition hover:brightness-105"
 							href={campus.mapUrl}
 							target="_blank"
 							rel="noopener noreferrer">Open in maps</a
 						>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					{/if}
 					<a
 						class="inline-flex min-h-12 items-center rounded-full border border-brand-dark/15 bg-white px-8 text-xs font-bold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-primary"
 						href={resolve('/plan-a-visit')}>Plan your visit</a
 					>
 					{#if chatHref}
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external wa.me link built from the settings number -->
+						<!-- eslint-disable svelte/no-navigation-without-resolve -- external wa.me link built from the settings number -->
 						<a
 							class="inline-flex min-h-12 items-center rounded-full border border-brand-dark/15 bg-white px-8 text-xs font-bold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-primary"
 							href={chatHref}
 							target="_blank"
 							rel="noopener noreferrer">Ask on WhatsApp</a
 						>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					{/if}
 				</div>
 			</div>

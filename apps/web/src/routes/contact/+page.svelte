@@ -66,20 +66,23 @@
 							<ul class="mt-4 space-y-3 text-sm">
 								{#if phoneHref}
 									<li>
+										<!-- eslint-disable svelte/no-navigation-without-resolve -- tel: link built from the settings number; resolve() only takes app routes -->
 										<a class="font-semibold text-brand-primary hover:underline" href={phoneHref}
 											>{extras.contactPhone}</a
 										>
+										<!-- eslint-enable svelte/no-navigation-without-resolve -->
 									</li>
 								{/if}
 								{#if chatHref}
 									<li>
-										<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external wa.me link built from the settings number -->
+										<!-- eslint-disable svelte/no-navigation-without-resolve -- external wa.me link built from the settings number -->
 										<a
 											class="font-semibold text-brand-primary hover:underline"
 											href={chatHref}
 											target="_blank"
 											rel="noopener noreferrer">Message us on WhatsApp</a
 										>
+										<!-- eslint-enable svelte/no-navigation-without-resolve -->
 									</li>
 								{/if}
 								{#if extras.contactEmail}
