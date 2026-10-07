@@ -2,7 +2,9 @@
 	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';
-	import { telHref, type SiteSettingsBundle } from '@trailblazers/core';
+	import type { SiteSettingsBundle } from '@trailblazers/core';
+	// Browser-safe subpath — the package root would bring the server graph with it.
+	import { telHref } from '@trailblazers/core/modules/settings/site-content';
 	import { whatsappChatUrl } from '@trailblazers/ui/site/share';
 
 	let { data }: { data: { settings: SiteSettingsBundle } } = $props();

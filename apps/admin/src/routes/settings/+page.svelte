@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { campusesToText, givingMethodsToText, socialLinksToText } from '@trailblazers/core';
+	// Browser-safe subpath: the package root re-exports the db client and IAM,
+	// which would pull postgres and node:crypto into the client bundle.
+	import {
+		campusesToText,
+		givingMethodsToText,
+		socialLinksToText
+	} from '@trailblazers/core/modules/settings/site-content';
 	import type { PageData, ActionData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

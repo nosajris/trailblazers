@@ -10,7 +10,8 @@
 		"./db/schema": {
 			"types": "./src/db/schema.ts",
 			"default": "./src/db/schema.ts"
-		}
+		},
+		"./*": "./src/*"
 	},
 	"dependencies": {
 		"drizzle-orm": "^0.45.1",

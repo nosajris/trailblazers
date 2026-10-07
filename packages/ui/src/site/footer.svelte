@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { telHref, type SiteExtras } from '@trailblazers/core';
+	import type { SiteExtras } from '@trailblazers/core';
+	// Browser-safe subpath — the package root would bring the server graph with it.
+	import { telHref } from '@trailblazers/core/modules/settings/site-content';
 	import { container, sectionY } from '../tb-layout.js';
 
 	type FooterColumn = { title: string; links: { label: string; href: string }[] };

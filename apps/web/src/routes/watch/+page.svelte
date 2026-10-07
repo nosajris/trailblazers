@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { container, sectionY } from '@trailblazers/ui/tb-layout';

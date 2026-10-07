@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { PAGE_SECTION_TYPES, SECTION_TYPE_INFO, type PageSectionType } from '@trailblazers/core';
+	// Browser-safe subpath — see the note in the settings page.
+	import {
+		PAGE_SECTION_TYPES,
+		SECTION_TYPE_INFO,
+		type PageSectionType
+	} from '@trailblazers/core/modules/pages/section-types';
 	import type { PageData, ActionData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
