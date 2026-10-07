@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -107,6 +108,10 @@
 								{/if}
 							</td>
 							<td class="text-right font-medium">
+								<a
+									href={resolve('/pages/[id]', { id: String(item.id) })}
+									class="mr-3 font-semibold text-[var(--brand-primary)] hover:underline">Sections</a
+								>
 								<button onclick={() => openEdit(item)} class="mr-3 text-[var(--brand-primary)] hover:underline">Edit</button>
 								<form action="?/deletePage" method="POST" class="inline">
 									<input type="hidden" name="id" value={item.id} />
