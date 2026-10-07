@@ -26,7 +26,7 @@ export const load = async ({ setHeaders }) => {
 	const [settings, initialBlocks, latestSermon] = await Promise.all([
 		services.settings.getBundle(),
 		services.pages.composePublicPage('/'),
-		services.sermons.getFeaturedSermon()
+		services.sermons.getLatestCard()
 	]);
 	let blocks = initialBlocks;
 

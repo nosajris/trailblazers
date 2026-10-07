@@ -7,7 +7,11 @@
 
 	type HeroNextEvent = { id: number | string; title: string; date: Date | string };
 
-	let { data, nextEvent = null }: { data: HomeHeroVm; nextEvent?: HeroNextEvent | null } = $props();
+	let {
+		data,
+		nextEvent = null,
+		serviceTimes = []
+	}: { data: HomeHeroVm; nextEvent?: HeroNextEvent | null; serviceTimes?: string[] } = $props();
 
 	function youtubeEmbedUrl(url: string): string | null {
 		const trimmed = url.trim();
@@ -31,6 +35,29 @@
 
 	const embed = $derived(data.videoUrl ? youtubeEmbedUrl(data.videoUrl) : null);
 
+	/**
+	 * Whether to fetch the background video at all.
+	 *
+	 * The iframe pulls roughly a megabyte of player code before a single frame
+	 * of video, which is real money on a Zimbabwean data bundle. It stays out
+	 * of the server-rendered HTML and is only mounted in the browser when the
+	 * visitor is not asking for reduced motion, has not turned on data saver,
+	 * and is not on a slow connection. The hero photo carries the section
+	 * otherwise, which is also what every phone gets.
+	 */
+	let videoAllowed = $state(false);
+
+	$effect(() => {
+		if (!embed) return;
+
+		type DataConnection = { saveData?: boolean; effectiveType?: string };
+		const connection = (navigator as Navigator & { connection?: DataConnection }).connection;
+		const slow = /(^|-)(2g|slow-2g)$/.test(connection?.effectiveType ?? '');
+		const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+
+		videoAllowed = !connection?.saveData && !slow && !reduced;
+	});
+
 	// A fixed zone keeps the server-rendered and browser-rendered text identical.
 	const formatWhen = (d: Date | string) =>
 		new Intl.DateTimeFormat('en-GB', {
@@ -45,7 +72,7 @@
 
 <section class="relative min-h-[min(82svh,46rem)] overflow-hidden bg-brand-dark text-white">
 	<div class="absolute inset-0">
-		{#if embed}
+		{#if embed && videoAllowed}
 			<!-- The video is desktop only: on mobile data a hidden lazy iframe never loads, so the photo carries the hero. -->
 			<div class="absolute inset-0 hidden md:block" data-bg-video>
 				<iframe
@@ -100,6 +127,16 @@
 			{#if data.subtitle}
 				<p class="mt-5 max-w-2xl text-base leading-relaxed text-white/85 sm:text-lg md:text-xl">
 					{data.subtitle}
+				</p>
+			{/if}
+
+			{#if serviceTimes.length > 0}
+				<!-- When we gather, answered before anyone has to look for it. -->
+				<p class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-white/90">
+					{#each serviceTimes.slice(0, 3) as time, i (i)}
+						{#if i > 0}<span class="text-white/40" aria-hidden="true">·</span>{/if}
+						<span>{time}</span>
+					{/each}
 				</p>
 			{/if}
 
