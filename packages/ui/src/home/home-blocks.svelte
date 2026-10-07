@@ -43,6 +43,7 @@
 	});
 </script>
 
+<div class="tb-stripes">
 {#each blocks as block (`${block.kind}-${JSON.stringify(block.data).slice(0, 40)}`)}
 	{#if block.kind === 'HERO'}
 		<HeroSection data={block.data} {nextEvent} serviceTimes={isHome ? (extras.visitTimes ?? []) : []} />
@@ -87,3 +88,16 @@
 {#if isHome}
 	<GetInvolvedSection givingUrl={extras.givingUrl ?? ''} />
 {/if}
+</div>
+
+<style>
+	/*
+	 * Alternating bands using palette colours only. Sections are brand-light by
+	 * default; every even-numbered one switches to white. Dark sections (hero,
+	 * testimonials) keep their own background.
+	 */
+	.tb-stripes > :global(section:nth-child(even):not(.bg-brand-dark)),
+	.tb-stripes > :global(div:nth-child(even) > section:not(.bg-brand-dark)) {
+		background-color: var(--color-bg-surface);
+	}
+</style>

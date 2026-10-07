@@ -18,7 +18,7 @@
 </script>
 
 {#if campuses.length > 0}
-	<section class="bg-brand-light pb-12 md:pb-16" aria-labelledby="ways-to-attend-title">
+	<section class="bg-brand-light py-12 md:py-16" aria-labelledby="ways-to-attend-title">
 		<div class={container}>
 			<div class="max-w-2xl">
 				<p class={eyebrow}>Join us</p>
