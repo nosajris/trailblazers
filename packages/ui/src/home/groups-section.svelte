@@ -11,7 +11,7 @@
 	const groups = $derived(data.groups.slice(0, PREVIEW_LIMIT));
 </script>
 
-<section class="border-b border-neutral-200/80 bg-white {sectionY}">
+<section class="bg-brand-light {sectionY}">
 	<div class="{container}">
 		<div class="max-w-3xl">
 			<p class={eyebrow}>Community</p>

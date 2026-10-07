@@ -12,7 +12,7 @@
 		);
 </script>
 
-<section class="border-b border-neutral-200/80 bg-white {sectionY}">
+<section class="bg-brand-light {sectionY}">
 	<div class="{container}">
 		<div class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
 			<div class="max-w-3xl">

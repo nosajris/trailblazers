@@ -12,7 +12,7 @@
 	];
 </script>
 
-<section class="border-b border-neutral-200/80 bg-brand-light py-12 md:py-16" aria-labelledby="intent-tiles-title">
+<section class="bg-brand-light py-12 md:py-16" aria-labelledby="intent-tiles-title">
 	<div class={container}>
 		<div class="max-w-2xl">
 			<p class={eyebrow}>Start here</p>

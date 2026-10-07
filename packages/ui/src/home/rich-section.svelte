@@ -13,7 +13,7 @@
 </script>
 
 {#if data}
-	<section class="border-b border-neutral-200/80 bg-[#f3f2ef] {sectionY}">
+	<section class="bg-brand-light {sectionY}">
 		<div class="{container}">
 			<div
 				class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16 xl:gap-24"

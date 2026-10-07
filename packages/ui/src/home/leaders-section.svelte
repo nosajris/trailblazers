@@ -6,7 +6,7 @@
 	let { data }: { data: HomeLeadersVm } = $props();
 </script>
 
-<section class="border-b border-neutral-200/80 bg-zinc-100 {sectionY}">
+<section class="bg-brand-light {sectionY}">
 	<div class="{container}">
 		<div class="max-w-3xl">
 			<p class={eyebrow}>Leadership</p>

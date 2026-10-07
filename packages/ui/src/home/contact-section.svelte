@@ -5,7 +5,7 @@
 	let { data }: { data: HomeContactVm } = $props();
 </script>
 
-<section class="border-b border-neutral-200/80 bg-[#f3f2ef] {sectionY}">
+<section class="bg-brand-light {sectionY}">
 	<div class="{container}">
 		<div class="mx-auto max-w-xl lg:mx-0 lg:max-w-none lg:grid lg:grid-cols-12 lg:gap-14 xl:gap-20">
 			<div class="lg:col-span-5">
