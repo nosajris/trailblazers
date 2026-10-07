@@ -45,7 +45,7 @@
 			</a>
 
 			{#if giveIsExternal}
-				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external giving platform from site settings -->
+				<!-- eslint-disable svelte/no-navigation-without-resolve -- external giving platform from site settings -->
 				<a
 					class="group flex flex-col rounded-2xl border border-brand-dark/10 bg-brand-dark p-7 text-white transition hover:-translate-y-0.5 hover:shadow-lg"
 					href={givingUrl}
@@ -58,6 +58,7 @@
 					</p>
 					<span class="mt-6 text-sm font-bold text-brand-gold transition group-hover:translate-x-0.5">Ways to give →</span>
 				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 			{:else}
 				<a
 					class="group flex flex-col rounded-2xl border border-brand-dark/10 bg-brand-dark p-7 text-white transition hover:-translate-y-0.5 hover:shadow-lg"

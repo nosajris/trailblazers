@@ -18,7 +18,7 @@
 </script>
 
 {#if href}
-	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external wa.me link built from the settings number -->
+	<!-- eslint-disable svelte/no-navigation-without-resolve -- external wa.me link built from the settings number -->
 	<a
 		{href}
 		target="_blank"
@@ -32,4 +32,5 @@
 			/>
 		</svg>
 	</a>
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 {/if}

@@ -22,6 +22,7 @@
 		<ul class="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-6">
 			{#each tiles as tile (tile.title)}
 				<li>
+					<!-- eslint-disable svelte/no-navigation-without-resolve -- every tile href is already passed through resolve() where the tiles are defined -->
 					<a
 						href={tile.href}
 						class="group flex h-full min-h-[10rem] flex-col rounded-2xl border border-neutral-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-primary hover:shadow-md md:p-6"
@@ -53,6 +54,7 @@
 							aria-hidden="true">→</span
 						>
 					</a>
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
 				</li>
 			{/each}
 		</ul>

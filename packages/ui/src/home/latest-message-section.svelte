@@ -75,13 +75,14 @@
 						<p class="mt-4 line-clamp-4 text-base leading-relaxed text-brand-dark/75">{sermon.summary}</p>
 					{/if}
 					<div class="mt-7 flex flex-wrap items-center gap-3">
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- watch URL comes from site settings and may be an absolute external address, which resolve() cannot take -->
+						<!-- eslint-disable svelte/no-navigation-without-resolve -- watch URL comes from site settings and may be an absolute external address, which resolve() cannot take -->
 						<a
 							class="inline-flex min-h-12 items-center rounded-full bg-brand-primary px-8 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-md transition hover:brightness-105"
 							href={watchHref}
 							target={isExternal ? '_blank' : undefined}
 							rel={isExternal ? 'noopener noreferrer' : undefined}>Watch now</a
 						>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						<a
 							class="inline-flex min-h-12 items-center text-sm font-bold text-brand-primary hover:underline"
 							href={resolve('/messages')}>All messages →</a

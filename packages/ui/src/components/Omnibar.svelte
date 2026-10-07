@@ -124,6 +124,7 @@
 			if (choice) {
 				event.preventDefault();
 				close();
+				// eslint-disable-next-line svelte/no-navigation-without-resolve -- hrefs come from search results, including CMS records, and may not be app routes
 				void goto(choice.href);
 			}
 		}
@@ -201,7 +202,7 @@
 				<ul class="space-y-1">
 					{#each shown as item, i (item.id)}
 						<li>
-							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- hrefs come from search results, including CMS records -->
+							<!-- eslint-disable svelte/no-navigation-without-resolve -- hrefs come from search results, including CMS records -->
 							<a
 								href={item.href}
 								onclick={close}
@@ -225,6 +226,7 @@
 								</span>
 								<span class="shrink-0 text-xs font-bold text-brand-primary" aria-hidden="true">→</span>
 							</a>
+							<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						</li>
 					{/each}
 				</ul>

@@ -60,13 +60,14 @@
 						<p class="mt-3 flex-1 text-sm leading-relaxed text-white/75">
 							Join the live stream, or catch the message later in the week.
 						</p>
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- watch URL comes from site settings and may be an absolute external address, which resolve() cannot take -->
+						<!-- eslint-disable svelte/no-navigation-without-resolve -- watch URL comes from site settings and may be an absolute external address, which resolve() cannot take -->
 						<a
 							class="mt-5 inline-flex min-h-11 items-center self-start rounded-full bg-white px-6 text-xs font-bold uppercase tracking-[0.12em] text-brand-dark transition hover:bg-brand-gold"
 							href={watchHref}
 							target={watchIsExternal ? '_blank' : undefined}
 							rel={watchIsExternal ? 'noopener noreferrer' : undefined}>Watch</a
 						>
+						<!-- eslint-enable svelte/no-navigation-without-resolve -->
 					</div>
 				</li>
 			</ul>
