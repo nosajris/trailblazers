@@ -158,8 +158,9 @@
 			</div>
 
 			{#if nextEvent}
+				<!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
 				<a
-					href={resolve('/events/[id]', { id: String(nextEvent.id) })}
+					href={(resolve as any)('/events/[id]', { id: String(nextEvent.id) })}
 					class="mt-8 inline-flex max-w-full items-center gap-3 text-sm text-white/80 transition hover:text-white"
 				>
 					<span class="h-2 w-2 shrink-0 rounded-full bg-brand-gold" aria-hidden="true"></span>

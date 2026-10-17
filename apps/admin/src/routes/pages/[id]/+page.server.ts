@@ -20,7 +20,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const result = await services.pages.getPageForAdmin(id);
 	if (!result) error(404, 'No such page.');
 
-	return { page: result.page, sections: result.sections };
+	const previewBlocks = await services.pages.composePreviewPage(id);
+
+	return { page: result.page, sections: result.sections, previewBlocks };
 };
 
 export const actions: Actions = {
@@ -74,6 +76,74 @@ export const actions: Actions = {
 		);
 
 		return { success: true };
+	},
+
+	/**
+	 * Drag-to-reorder from the section list. `order` is a comma-separated
+	 * list of section ids in their new top-to-bottom order; every id already
+	 * on the page must appear exactly once, or the drop is rejected rather
+	 * than silently losing a section.
+	 */
+	reorderSections: async ({ request, params, locals }) => {
+		requireSection(locals.user, 'content');
+
+		const form = await request.formData();
+		const pageId = Number(params.id);
+		const raw = form.get('order')?.toString() ?? '';
+		const orderedIds = raw
+			.split(',')
+			.map((part) => Number(part))
+			.filter((n) => Number.isInteger(n) && n > 0);
+
+		const current = await services.pages.getPageForAdmin(pageId);
+		if (!current) return fail(404, { error: 'That page could not be found.' });
+
+		const currentIds = new Set(current.sections.map((s) => s.id));
+		const sameSet =
+			orderedIds.length === currentIds.size && orderedIds.every((id) => currentIds.has(id));
+		if (!sameSet) {
+			return fail(400, { error: 'That reorder could not be applied.' });
+		}
+
+		await services.pages.reorderSections(pageId, orderedIds);
+		await services.auditLogs.logAction(
+			'REORDER_PAGE_SECTIONS',
+			'PAGE',
+			String(pageId),
+			`Reordered sections on page ${pageId}`,
+			locals.user?.id,
+			locals.user?.fullName
+		);
+
+		return { success: true };
+	},
+
+	/**
+	 * Staff upload for an image-bearing field (the hero background today).
+	 * Returns the processed, Blob-hosted URL; the client sets it into the
+	 * field itself rather than this action touching the section — so it
+	 * works the same way for a brand-new, not-yet-saved section.
+	 */
+	uploadImage: async ({ request, locals }) => {
+		requireSection(locals.user, 'content');
+
+		const form = await request.formData();
+		const file = form.get('file');
+		if (!(file instanceof File) || file.size === 0) {
+			return fail(400, { error: 'Choose an image to upload.' });
+		}
+
+		try {
+			const buffer = Buffer.from(await file.arrayBuffer());
+			const asset = await services.media.upload(
+				{ buffer, mimeType: file.type, size: file.size },
+				locals.user?.id
+			);
+			return { success: true, uploadedUrl: asset.url };
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'That upload failed.';
+			return fail(400, { error: message });
+		}
 	},
 
 	moveSection: async ({ request, locals }) => {

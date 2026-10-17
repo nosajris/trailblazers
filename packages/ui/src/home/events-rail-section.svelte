@@ -35,8 +35,9 @@
 
 		<div class="mt-12 {railRow}">
 			{#each data.events as event (event.id)}
+				<!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
 				<a
-					href={resolve('/events/[id]', { id: String(event.id) })}
+					href={(resolve as any)('/events/[id]', { id: String(event.id) })}
 					class="{railItem} card group flex flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-brand-light shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
 				>
 					<div class="relative aspect-[16/10] overflow-hidden bg-neutral-200">

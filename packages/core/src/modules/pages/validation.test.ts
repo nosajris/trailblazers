@@ -8,6 +8,7 @@ test('every section type has editor metadata', () => {
 		assert.ok(SECTION_TYPE_INFO[type], type);
 		assert.ok(SECTION_TYPE_INFO[type].label.length > 0, type);
 		assert.ok(SECTION_TYPE_INFO[type].help.length > 0, type);
+		assert.ok(SECTION_TYPE_INFO[type].glyph.length > 0, type);
 	}
 	assert.equal(isPageSectionType('HERO'), true);
 	assert.equal(isPageSectionType('CUSTOM'), false);

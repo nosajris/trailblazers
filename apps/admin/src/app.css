@@ -76,4 +76,25 @@
 	.admin-badge-neutral {
 		@apply bg-zinc-100 text-zinc-700 border border-zinc-200;
 	}
+
+	/* Visual section-type picker in the page editor, replacing a plain
+	   <select> so staff recognise a section type by shape, not just name
+	   (borrowed from Strata's chip pickers). */
+	.admin-type-pick {
+		@apply flex flex-col items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2 py-3 text-center text-xs font-medium text-zinc-600 transition-all hover:border-zinc-300 hover:bg-zinc-50;
+	}
+
+	.admin-type-pick-active {
+		@apply border-brand-primary bg-[color-mix(in_srgb,var(--brand-primary)_8%,white)] text-brand-primary;
+	}
+
+	/* Section-list row ↔ live-preview block sync highlight. */
+	.admin-section-row-active {
+		@apply border-brand-primary ring-2 ring-brand-primary/30;
+	}
+
+	.admin-preview-block-active {
+		outline: 2px solid var(--brand-primary);
+		outline-offset: 2px;
+	}
 }

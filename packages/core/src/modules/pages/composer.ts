@@ -36,6 +36,37 @@ export function createPageComposerService(db: Database) {
 			return results.filter((block): block is HomeSectionBlock => block !== null);
 		},
 
+		/**
+		 * Same composition as `composePublicPage`, but for the staff editor's
+		 * live preview: by page id rather than slug, every section regardless
+		 * of status (so a DRAFT section is visible while staff work on it),
+		 * and each block tagged with the section it came from so the editor
+		 * can sync hovering a list row to highlighting the matching block.
+		 */
+		async composePreviewPage(pageId: number): Promise<HomeSectionBlock[]> {
+			const page = await db.query.pages.findFirst({ where: eq(pages.id, pageId) });
+			if (!page) return [];
+
+			const sections = await db
+				.select()
+				.from(pageSections)
+				.where(eq(pageSections.pageId, page.id))
+				.orderBy(asc(pageSections.sortOrder), asc(pageSections.id));
+
+			const results: (HomeSectionBlock | null)[] = await Promise.all(
+				sections.map(async (section): Promise<HomeSectionBlock | null> => {
+					const loader = registry[section.sectionType] as
+						| ((s: typeof section) => Promise<HomeSectionBlock | null>)
+						| undefined;
+					const block = loader ? await loader(section) : null;
+					if (!block) return null;
+					return { ...block, sectionId: section.id, draft: section.status !== 'PUBLISHED' };
+				})
+			);
+
+			return results.filter((block): block is HomeSectionBlock => block !== null);
+		},
+
 		/** Published page slugs, for the sitemap. */
 		async listPublishedSlugs(): Promise<string[]> {
 			const rows = await db
@@ -145,6 +176,24 @@ export function createPageComposerService(db: Database) {
 				.update(pageSections)
 				.set({ sortOrder: section.sortOrder })
 				.where(eq(pageSections.id, swapWith.id));
+		},
+
+		/**
+		 * Drag-to-reorder from the section list: applies a full new order in
+		 * one go instead of the one-step-at-a-time swaps `moveSection` does.
+		 * Scoped to `pageId` so a stale or tampered id list can't touch another
+		 * page's sections, and wrapped in a transaction since it is several
+		 * writes that must land together.
+		 */
+		async reorderSections(pageId: number, orderedIds: number[]) {
+			await db.transaction(async (tx) => {
+				for (const [index, id] of orderedIds.entries()) {
+					await tx
+						.update(pageSections)
+						.set({ sortOrder: (index + 1) * 10 })
+						.where(and(eq(pageSections.id, id), eq(pageSections.pageId, pageId)));
+				}
+			});
 		},
 
 		async savePage(input: { id?: number; title: string; slug: string; status?: string }) {

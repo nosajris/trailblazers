@@ -18,8 +18,9 @@
 
 		<div class="mt-12 {railRow}">
 			{#each data.posts as post (post.id)}
+				<!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
 				<a
-					href={resolve('/stories/[id]', { id: String(post.id) })}
+					href={(resolve as any)('/stories/[id]', { id: String(post.id) })}
 					class="{railItem} flex flex-col overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
 				>
 					{#if post.imageUrl}

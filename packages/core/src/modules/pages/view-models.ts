@@ -54,7 +54,7 @@ export type HomeContactVm = {
 
 export type HomeCustomVm = Record<string, unknown>;
 
-export type HomeSectionBlock =
+type HomeSectionBlockVariant =
 	| { kind: 'HERO'; data: HomeHeroVm }
 	| { kind: 'EVENTS_RAIL'; data: HomeEventsRailVm }
 	| { kind: 'BLOG'; data: HomeBlogVm }
@@ -67,3 +67,17 @@ export type HomeSectionBlock =
 	| { kind: 'FAQ'; data: HomeFaqVm }
 	| { kind: 'CONTACT'; data: HomeContactVm }
 	| { kind: 'CUSTOM'; data: HomeCustomVm };
+
+/**
+ * `sectionId` and `draft` are only ever set by `composePreviewPage` (the
+ * staff editor's live preview) — `composePublicPage` leaves them undefined,
+ * so the public render is unaffected. Kept on the shared type rather than a
+ * second one so every section component takes the same `data` shape either
+ * way.
+ */
+export type HomeSectionBlock = HomeSectionBlockVariant & {
+	/** The `page_sections.id` this block came from. */
+	sectionId?: number;
+	/** True when the section is DRAFT — still shown in the preview, flagged. */
+	draft?: boolean;
+};
