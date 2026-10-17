@@ -3,9 +3,21 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="description" content="PAOZ TRAILBLAZERS is a transformational leadership ecosystem for young adults.">
-		<title>PAOZ TRAILBLAZERS | National CAMP 2025 IS HERE!</title>
-		
+		<meta name="description" content="PAOZ Trailblazers is a transformational leadership ecosystem for young adults — events, community, and growth.">
+		<title>Trailblazers Young Adults</title>
+
+		<!--
+			These icon/manifest files already existed in static/ (icon-192.png,
+			apple-touch-icon.png, manifest.webmanifest) but nothing in <head>
+			ever linked to them, so the browser tab, the iOS home-screen bookmark,
+			and the "Add to Home Screen" PWA install all fell back to generic
+			defaults with none of this site's branding.
+		-->
+		<link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png" />
+		<link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<meta name="theme-color" content="#078349" />
+
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
