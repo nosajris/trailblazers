@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { HomeTestimonialsVm } from '@trailblazers/core';
 	import { container, sectionY, eyebrowGoldOnDark } from '../tb-layout.js';
+	import { responsiveSrcset } from '../site/responsive-images.js';
 
 	let { data }: { data: HomeTestimonialsVm } = $props();
 
@@ -29,11 +30,23 @@
 					>
 						“{t.content}”
 					</blockquote>
-					<figcaption class="mt-6 border-l-2 border-brand-primary pl-4 text-sm font-semibold text-white">
-						{t.name}
-						{#if t.role}
-							<span class="mt-1 block font-normal text-gray-400">{t.role}</span>
+					<figcaption class="mt-6 flex items-center gap-3 border-l-2 border-brand-primary pl-4 text-sm font-semibold text-white">
+						{#if t.imageUrl}
+							<img
+								src={t.imageUrl}
+								srcset={responsiveSrcset(t.imageUrl)}
+								sizes="40px"
+								alt=""
+								class="h-10 w-10 shrink-0 rounded-full object-cover"
+								loading="lazy"
+							/>
 						{/if}
+						<span>
+							{t.name}
+							{#if t.role}
+								<span class="mt-1 block font-normal text-gray-400">{t.role}</span>
+							{/if}
+						</span>
 					</figcaption>
 				</figure>
 			{/each}

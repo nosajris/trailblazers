@@ -24,6 +24,7 @@ export function createTestimonialService(db: Database) {
 				id: r.id,
 				name: r.name,
 				role: r.role,
+				imageUrl: r.imageUrl,
 				content: r.content,
 				rating: r.rating,
 				isFeatured: r.isFeatured,
@@ -36,6 +37,7 @@ export function createTestimonialService(db: Database) {
 			id?: number;
 			name: string;
 			role?: string;
+			imageUrl?: string;
 			content: string;
 			rating?: number;
 			isFeatured?: boolean;
@@ -45,6 +47,7 @@ export function createTestimonialService(db: Database) {
 			const values = {
 				name: input.name,
 				role: input.role || null,
+				imageUrl: input.imageUrl || null,
 				content: input.content,
 				rating: input.rating ?? 5,
 				isFeatured: input.isFeatured ?? false,

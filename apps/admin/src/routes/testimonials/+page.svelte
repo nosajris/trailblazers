@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { deserialize } from '$app/forms';
+	import MediaPicker from '$lib/components/MediaPicker.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -20,6 +22,7 @@
 			id: '',
 			name: '',
 			role: '',
+			imageUrl: '',
 			content: '',
 			rating: 5,
 			isFeatured: false,
@@ -37,6 +40,38 @@
 	function closeModal() {
 		showModal = false;
 		editingItem = null;
+	}
+
+	/** Uploading for the testimonial's photo — see the `uploadImage` action. */
+	let uploading = $state(false);
+	let uploadError = $state('');
+
+	async function handleImageUpload(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file || !editingItem) return;
+
+		uploading = true;
+		uploadError = '';
+		try {
+			const body = new FormData();
+			body.set('file', file);
+			const response = await fetch('?/uploadImage', { method: 'POST', body });
+			const result = deserialize<{ uploadedUrl?: string }, { error?: string }>(await response.text());
+
+			if (result.type === 'success' && result.data?.uploadedUrl) {
+				editingItem.imageUrl = result.data.uploadedUrl;
+			} else if (result.type === 'failure') {
+				uploadError = result.data?.error ?? 'That upload failed.';
+			} else {
+				uploadError = 'That upload failed.';
+			}
+		} catch {
+			uploadError = 'That upload failed.';
+		} finally {
+			uploading = false;
+			input.value = '';
+		}
 	}
 
 	function downloadCsv() {
@@ -107,10 +142,21 @@
 					{#each filteredTestimonials as item (item.id)}
 						<tr>
 							<td>
-								<div class="font-medium text-[var(--zinc-900)]">{item.name}</div>
-								{#if item.role}
-									<div class="text-xs text-[var(--zinc-400)]">{item.role}</div>
-								{/if}
+								<div class="flex items-center gap-3">
+									{#if item.imageUrl}
+										<img src={item.imageUrl} alt={item.name} class="h-9 w-9 rounded-full object-cover border border-[var(--zinc-200)]" />
+									{:else}
+										<div class="h-9 w-9 rounded-full bg-[var(--zinc-200)] text-[var(--zinc-700)] flex items-center justify-center font-bold text-xs">
+											{item.name?.[0] || 'T'}
+										</div>
+									{/if}
+									<div>
+										<div class="font-medium text-[var(--zinc-900)]">{item.name}</div>
+										{#if item.role}
+											<div class="text-xs text-[var(--zinc-400)]">{item.role}</div>
+										{/if}
+									</div>
+								</div>
 							</td>
 							<td class="text-sm text-[var(--zinc-600)] max-w-md line-clamp-2">{item.content}</td>
 							<td class="text-sm text-amber-500 font-bold">{'★'.repeat(item.rating || 5)}</td>
@@ -163,6 +209,27 @@
 						<label for="test-role" class="block text-xs font-semibold text-[var(--zinc-700)] uppercase mb-1">Role / Campus</label>
 						<input id="test-role" type="text" name="role" bind:value={editingItem.role} placeholder="e.g. Student / Member" class="admin-input" />
 					</div>
+				</div>
+
+				<div>
+					<label for="test-image" class="block text-xs font-semibold text-[var(--zinc-700)] uppercase mb-1">Photo</label>
+					<div class="flex items-center gap-2">
+						<input id="test-image" type="text" name="imageUrl" bind:value={editingItem.imageUrl} placeholder="https://..." class="admin-input" />
+						<label class="admin-btn-secondary shrink-0 cursor-pointer px-3 py-2 text-xs">
+							{uploading ? 'Uploading…' : 'Upload'}
+							<input
+								type="file"
+								accept="image/jpeg,image/png,image/webp"
+								class="hidden"
+								disabled={uploading}
+								onchange={handleImageUpload}
+							/>
+						</label>
+						<MediaPicker onselect={(url) => (editingItem.imageUrl = url)} />
+					</div>
+					{#if uploadError}
+						<p class="mt-1 text-xs font-semibold text-[var(--color-danger-fg)]">{uploadError}</p>
+					{/if}
 				</div>
 
 				<div>

@@ -6,6 +6,7 @@ export const testimonials = pgTable(
 		id: serial('id').primaryKey(),
 		name: text('name').notNull(),
 		role: text('role'),
+		imageUrl: text('image_url'),
 		content: text('content').notNull(),
 		rating: integer('rating').default(5),
 		isFeatured: boolean('is_featured').default(false),
