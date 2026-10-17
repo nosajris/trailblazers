@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { deserialize } from '$app/forms';
+	import MediaPicker from '$lib/components/MediaPicker.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -36,6 +38,38 @@
 	function closeModal() {
 		showModal = false;
 		editingItem = null;
+	}
+
+	/** Uploading for this field's image — see the `uploadImage` action. */
+	let uploading = $state(false);
+	let uploadError = $state('');
+
+	async function handleImageUpload(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file || !editingItem) return;
+
+		uploading = true;
+		uploadError = '';
+		try {
+			const body = new FormData();
+			body.set('file', file);
+			const response = await fetch('?/uploadImage', { method: 'POST', body });
+			const result = deserialize<{ uploadedUrl?: string }, { error?: string }>(await response.text());
+
+			if (result.type === 'success' && result.data?.uploadedUrl) {
+				editingItem.imageUrl = result.data.uploadedUrl;
+			} else if (result.type === 'failure') {
+				uploadError = result.data?.error ?? 'That upload failed.';
+			} else {
+				uploadError = 'That upload failed.';
+			}
+		} catch {
+			uploadError = 'That upload failed.';
+		} finally {
+			uploading = false;
+			input.value = '';
+		}
 	}
 
 	function downloadCsv() {
@@ -165,7 +199,23 @@
 
 				<div>
 					<label for="eq-image" class="block text-xs font-semibold text-[var(--zinc-700)] uppercase mb-1">Image URL</label>
-					<input id="eq-image" type="text" name="imageUrl" bind:value={editingItem.imageUrl} placeholder="https://..." class="admin-input" />
+					<div class="flex items-center gap-2">
+						<input id="eq-image" type="text" name="imageUrl" bind:value={editingItem.imageUrl} placeholder="https://..." class="admin-input" />
+						<label class="admin-btn-secondary shrink-0 cursor-pointer px-3 py-2 text-xs">
+							{uploading ? 'Uploading…' : 'Upload'}
+							<input
+								type="file"
+								accept="image/jpeg,image/png,image/webp"
+								class="hidden"
+								disabled={uploading}
+								onchange={handleImageUpload}
+							/>
+						</label>
+						<MediaPicker onselect={(url) => (editingItem.imageUrl = url)} />
+					</div>
+					{#if uploadError}
+						<p class="mt-1 text-xs font-semibold text-[var(--color-danger-fg)]">{uploadError}</p>
+					{/if}
 				</div>
 
 				<div>

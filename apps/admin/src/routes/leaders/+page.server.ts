@@ -57,5 +57,31 @@ export const actions: Actions = {
 			);
 		}
 		return { success: true };
+	},
+
+	/**
+	 * Staff upload for a leader's avatar image. Returns the processed,
+	 * Blob-hosted URL; the client sets it into the modal's own field rather
+	 * than this action touching the leader record — same pattern as the
+	 * page-section editor's `uploadImage` action.
+	 */
+	uploadImage: async ({ request, locals }) => {
+		const form = await request.formData();
+		const file = form.get('file');
+		if (!(file instanceof File) || file.size === 0) {
+			return fail(400, { error: 'Choose an image to upload.' });
+		}
+
+		try {
+			const buffer = Buffer.from(await file.arrayBuffer());
+			const asset = await services.media.upload(
+				{ buffer, mimeType: file.type, size: file.size },
+				locals.user?.id
+			);
+			return { success: true, uploadedUrl: asset.url };
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'That upload failed.';
+			return fail(400, { error: message });
+		}
 	}
 };

@@ -59,5 +59,30 @@ export const actions: Actions = {
 			);
 		}
 		return { success: true };
+	},
+
+	/**
+	 * Staff upload for this field's image. Same shape as the other
+	 * `uploadImage` actions in this app — the client sets the returned URL
+	 * into the modal's own field.
+	 */
+	uploadImage: async ({ request, locals }) => {
+		const form = await request.formData();
+		const file = form.get('file');
+		if (!(file instanceof File) || file.size === 0) {
+			return fail(400, { error: 'Choose an image to upload.' });
+		}
+
+		try {
+			const buffer = Buffer.from(await file.arrayBuffer());
+			const asset = await services.media.upload(
+				{ buffer, mimeType: file.type, size: file.size },
+				locals.user?.id
+			);
+			return { success: true, uploadedUrl: asset.url };
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'That upload failed.';
+			return fail(400, { error: message });
+		}
 	}
 };

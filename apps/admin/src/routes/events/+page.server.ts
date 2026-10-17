@@ -1,3 +1,4 @@
+import { fail } from '@sveltejs/kit';
 import { deleteEventSchema, saveEventSchema, readPageRequest } from '@trailblazers/core';
 import type { PageServerLoad, Actions } from './$types';
 import { services } from '$lib/server/services.js';
@@ -58,5 +59,33 @@ export const actions: Actions = {
 		requireSection(locals.user, 'content');
 		const allEvents = await services.events.getAllEventsForAdmin();
 		return { csv: services.export.arrayToCsv(allEvents) };
+	},
+
+	/**
+	 * Staff upload for an event's cover image. Same shape as the other
+	 * `uploadImage` actions in this app — the client sets the returned URL
+	 * into the modal's own field rather than this action touching the
+	 * event record.
+	 */
+	uploadImage: async ({ request, locals }) => {
+		requireSection(locals.user, 'content');
+
+		const form = await request.formData();
+		const file = form.get('file');
+		if (!(file instanceof File) || file.size === 0) {
+			return fail(400, { error: 'Choose an image to upload.' });
+		}
+
+		try {
+			const buffer = Buffer.from(await file.arrayBuffer());
+			const asset = await services.media.upload(
+				{ buffer, mimeType: file.type, size: file.size },
+				locals.user?.id
+			);
+			return { success: true, uploadedUrl: asset.url };
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'That upload failed.';
+			return fail(400, { error: message });
+		}
 	}
 };
