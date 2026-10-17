@@ -26,6 +26,8 @@ export {
 export type { CampusDetail, GivingMethod, SocialLink } from './modules/settings/site-content.js';
 export { createTestimonialService } from './modules/testimonials/service.js';
 export { createLeaderService } from './modules/leaders/service.js';
+export { createMediaService } from './modules/media/service.js';
+export type { MediaAsset } from './modules/media/types.js';
 export { createFaqService } from './modules/faq/service.js';
 export { createInquiryService } from './modules/inquiries/service.js';
 export { createBepService } from './modules/bep/service.js';

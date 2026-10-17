@@ -11,6 +11,7 @@ export * from '../modules/bep/schema.js';
 export * from '../modules/equipment/schema.js';
 export * from '../modules/statistics/schema.js';
 export * from '../modules/pages/schema.js';
+export * from '../modules/media/schema.js';
 export * from '../modules/settings/schema.js';
 export * from '../modules/serve/schema.js';
 export * from '../modules/newcomers/schema.js';

@@ -17,6 +17,23 @@ test('unknown, remote and empty sources get nothing', () => {
 	assert.equal(responsiveSrcset(null), undefined);
 	assert.equal(responsiveSrcset('/images/__proto__'), undefined);
 });
+test('a CMS upload derives its srcset from its own file name, no lookup needed', () => {
+	const s = responsiveSrcset('https://abc123.public.blob.vercel-storage.com/cms/f1b2-1600.webp');
+	assert.equal(
+		s,
+		'https://abc123.public.blob.vercel-storage.com/cms/f1b2-480.webp 480w, ' +
+			'https://abc123.public.blob.vercel-storage.com/cms/f1b2-960.webp 960w, ' +
+			'https://abc123.public.blob.vercel-storage.com/cms/f1b2-1600.webp 1600w'
+	);
+});
+test("a CMS upload narrower than a breakpoint doesn't reference a variant that was never generated", () => {
+	const s = responsiveSrcset('https://abc123.public.blob.vercel-storage.com/cms/f1b2-700.webp');
+	assert.equal(
+		s,
+		'https://abc123.public.blob.vercel-storage.com/cms/f1b2-480.webp 480w, ' +
+			'https://abc123.public.blob.vercel-storage.com/cms/f1b2-700.webp 700w'
+	);
+});
 test('every manifest entry points at files that exist', () => {
 	for (const [file, [, widths]] of Object.entries(RESPONSIVE_VARIANTS)) {
 		assert.ok(existsSync(images(file)), `${file} missing`);

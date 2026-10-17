@@ -45,17 +45,48 @@ const VARIANTS: Record<string, [number, number[]]> = {
 	'wallpaper07.jpg': [1920, [480, 960]],
 };
 
-/** `srcset` for a local `/images/...` URL, or undefined when no variants exist for it. */
+/**
+ * A staff upload's smaller webp copies, keyed by their own width in the file
+ * name — `<anything>/cms/<id>-<width>.webp` — so this needs no second lookup
+ * against the database. Mirrors `VARIANT_WIDTHS` in
+ * `packages/core/src/modules/media/dimensions.ts`; the upload pipeline only
+ * ever generates these two, so there is nothing to keep in sync beyond this
+ * comment.
+ */
+const CMS_VARIANT_WIDTHS = [480, 960];
+const CMS_VARIANT_PATTERN = /^(.*\/cms\/[^/]+)-(\d+)\.webp$/;
+
+/**
+ * `srcset` for an image URL, or undefined when it is neither a pre-built
+ * static asset nor a staff upload — a hand-pasted external URL, say, which
+ * has no variants to offer.
+ */
 export function responsiveSrcset(src: string | null | undefined): string | undefined {
-	if (!src || !src.startsWith('/images/')) return undefined;
-	const file = src.slice('/images/'.length);
-	const entry = Object.hasOwn(VARIANTS, file) ? VARIANTS[file] : undefined;
-	if (!entry) return undefined;
-	const [width, widths] = entry;
-	const base = file.replace(/\.[^.]+$/, '');
-	const sets = widths.map((w) => `/images/w/${base}-${w}.webp ${w}w`);
-	sets.push(`${src} ${width}w`);
-	return sets.join(', ');
+	if (!src) return undefined;
+
+	if (src.startsWith('/images/')) {
+		const file = src.slice('/images/'.length);
+		const entry = Object.hasOwn(VARIANTS, file) ? VARIANTS[file] : undefined;
+		if (!entry) return undefined;
+		const [width, widths] = entry;
+		const base = file.replace(/\.[^.]+$/, '');
+		const sets = widths.map((w) => `/images/w/${base}-${w}.webp ${w}w`);
+		sets.push(`${src} ${width}w`);
+		return sets.join(', ');
+	}
+
+	const cmsMatch = src.match(CMS_VARIANT_PATTERN);
+	if (cmsMatch) {
+		const [, base, widthStr] = cmsMatch;
+		const fullWidth = Number(widthStr);
+		const sets = CMS_VARIANT_WIDTHS.filter((w) => w < fullWidth).map(
+			(w) => `${base}-${w}.webp ${w}w`
+		);
+		sets.push(`${src} ${fullWidth}w`);
+		return sets.join(', ');
+	}
+
+	return undefined;
 }
 
 export const RESPONSIVE_FILES = Object.keys(VARIANTS);

@@ -7,6 +7,7 @@ import { createGroupService } from './modules/groups/service.js';
 import { createIamService } from './modules/iam/service.js';
 import { createInquiryService } from './modules/inquiries/service.js';
 import { createLeaderService } from './modules/leaders/service.js';
+import { createMediaService } from './modules/media/service.js';
 import { createNewcomerService } from './modules/newcomers/service.js';
 import { createPageComposerService } from './modules/pages/composer.js';
 import { createParentService } from './modules/parents/service.js';
@@ -52,6 +53,7 @@ export function createCoreServices(db: Database, config: CoreServicesConfig) {
 		groups: createGroupService(db),
 		testimonials: createTestimonialService(db),
 		leaders: createLeaderService(db),
+		media: createMediaService(db),
 		faq: createFaqService(db),
 		inquiries: createInquiryService(db, { secretKey: config.secretKey }),
 		bep: createBepService(db),
