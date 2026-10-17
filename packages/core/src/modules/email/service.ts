@@ -9,9 +9,16 @@
  * keep current. Without `RESEND_API_KEY` it falls back to logging, which keeps
  * local development and CI working and makes this safe to merge before the key
  * exists.
+ *
+ * Every message's HTML is built by `emailHtml` from the same plain text each
+ * caller already writes — one calm branded card instead of each call site
+ * hand-rolling its own `<p>` tags (or, for the office notification, dumping
+ * raw text into a `<pre>`). A caller can still pass `html` explicitly to
+ * override that, but nothing here needs to any more.
  */
 
 import { logger } from '../../logger.js';
+import { emailHtml, type EmailAction } from './html-template.js';
 
 export type EmailConfig = {
 	/** Resend API key. Absent means log-only mode. */
@@ -35,20 +42,14 @@ export type EmailMessage = {
 	subject: string;
 	/** Plain text. Always provide it: some clients prefer it, and it is the accessible fallback. */
 	text: string;
+	/** A link to render as a button in the HTML version. Ignored if `html` is given explicitly. */
+	action?: EmailAction;
+	/** Overrides the HTML this module would otherwise build from `text`/`action`. */
 	html?: string;
 	replyTo?: string;
 };
 
 const RESEND_ENDPOINT = 'https://api.resend.com/emails';
-
-/** Minimal HTML escaping for values interpolated into an email body. */
-function escapeHtml(value: string): string {
-	return value
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;');
-}
 
 export function createEmailService(config: EmailConfig = { apiKey: undefined, from: undefined, officeAddress: undefined }) {
 	const enabled = Boolean(config.apiKey && config.from);
@@ -60,6 +61,8 @@ export function createEmailService(config: EmailConfig = { apiKey: undefined, fr
 	 * submission. The caller gets a result and the failure is logged.
 	 */
 	async function send(message: EmailMessage): Promise<SendResult> {
+		const html = message.html ?? emailHtml({ subject: message.subject, text: message.text, action: message.action });
+
 		if (!enabled) {
 			logger.info('EMAIL', 'simulated send (no RESEND_API_KEY configured)', {
 				subject: message.subject
@@ -79,7 +82,7 @@ export function createEmailService(config: EmailConfig = { apiKey: undefined, fr
 					to: [message.to],
 					subject: message.subject,
 					text: message.text,
-					...(message.html ? { html: message.html } : {}),
+					html,
 					...(message.replyTo ? { reply_to: message.replyTo } : {})
 				})
 			});
@@ -118,12 +121,7 @@ export function createEmailService(config: EmailConfig = { apiKey: undefined, fr
 					`Hi ${fullName},\n\n` +
 					`Thanks for connecting with PAOZ Trailblazers. We are glad you are here.\n\n` +
 					`If you have any questions, just reply to this email.\n\n` +
-					`— The Trailblazers team`,
-				html:
-					`<p>Hi ${escapeHtml(fullName)},</p>` +
-					`<p>Thanks for connecting with PAOZ Trailblazers. We are glad you are here.</p>` +
-					`<p>If you have any questions, just reply to this email.</p>` +
-					`<p>— The Trailblazers team</p>`
+					`— The Trailblazers team`
 			});
 		},
 
@@ -135,12 +133,7 @@ export function createEmailService(config: EmailConfig = { apiKey: undefined, fr
 					`Hi ${fullName},\n\n` +
 					`We have received your application to serve on the ${team} team. ` +
 					`Someone from the team will be in touch soon.\n\n` +
-					`— The Trailblazers team`,
-				html:
-					`<p>Hi ${escapeHtml(fullName)},</p>` +
-					`<p>We have received your application to serve on the <strong>${escapeHtml(team)}</strong> team. ` +
-					`Someone from the team will be in touch soon.</p>` +
-					`<p>— The Trailblazers team</p>`
+					`— The Trailblazers team`
 			});
 		},
 
@@ -164,14 +157,25 @@ export function createEmailService(config: EmailConfig = { apiKey: undefined, fr
 						? `Your place at ${eventTitle} is confirmed. We look forward to seeing you.`
 						: `${eventTitle} is currently full, so we have added you to the waitlist. ` +
 							`We will email you if a place opens up.`) +
-					`\n\n— The Trailblazers team`,
-				html:
-					`<p>Hi ${escapeHtml(fullName)},</p>` +
-					(confirmed
-						? `<p>Your place at <strong>${escapeHtml(eventTitle)}</strong> is confirmed. We look forward to seeing you.</p>`
-						: `<p><strong>${escapeHtml(eventTitle)}</strong> is currently full, so we have added you to the waitlist. ` +
-							`We will email you if a place opens up.</p>`) +
-					`<p>— The Trailblazers team</p>`
+					`\n\n— The Trailblazers team`
+			});
+		},
+
+		/** The day-before nudge for someone registered for an event. */
+		async sendEventReminder(
+			toEmail: string,
+			fullName: string,
+			eventTitle: string,
+			whenText: string,
+			location: string
+		) {
+			return send({
+				to: toEmail,
+				subject: `Tomorrow: ${eventTitle}`,
+				text:
+					`Hi ${fullName},\n\n` +
+					`Just a reminder that ${eventTitle} is coming up ${whenText} at ${location}. ` +
+					`We are looking forward to seeing you there.\n\n— The Trailblazers team`
 			});
 		},
 
@@ -191,7 +195,6 @@ export function createEmailService(config: EmailConfig = { apiKey: undefined, fr
 				to: config.officeAddress,
 				subject,
 				text: body,
-				html: `<pre style="font-family:inherit;white-space:pre-wrap">${escapeHtml(body)}</pre>`,
 				replyTo
 			});
 		}

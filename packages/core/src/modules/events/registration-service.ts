@@ -5,13 +5,14 @@
  * only talks to the database.
  */
 
-import { and, count, desc, eq } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, isNull } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { events, eventRegistrations } from './schema.js';
 import { PolicyError } from '../iam/permissions.js';
 import { Sanitizer } from '../../util/sanitizer.js';
 import { logger } from '../../logger.js';
 import {
+	isDueForReminder,
 	isRegistrationOpen,
 	nextRegistrationStatus,
 	seatsRemaining,
@@ -148,6 +149,45 @@ export function createEventRegistrationService(db: Database) {
 				.from(eventRegistrations)
 				.where(eq(eventRegistrations.eventId, eventId))
 				.orderBy(desc(eventRegistrations.createdAt));
+		},
+
+		/**
+		 * Confirmed registrations for an event starting 20-32 hours from now
+		 * that have not had their reminder yet — see `isDueForReminder` for why
+		 * the window is wide rather than a strict "tomorrow". Published events
+		 * only: a draft or unpublished event should not be emailing anyone.
+		 */
+		async listDueForReminders(now: Date = new Date()) {
+			const rows = await db
+				.select({
+					registrationId: eventRegistrations.id,
+					fullName: eventRegistrations.fullName,
+					email: eventRegistrations.email,
+					eventId: events.id,
+					eventTitle: events.title,
+					eventDate: events.date,
+					eventLocation: events.location
+				})
+				.from(eventRegistrations)
+				.innerJoin(events, eq(eventRegistrations.eventId, events.id))
+				.where(
+					and(
+						eq(eventRegistrations.status, 'CONFIRMED'),
+						eq(events.status, 'PUBLISHED'),
+						isNull(eventRegistrations.reminderSentAt)
+					)
+				);
+
+			return rows.filter((row) => isDueForReminder(row.eventDate, now));
+		},
+
+		/** Marks a batch of registrations as reminded, so the next run skips them. */
+		async markReminded(registrationIds: number[]) {
+			if (registrationIds.length === 0) return;
+			await db
+				.update(eventRegistrations)
+				.set({ reminderSentAt: new Date() })
+				.where(inArray(eventRegistrations.id, registrationIds));
 		}
 	};
 }

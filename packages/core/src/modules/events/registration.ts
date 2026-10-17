@@ -60,3 +60,17 @@ export function nextInLine<T extends { status: RegistrationStatus; createdAt: Da
 
 	return waiting[0] ?? null;
 }
+
+/**
+ * Whether an event is close enough to send its registrants the day-before
+ * reminder: starts between 20 and 32 hours from now. The wide window (not a
+ * strict "tomorrow") is what makes a once-a-day cron reliable regardless of
+ * the exact hour it runs at or a single missed run — an event is caught on
+ * whichever of the one or two days its window overlaps a run, and the
+ * `reminderSentAt` marker on the registration (see registration-service.ts)
+ * stops a second run from sending it twice.
+ */
+export function isDueForReminder(eventDate: Date, now: Date = new Date()): boolean {
+	const hoursAway = (eventDate.getTime() - now.getTime()) / (3600 * 1000);
+	return hoursAway >= 20 && hoursAway <= 32;
+}

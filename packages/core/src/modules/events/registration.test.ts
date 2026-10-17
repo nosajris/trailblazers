@@ -8,6 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+	isDueForReminder,
 	isFull,
 	isRegistrationOpen,
 	nextInLine,
@@ -78,4 +79,17 @@ test('a cancelled registration is never promoted', () => {
 	];
 
 	assert.equal(nextInLine(registrations)?.who, 'waiting');
+});
+
+test('isDueForReminder is true for an event 20 to 32 hours away', () => {
+	const now = new Date('2026-01-10T00:00:00Z');
+	assert.equal(isDueForReminder(new Date('2026-01-10T20:00:00Z'), now), true);
+	assert.equal(isDueForReminder(new Date('2026-01-11T08:00:00Z'), now), true);
+});
+
+test('isDueForReminder is false outside the 20-32 hour window', () => {
+	const now = new Date('2026-01-10T00:00:00Z');
+	assert.equal(isDueForReminder(new Date('2026-01-10T10:00:00Z'), now), false); // too soon — today, inside 20h
+	assert.equal(isDueForReminder(new Date('2026-01-12T00:00:00Z'), now), false); // too far out
+	assert.equal(isDueForReminder(new Date('2026-01-09T00:00:00Z'), now), false); // already past
 });

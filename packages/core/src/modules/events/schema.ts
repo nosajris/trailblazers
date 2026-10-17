@@ -60,12 +60,16 @@ export const eventRegistrations = pgTable(
 		/** CONFIRMED, WAITLIST or CANCELLED. */
 		status: text('status').notNull().default('CONFIRMED'),
 		notes: text('notes'),
-		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		/** Set once the day-before reminder email has gone out, so the cron job never sends it twice. */
+		reminderSentAt: timestamp('reminder_sent_at', { withTimezone: true })
 	},
 	(table) => [
 		// One seat per person per event.
 		uniqueIndex('event_registrations_event_email_idx').on(table.eventId, table.email),
 		// Serves the confirmed-seat count that capacity is checked against.
-		index('event_registrations_event_status_idx').on(table.eventId, table.status)
+		index('event_registrations_event_status_idx').on(table.eventId, table.status),
+		// Serves the reminder job's "who is due and hasn't been reminded" scan.
+		index('event_registrations_reminder_idx').on(table.status, table.reminderSentAt)
 	]
 );

@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm';
 import type { Database } from '../../db/client.js';
 import { siteSettings } from './schema.js';
 import type { CampusDetail, GivingMethod, SocialLink } from './site-content.js';
@@ -52,6 +53,8 @@ export type SiteExtras = {
 	givingNote?: string;
 	/** Canonical base URL for structured data; otherwise inferred per request. */
 	siteUrl?: string;
+	/** Off switches the weekly traffic-digest email (see the daily cron job) without touching env vars or code. Defaults to on. */
+	weeklyDigestEnabled?: boolean;
 };
 
 export type SiteSettingsBundle = {
@@ -73,7 +76,8 @@ const DEFAULT_EXTRAS: SiteExtras = {
 		{ code: 'en', label: 'English', href: '#' },
 		{ code: 'es', label: 'Español', href: '#' }
 	],
-	organizationName: 'Trailblazers Young Adults'
+	organizationName: 'Trailblazers Young Adults',
+	weeklyDigestEnabled: true
 };
 
 const DEFAULTS: SiteSettingsBundle = {
@@ -182,6 +186,17 @@ export function createSettingsService(db: Database) {
 				seoDefaults,
 				siteExtras
 			};
+		},
+
+		/**
+		 * A single raw key from the settings table — for small bits of state that
+		 * do not belong in the typed bundle, like "has this week's digest email
+		 * already gone out". Not part of `getBundle()`'s shape, so a caller that
+		 * needs one of these knows it is reading something ad hoc.
+		 */
+		async getSetting<T = unknown>(key: string): Promise<T | undefined> {
+			const rows = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+			return rows[0]?.value as T | undefined;
 		},
 
 		async updateSetting(key: string, value: unknown) {
