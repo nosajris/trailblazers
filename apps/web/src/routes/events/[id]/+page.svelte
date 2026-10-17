@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { eventReminderText, whatsappShareUrl } from '@trailblazers/ui/site/share';
+	import { withBreadcrumbs } from '@trailblazers/core/util/seo';
 
 	let { data, form } = $props();
 
@@ -72,6 +73,14 @@
 		}
 	});
 
+	const combinedJsonLd = $derived(
+		withBreadcrumbs(eventJsonLd, [
+			['Home', page.url.origin + resolve('/')],
+			['Events', page.url.origin + resolve('/events')],
+			[event.title, page.url.href]
+		])
+	);
+
 	const formatPrice = (cents: number) => {
 		if (cents === 0) return 'Free';
 		return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
@@ -81,8 +90,8 @@
 <SeoMeta
 	title={`${event.title} — Trailblazers`}
 	description={event.description.slice(0, 180)}
-	image={event.imageUrl ?? '/images/wallpaper04.jpg'}
-	jsonLd={eventJsonLd}
+	image={event.imageUrl ?? data.ogImage ?? '/images/wallpaper04.jpg'}
+	jsonLd={combinedJsonLd}
 />
 
 <SiteShell settings={data.settings}>

@@ -5,6 +5,7 @@
 	import SeoMeta from '@trailblazers/ui/site/seo-meta.svelte';
 	import { container } from '@trailblazers/ui/tb-layout';
 	import { whatsappShareUrl } from '@trailblazers/ui/site/share';
+	import { withBreadcrumbs } from '@trailblazers/core/util/seo';
 
 	let { data } = $props();
 
@@ -39,15 +40,23 @@
 		...(message.youtubeId ? { embedUrl: `https://www.youtube-nocookie.com/embed/${message.youtubeId}` } : {}),
 		publisher: { '@type': 'Organization', name: 'PAOZ Trailblazers' }
 	});
+
+	const combinedJsonLd = $derived(
+		withBreadcrumbs(jsonLd, [
+			['Home', page.url.origin + resolve('/')],
+			['Watch', page.url.origin + resolve('/watch')],
+			[message.title, page.url.href]
+		])
+	);
 </script>
 
 <SeoMeta
 	title={`${message.title} — Trailblazers`}
 	description={message.summary ?? `${message.title}, a message from ${message.speaker}.`}
-	image={message.thumbnailUrl ?? '/images/sermon1.jpg'}
+	image={message.thumbnailUrl ?? data.ogImage ?? '/images/sermon1.jpg'}
 	type="article"
 	publishedTime={message.publishedAt ? new Date(message.publishedAt).toISOString() : undefined}
-	{jsonLd}
+	jsonLd={combinedJsonLd}
 />
 
 <SiteShell settings={data.settings}>

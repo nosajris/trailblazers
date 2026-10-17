@@ -17,7 +17,8 @@
     "DB_PORT",
     "RESEND_API_KEY",
     "EMAIL_FROM",
-    "OFFICE_EMAIL"
+    "OFFICE_EMAIL",
+    "BLOB_READ_WRITE_TOKEN"
   ],
   "tasks": {
     "build": {

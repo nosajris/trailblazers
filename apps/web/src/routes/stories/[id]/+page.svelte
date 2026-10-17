@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { whatsappShareUrl } from '@trailblazers/ui/site/share';
+	import { withBreadcrumbs } from '@trailblazers/core/util/seo';
 	import { container } from '@trailblazers/ui/tb-layout';
 
 	let { data } = $props();
@@ -31,15 +32,23 @@
 		author: { '@type': 'Organization', name: 'PAOZ Trailblazers' },
 		publisher: { '@type': 'Organization', name: 'PAOZ Trailblazers' }
 	});
+
+	const combinedJsonLd = $derived(
+		withBreadcrumbs(articleJsonLd, [
+			['Home', page.url.origin + resolve('/')],
+			['Stories', page.url.origin + resolve('/stories')],
+			[p.title, page.url.href]
+		])
+	);
 </script>
 
 <SeoMeta
 	title={`${p.title} — Trailblazers Stories`}
 	description={p.summary}
-	image={p.imageUrl ?? '/images/slider01.jpeg'}
+	image={p.imageUrl ?? data.ogImage ?? '/images/slider01.jpeg'}
 	type="article"
 	publishedTime={new Date(p.createdAt).toISOString()}
-	jsonLd={articleJsonLd}
+	jsonLd={combinedJsonLd}
 />
 
 <SiteShell settings={data.settings}>

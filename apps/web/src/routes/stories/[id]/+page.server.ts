@@ -1,9 +1,10 @@
 import { services } from '$lib/server/services';
 import { error } from '@sveltejs/kit';
+import { ogImageUrl } from '@trailblazers/core';
 import type { PageServerLoad } from './$types';
 import { cacheHeaders } from '$lib/server/cache';
 
-export const load: PageServerLoad = async ({ params, setHeaders }) => {
+export const load: PageServerLoad = async ({ params, setHeaders, url }) => {
 	setHeaders(cacheHeaders('content'));
 
 	const id = Number(params.id);
@@ -20,5 +21,11 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	// A story used to be a dead end: no way to share it and nothing to read next.
 	const more = latest.filter((item) => item.id !== post.id).slice(0, 3);
 
-	return { post, settings, more };
+	// See events/[id]/+page.server.ts for why this is conditional on both.
+	const ogImage =
+		!post.imageUrl && process.env.SECRET_KEY
+			? ogImageUrl(url.origin, process.env.SECRET_KEY, { title: post.title, kicker: 'Story' })
+			: null;
+
+	return { post, settings, more, ogImage };
 };

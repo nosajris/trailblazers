@@ -1,6 +1,6 @@
 import { services } from '$lib/server/services';
 import { error, fail } from '@sveltejs/kit';
-import { PolicyError, logger, parseForm, registerForEventSchema, summarizeErrors } from '@trailblazers/core';
+import { PolicyError, logger, ogImageUrl, parseForm, registerForEventSchema, summarizeErrors } from '@trailblazers/core';
 import { cacheHeaders } from '$lib/server/cache';
 import {
 	consumeFormSubmission,
@@ -9,7 +9,7 @@ import {
 } from '$lib/server/rate-limit';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ params, setHeaders }) => {
+export const load: PageServerLoad = async ({ params, setHeaders, url }) => {
 	const eventId = Number(params.id);
 	if (!Number.isInteger(eventId)) throw error(404, 'Event not found');
 
@@ -33,7 +33,15 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	// rather than for the usual content window.
 	setHeaders(cacheHeaders('dynamic'));
 
-	return { event, settings, availability };
+	// Only when nobody has uploaded a photo for this event, and only when
+	// there's a secret to sign it with — without SECRET_KEY the /og route
+	// would 403 anyway, so there's nothing to gain from building the URL.
+	const ogImage =
+		!event.imageUrl && process.env.SECRET_KEY
+			? ogImageUrl(url.origin, process.env.SECRET_KEY, { title: event.title, kicker: 'Event' })
+			: null;
+
+	return { event, settings, availability, ogImage };
 };
 
 export const actions: Actions = {
