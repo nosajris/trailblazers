@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { onDestroy } from 'svelte';
 	import { container } from '../tb-layout.js';
+	import { trackClick } from './track-click.js';
 	import type { SiteExtras, SiteNavItem, SiteNavMega } from '@trailblazers/core';
 
 	function isMegaNavItem(item: SiteNavItem): item is SiteNavMega {
@@ -280,7 +281,7 @@
 					<a
 						class="rounded-lg px-3 py-2 text-sm font-semibold text-brand-dark hover:bg-brand-primary/10 hover:text-brand-primary transition"
 						href={watchHref}
-						onclick={closeMenu}>Watch</a
+						onclick={() => { trackClick(watchHref, 'Watch'); closeMenu(); }}>Watch</a
 					>
 					<a
 						class="rounded-lg px-3 py-2 text-sm font-semibold text-brand-dark hover:bg-brand-primary/10 hover:text-brand-primary transition"
@@ -290,7 +291,7 @@
 					<a
 						class="rounded-lg px-3 py-2 text-sm font-semibold text-brand-dark hover:bg-brand-primary/10 hover:text-brand-primary transition"
 						href={givingHref}
-						onclick={closeMenu}>Give</a
+						onclick={() => { trackClick(givingHref, 'Give'); closeMenu(); }}>Give</a
 					>
 				</div>
 				<nav class="flex flex-1 flex-col gap-1 px-4 pb-8" aria-label="Mobile">

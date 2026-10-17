@@ -37,6 +37,27 @@
 			</div>
 		</div>
 
+		<!-- Notifications -->
+		<div class="space-y-4">
+			<h2 class="text-base font-bold text-[var(--zinc-900)] border-b border-[var(--zinc-200)] pb-2">Notifications</h2>
+			<label class="flex items-start gap-3">
+				<input
+					id="admin-setting-weekly-digest"
+					type="checkbox"
+					name="weeklyDigestEnabled"
+					checked={data.settings.siteExtras.weeklyDigestEnabled !== false}
+					class="mt-0.5 h-4 w-4 rounded border-[var(--zinc-300)] text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+				/>
+				<span>
+					<span class="block text-sm font-semibold text-[var(--zinc-900)]">Weekly traffic digest</span>
+					<span class="block text-xs text-[var(--zinc-500)]">
+						Emails the office address last week's site analytics every Monday morning. Sends
+						nothing on a quiet week with no visitors.
+					</span>
+				</span>
+			</label>
+		</div>
+
 		<!-- Global URLs -->
 		<div class="space-y-4">
 			<h2 class="text-base font-bold text-[var(--zinc-900)] border-b border-[var(--zinc-200)] pb-2">Media & Platform Links</h2>

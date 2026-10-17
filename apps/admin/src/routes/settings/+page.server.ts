@@ -32,6 +32,8 @@ export const actions: Actions = {
 		const watchEmbedUrl = form.get('watchEmbedUrl')?.toString().trim();
 		const messagesUrl = form.get('messagesUrl')?.toString().trim();
 		const planVisitHref = form.get('planVisitHref')?.toString().trim();
+		// An unchecked checkbox sends no field at all, so its presence is the signal.
+		const weeklyDigestEnabled = form.has('weeklyDigestEnabled');
 
 		// Four schemas over one form, so a mistake in any block is reported under
 		// its own field rather than silently dropping the rest of the save.
@@ -81,7 +83,8 @@ export const actions: Actions = {
 			watchEmbedUrl: watchEmbedUrl ?? current.siteExtras.watchEmbedUrl,
 			messagesUrl: messagesUrl ?? current.siteExtras.messagesUrl,
 			planVisitHref: planVisitHref ?? current.siteExtras.planVisitHref,
-			organizationName: organizationName ?? current.siteExtras.organizationName
+			organizationName: organizationName ?? current.siteExtras.organizationName,
+			weeklyDigestEnabled
 		};
 
 		const updatedSeo = {

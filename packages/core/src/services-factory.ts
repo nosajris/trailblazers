@@ -24,6 +24,7 @@ import { createStatisticsService } from './modules/statistics/service.js';
 import { createDashboardService } from './modules/statistics/dashboard.js';
 import { createEventRegistrationService } from './modules/events/registration-service.js';
 import { createPrayerService } from './modules/prayer/service.js';
+import { createAnalyticsService } from './modules/analytics/service.js';
 
 export type CoreServicesConfig = {
 	/**
@@ -69,7 +70,8 @@ export function createCoreServices(db: Database, config: CoreServicesConfig) {
 		eventRegistrations: createEventRegistrationService(db),
 		prayer: createPrayerService(db),
 		statistics: createStatisticsService(db),
-		dashboard: createDashboardService(db)
+		dashboard: createDashboardService(db),
+		analytics: createAnalyticsService(db, { secretKey: config.secretKey })
 	};
 }
 

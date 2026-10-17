@@ -4,6 +4,7 @@
 	// Browser-safe subpath — the package root would bring the server graph with it.
 	import { telHref } from '@trailblazers/core/modules/settings/site-content';
 	import { container, sectionY } from '../tb-layout.js';
+	import { trackClick } from './track-click.js';
 
 	type FooterColumn = { title: string; links: { label: string; href: string }[] };
 
@@ -147,9 +148,9 @@
 				<h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-gold">Join us</h3>
 				<ul class="mt-5 space-y-3 text-sm">
 					<li><a class="transition hover:text-white" href={resolve('/plan-a-visit')}>Plan a visit</a></li>
-					<li><a class="transition hover:text-white" href={watchHref}>Watch</a></li>
+					<li><a class="transition hover:text-white" href={watchHref} onclick={() => trackClick(watchHref, 'Watch')}>Watch</a></li>
 					<li><a class="transition hover:text-white" href={messagesHref}>Messages</a></li>
-					<li><a class="transition hover:text-white" href={givingHref}>Give</a></li>
+					<li><a class="transition hover:text-white" href={givingHref} onclick={() => trackClick(givingHref, 'Give')}>Give</a></li>
 					<li><a class="transition hover:text-white" href={resolve('/contact')}>Contact</a></li>
 				</ul>
 			</div>

@@ -3,16 +3,19 @@
 	import { resolve } from '$app/paths';
 	import type { SiteExtras } from '@trailblazers/core';
 	import { isActivePath } from './nav-utils.js';
+	import { trackClick } from './track-click.js';
 
 	let { extras }: { extras: SiteExtras } = $props();
 
 	const givingHref = $derived(extras.givingUrl?.trim() ? extras.givingUrl : '/give');
 
-	const items = $derived([
+	type NavItem = { label: string; href: string; icon: string; track?: boolean };
+
+	const items = $derived<NavItem[]>([
 		{ label: 'Home', href: resolve('/'), icon: 'home' },
 		{ label: 'Events', href: resolve('/events'), icon: 'calendar' },
 		{ label: 'Groups', href: resolve('/groups'), icon: 'users' },
-		{ label: 'Give', href: givingHref, icon: 'heart' }
+		{ label: 'Give', href: givingHref, icon: 'heart', track: true }
 	]);
 </script>
 
@@ -34,6 +37,7 @@
 				<a
 					href={item.href}
 					aria-current={active ? 'page' : undefined}
+					onclick={item.track ? () => trackClick(item.href, item.label) : undefined}
 					class="flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition {active
 						? 'text-brand-primary'
 						: 'text-brand-dark/70 hover:text-brand-primary'}"

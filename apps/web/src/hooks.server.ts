@@ -1,7 +1,7 @@
 import { services } from '$lib/server/services';
 import { isDatabaseUrlConfigured } from '$lib/server/db';
 import { SESSION_COOKIE } from '$lib/server/auth-constants';
-import { assertUsableSecret, resolveLocale } from '@trailblazers/core';
+import { assertUsableSecret, isTrackablePageView, resolveLocale } from '@trailblazers/core';
 import { securityHeaders } from '$lib/server/security-headers';
 import type { Handle } from '@sveltejs/kit';
 
@@ -30,6 +30,34 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
+	// Fire-and-forget: a dropped or slow analytics write must never slow down
+	// or break the page itself. No cookie is read or set — see
+	// `@trailblazers/core`'s analytics module for what is and isn't stored.
+	if (
+		isTrackablePageView({
+			method: event.request.method,
+			pathname: event.url.pathname,
+			accept: event.request.headers.get('accept'),
+			isDataRequest: event.isDataRequest
+		})
+	) {
+		const utm = services.analytics.utmOf({
+			utm_source: event.url.searchParams.get('utm_source'),
+			utm_medium: event.url.searchParams.get('utm_medium'),
+			utm_content: event.url.searchParams.get('utm_content'),
+			utm_campaign: event.url.searchParams.get('utm_campaign')
+		});
+		services.analytics
+			.recordView({
+				ip: event.getClientAddress(),
+				ua: event.request.headers.get('user-agent'),
+				src: event.url.searchParams.get('src') ?? '',
+				ref: event.request.headers.get('referer') ?? '',
+				utm
+			})
+			.catch(() => undefined);
+	}
+
 	const token = event.cookies.get(SESSION_COOKIE);
 	if (token) {
 		// A token that predates the hashed-session change, or one signed with a

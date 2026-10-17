@@ -219,6 +219,11 @@ export {
 	type StoredFile,
 	type ValidationResult
 } from './util/storage.js';
+export { createAnalyticsService } from './modules/analytics/service.js';
+export type { AnalyticsConfig, RecordViewInput } from './modules/analytics/service.js';
+export type { AnalyticsReport } from './modules/analytics/logic.js';
+export { isTrackablePageView, type TrackableRequest } from './modules/analytics/request-filter.js';
+export { weeklyDigestEmail, type WeeklyDigestEmail } from './modules/analytics/digest.js';
 export { ogCardSvg, OG_IMAGE_SIZE, type OgCardInput } from './modules/og-image/card.js';
 export { ogImageUrl, signOgParams, verifyOgParams, type OgCardParams } from './modules/og-image/sign.js';
 export { renderOgCard } from './modules/og-image/render.js';
