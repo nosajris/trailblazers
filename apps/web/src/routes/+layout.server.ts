@@ -1,5 +1,5 @@
 import { services } from '$lib/server/services';
-import { catalogues, createTranslator, resolveLocale } from '@trailblazers/core';
+import { catalogues, createTranslator, organizationJsonLd, resolveLocale } from '@trailblazers/core';
 import type { LayoutServerLoad } from './$types';
 
 /** Remembers a language choice so it survives the next visit. */
@@ -33,13 +33,11 @@ export const load: LayoutServerLoad = async ({ url, request, cookies }) => {
 
 	const t = createTranslator(locale, catalogues);
 
-	const jsonLdOrganization = {
-		'@context': 'https://schema.org',
-		'@type': 'Organization',
-		name: orgName,
-		url: siteUrl,
-		description: settings.seoDefaults.description
-	};
+	// Built from the same Settings fields staff already fill in (phone, email,
+	// address, social links) — Google reads these into a result's knowledge
+	// panel via telephone/email/address/sameAs, so leaving them out of the
+	// Organization node was leaving that panel empty for no reason.
+	const jsonLdOrganization = organizationJsonLd(settings, siteUrl);
 
 	const jsonLdWebsite = {
 		'@context': 'https://schema.org',

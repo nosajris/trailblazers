@@ -30,6 +30,8 @@ export { createFaqService } from './modules/faq/service.js';
 export { createInquiryService } from './modules/inquiries/service.js';
 export { createBepService } from './modules/bep/service.js';
 export { createSettingsService } from './modules/settings/service.js';
+export { organizationJsonLd, type OrganizationJsonLd } from './modules/settings/seo.js';
+export { breadcrumbsJsonLd, withBreadcrumbs, type BreadcrumbTrail } from './util/seo.js';
 export {
 	visitDetailsSchema,
 	contactChannelsSchema,

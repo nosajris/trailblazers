@@ -39,7 +39,8 @@ const SCAN = [
  */
 const CLIENT_SAFE = [
 	'@trailblazers/core/modules/settings/site-content',
-	'@trailblazers/core/modules/pages/section-types'
+	'@trailblazers/core/modules/pages/section-types',
+	'@trailblazers/core/util/seo'
 ];
 
 /** Server-only files may import whatever they like. */
