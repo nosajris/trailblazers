@@ -7,8 +7,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	// See apps/web/vite.config.ts for why this binds to 127.0.0.1 explicitly.
 	server: {
-		port: 5174
+		port: 5174,
+		host: '127.0.0.1'
 	},
 	resolve: {
 		alias: {
