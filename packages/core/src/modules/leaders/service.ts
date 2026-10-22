@@ -1,4 +1,5 @@
 import { asc, eq } from 'drizzle-orm';
+import { publicMediaUrl } from '../../util/public-media-url.js';
 import type { Database } from '../../db/client.js';
 import { leaders } from './schema.js';
 import { toLeaderVm } from './mappers.js';
@@ -24,7 +25,7 @@ export function createLeaderService(db: Database) {
 				id: r.id,
 				name: r.name,
 				role: r.role,
-				imageUrl: r.imageUrl,
+				imageUrl: publicMediaUrl(r.imageUrl),
 				order: r.order,
 				status: r.status
 			}));

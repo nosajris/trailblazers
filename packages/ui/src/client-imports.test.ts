@@ -40,7 +40,9 @@ const SCAN = [
 const CLIENT_SAFE = [
 	'@trailblazers/core/modules/settings/site-content',
 	'@trailblazers/core/modules/pages/section-types',
-	'@trailblazers/core/util/seo'
+	'@trailblazers/core/util/seo',
+	// Pure string rewrite, no imports of its own — same as util/seo above.
+	'@trailblazers/core/util/public-media-url'
 ];
 
 /** Server-only files may import whatever they like. */

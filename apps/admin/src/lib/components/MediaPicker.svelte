@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { publicMediaUrl } from '@trailblazers/core/util/public-media-url';
+
 	type MediaAsset = {
 		id: number;
 		url: string;
@@ -43,13 +45,20 @@
 		closePicker();
 	}
 
-	/** The smallest variant available, for a fast-loading grid thumbnail. */
+	/**
+	 * The smallest variant available, for a fast-loading grid thumbnail.
+	 * `asset.url`/`variants` are bare Blob pathnames (the store is private),
+	 * so this is the display-only rewrite to `/media/<pathname>` —
+	 * `pick()` below still passes the raw, un-rewritten value to `onselect`,
+	 * since that's what gets stored.
+	 */
 	function thumbnailFor(asset: MediaAsset) {
 		const widths = Object.keys(asset.variants)
 			.map(Number)
 			.filter((n) => Number.isFinite(n))
 			.sort((a, b) => a - b);
-		return widths.length > 0 ? asset.variants[String(widths[0])] : asset.url;
+		const raw = widths.length > 0 ? asset.variants[String(widths[0])] : asset.url;
+		return publicMediaUrl(raw) ?? raw;
 	}
 </script>
 

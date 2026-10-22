@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import { put, del } from '@vercel/blob';
+import { put, del, get } from '@vercel/blob';
 import { randomUUID } from 'node:crypto';
 import type { Database } from '../../db/client.js';
 import { createMediaRepository } from './repository.js';
@@ -17,9 +17,19 @@ export type UploadInput = {
 
 /**
  * Turns a staff upload into a capped-size webp plus smaller variants, all
- * stored on Vercel Blob. Every file name ends `-<width>.webp`, so the CMS
- * branch of `responsiveSrcset` (`packages/ui/src/site/responsive-images.ts`)
- * can derive the srcset from `url` alone — no second lookup at render time.
+ * stored on a *private* Vercel Blob store. Every file name ends
+ * `-<width>.webp`, so the CMS branch of `responsiveSrcset`
+ * (`packages/ui/src/site/responsive-images.ts`) can derive the srcset from
+ * `url` alone — no second lookup at render time.
+ *
+ * `url` here is the bare Blob *pathname* (e.g. `cms/<uuid>-960.webp`), not a
+ * fetchable URL — a private store's blob URL requires an auth header, so it
+ * is useless written straight into `<img src>`. `publicMediaUrl()`
+ * (`packages/core/src/util/public-media-url.ts`) rewrites a `cms/` pathname to
+ * `/media/<pathname>`, which `routes/media/[...path]/+server.ts` in both
+ * `apps/web` and `apps/admin` streams through the SDK's `get()`. The route has
+ * no auth check of its own: these images are public site content, the store
+ * is only private so the raw Blob URL can't be hot-linked or enumerated.
  */
 export function createMediaService(db: Database) {
 	const repo = createMediaRepository(db);
@@ -60,11 +70,12 @@ export function createMediaService(db: Database) {
 					access: 'private',
 					contentType: 'image/webp'
 				});
-				variants[String(width)] = variantBlob.url;
+				// Pathname, not `variantBlob.url` — see the module doc comment.
+				variants[String(width)] = variantBlob.pathname;
 			}
 
 			const saved = await repo.insert({
-				url: fullBlob.url,
+				url: fullBlob.pathname,
 				width: fullWidth,
 				height: fullHeight,
 				variants,
@@ -80,12 +91,30 @@ export function createMediaService(db: Database) {
 			};
 		},
 
-		/** Best-effort: a dangling blob costs storage, not correctness, so a failed delete there doesn't block the record removal. */
+		/**
+		 * Best-effort: a dangling blob costs storage, not correctness, so a
+		 * failed delete there doesn't block the record removal. `url` and
+		 * `variants` hold bare pathnames (see the module doc comment); `del()`
+		 * accepts a pathname directly, same as it would a full URL.
+		 */
 		async deleteAsset(id: number, url: string, variants: Record<string, string>) {
 			await Promise.all(
 				[url, ...Object.values(variants)].map((u) => del(u).catch(() => undefined))
 			);
 			await repo.delete(id);
+		},
+
+		/**
+		 * Streams a stored image back out of the private store. `pathname` is
+		 * the bare Blob pathname from `media_assets.url` / a `*.image_url`
+		 * column (via `/media/[...path]` in both apps — see that route and
+		 * the module doc comment above). Returns `null` on a missing blob so
+		 * the route can answer 404 instead of leaking the SDK's own error.
+		 */
+		async getBlob(pathname: string): Promise<{ stream: ReadableStream; contentType: string } | null> {
+			const result = await get(pathname, { access: 'private' });
+			if (!result || result.statusCode !== 200) return null;
+			return { stream: result.stream, contentType: result.blob.contentType };
 		},
 
 		/**

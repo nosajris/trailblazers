@@ -1,4 +1,5 @@
 import { asc, eq } from 'drizzle-orm';
+import { publicMediaUrl } from '../../util/public-media-url.js';
 import type { Database } from '../../db/client.js';
 import { testimonials } from './schema.js';
 import { toTestimonialVm } from './mappers.js';
@@ -24,7 +25,7 @@ export function createTestimonialService(db: Database) {
 				id: r.id,
 				name: r.name,
 				role: r.role,
-				imageUrl: r.imageUrl,
+				imageUrl: publicMediaUrl(r.imageUrl),
 				content: r.content,
 				rating: r.rating,
 				isFeatured: r.isFeatured,
