@@ -46,7 +46,7 @@ export function createMediaService(db: Database) {
 
 			const key = `cms/${randomUUID()}`;
 			const fullBlob = await put(`${key}-${fullWidth}.webp`, fullBuffer, {
-				access: 'public',
+				access: 'private',
 				contentType: 'image/webp'
 			});
 
@@ -57,7 +57,7 @@ export function createMediaService(db: Database) {
 					.webp({ quality: WEBP_QUALITY })
 					.toBuffer();
 				const variantBlob = await put(`${key}-${width}.webp`, variantBuffer, {
-					access: 'public',
+					access: 'private',
 					contentType: 'image/webp'
 				});
 				variants[String(width)] = variantBlob.url;
