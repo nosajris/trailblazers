@@ -8,7 +8,7 @@
  * order, and both sides are unit tested.
  */
 
-export type SearchKind = 'page' | 'event' | 'group' | 'sermon';
+export type SearchKind = 'page' | 'event' | 'group' | 'sermon' | 'story' | 'leader' | 'faq';
 
 export type SearchItem = {
 	/** Unique within a result set, so lists can be keyed. */
@@ -22,7 +22,15 @@ export type SearchItem = {
 };
 
 /** Upcoming things first when scores tie; pages last, since they are always reachable. */
-const KIND_WEIGHT: Record<SearchKind, number> = { event: 3, group: 2, sermon: 1, page: 0 };
+const KIND_WEIGHT: Record<SearchKind, number> = {
+	event: 3,
+	group: 2,
+	sermon: 1,
+	story: 1,
+	leader: 1,
+	faq: 1,
+	page: 0
+};
 
 const fold = (value: string): string =>
 	value

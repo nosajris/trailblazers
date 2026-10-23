@@ -18,6 +18,7 @@
 		<div class="mt-10 grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-8 lg:grid-cols-3 lg:gap-12">
 			{#each data.leaders as leader (leader.id)}
 				<div
+					id={`leader-${leader.id}`}
 					class="flex flex-col items-center text-center sm:items-stretch md:text-left lg:items-center lg:text-center"
 				>
 					{#if leader.imageUrl}

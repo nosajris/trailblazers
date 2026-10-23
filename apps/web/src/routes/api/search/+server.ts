@@ -44,11 +44,14 @@ export const GET: RequestHandler = async ({ url, setHeaders }) => {
 	const query = (url.searchParams.get('q') ?? '').slice(0, MAX_QUERY);
 	if (query.trim().length === 0) return json({ results: [] });
 
-	const [events, groups, sermons, settings] = await Promise.all([
+	const [events, groups, sermons, settings, stories, leaders, faqs] = await Promise.all([
 		services.events.listUpcomingForHome(50),
 		services.groups.listPublished(),
 		services.sermons.getAllSermons(),
-		services.settings.getBundle()
+		services.settings.getBundle(),
+		services.blog.listPublished(100),
+		services.leaders.listPublished(),
+		services.faq.listPublished()
 	]);
 
 	const items: SearchItem[] = [
@@ -84,6 +87,29 @@ export const GET: RequestHandler = async ({ url, setHeaders }) => {
 			subtitle: sermon.speaker,
 			href: '/watch',
 			keywords: `${sermon.speaker} ${sermon.scripture ?? ''} ${sermon.summary ?? ''}`
+		})),
+		...stories.map((story) => ({
+			id: `story-${story.id}`,
+			kind: 'story' as const,
+			title: story.title,
+			subtitle: story.category ?? 'Story',
+			href: `/stories/${story.id}`,
+			keywords: story.summary
+		})),
+		...leaders.map((leader) => ({
+			id: `leader-${leader.id}`,
+			kind: 'leader' as const,
+			title: leader.name,
+			subtitle: leader.role,
+			href: `/#leader-${leader.id}`
+		})),
+		...faqs.map((faq) => ({
+			id: `faq-${faq.id}`,
+			kind: 'faq' as const,
+			title: faq.question,
+			subtitle: 'FAQ',
+			href: `/faq#faq-${faq.id}`,
+			keywords: faq.answer
 		}))
 	];
 

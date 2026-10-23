@@ -22,6 +22,9 @@
 		event: 'Event',
 		group: 'Group',
 		sermon: 'Message',
+		story: 'Story',
+		leader: 'Leader',
+		faq: 'FAQ',
 		page: 'Page'
 	};
 
