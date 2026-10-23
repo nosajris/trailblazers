@@ -89,5 +89,48 @@ export function responsiveSrcset(src: string | null | undefined): string | undef
 	return undefined;
 }
 
+/**
+ * The AVIF counterpart of `responsiveSrcset`, for a `<source type="image/avif">`
+ * placed before the existing `<img>` inside a `<picture>`. Unlike the webp
+ * srcset, this never includes a "full size, original format" entry — there is
+ * no avif of the unconverted original — so it only ever lists the smaller
+ * pre-generated variants. A browser without avif support, or a size that
+ * needs something larger than the biggest variant, simply falls through to
+ * the `<img>` underneath, exactly as it already does for a browser without
+ * srcset support at all.
+ *
+ * Static files: `/images/w/<base>-<width>.avif`, generated alongside the
+ * existing webp ones (see the generation note in ADR 0007). CMS uploads:
+ * same pathname as the matched webp variant with `.avif` in place of
+ * `.webp` — the upload pipeline (`modules/media/service.ts`) writes both
+ * under the same key, so no second lookup is needed here either.
+ */
+export function responsiveAvifSrcset(src: string | null | undefined): string | undefined {
+	if (!src) return undefined;
+
+	if (src.startsWith('/images/')) {
+		const file = src.slice('/images/'.length);
+		const entry = Object.hasOwn(VARIANTS, file) ? VARIANTS[file] : undefined;
+		if (!entry) return undefined;
+		const [, widths] = entry;
+		const base = file.replace(/\.[^.]+$/, '');
+		const sets = widths.map((w) => `/images/w/${base}-${w}.avif ${w}w`);
+		return sets.length ? sets.join(', ') : undefined;
+	}
+
+	const cmsMatch = src.match(CMS_VARIANT_PATTERN);
+	if (cmsMatch) {
+		const [, base, widthStr] = cmsMatch;
+		const fullWidth = Number(widthStr);
+		const sets = CMS_VARIANT_WIDTHS.filter((w) => w < fullWidth).map(
+			(w) => `${base}-${w}.avif ${w}w`
+		);
+		sets.push(`${base}-${fullWidth}.avif ${fullWidth}w`);
+		return sets.join(', ');
+	}
+
+	return undefined;
+}
+
 export const RESPONSIVE_FILES = Object.keys(VARIANTS);
 export const RESPONSIVE_VARIANTS = VARIANTS;

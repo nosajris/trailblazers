@@ -8,6 +8,7 @@ import { clampToLongEdge, variantWidthsFor, MAX_LONG_EDGE } from './dimensions.j
 import type { MediaAsset } from './types.js';
 
 const WEBP_QUALITY = 82;
+const AVIF_QUALITY = 55;
 
 export type UploadInput = {
 	buffer: Buffer;
@@ -59,6 +60,16 @@ export function createMediaService(db: Database) {
 				access: 'private',
 				contentType: 'image/webp'
 			});
+			// Same key, same width, `.avif` in place of `.webp` — so
+			// `responsiveAvifSrcset` (packages/ui/src/site/responsive-images.ts)
+			// can derive the avif pathname from the webp one with a string
+			// swap, no second lookup or DB column needed. Best-effort: an avif
+			// encode failing (an unusual source image) must never block the
+			// upload the webp pipeline already succeeded at.
+			await put(`${key}-${fullWidth}.avif`, await sharp(fullBuffer).avif({ quality: AVIF_QUALITY }).toBuffer(), {
+				access: 'private',
+				contentType: 'image/avif'
+			}).catch(() => undefined);
 
 			const variants: Record<string, string> = {};
 			for (const width of variantWidthsFor(fullWidth)) {
@@ -72,6 +83,12 @@ export function createMediaService(db: Database) {
 				});
 				// Pathname, not `variantBlob.url` — see the module doc comment.
 				variants[String(width)] = variantBlob.pathname;
+
+				await put(
+					`${key}-${width}.avif`,
+					await sharp(fullBuffer).resize({ width, withoutEnlargement: true }).avif({ quality: AVIF_QUALITY }).toBuffer(),
+					{ access: 'private', contentType: 'image/avif' }
+				).catch(() => undefined);
 			}
 
 			const saved = await repo.insert({
