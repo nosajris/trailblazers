@@ -5,6 +5,7 @@
 	import SiteShell from '@trailblazers/ui/site/site-shell.svelte';
 	import { whatsappShareUrl } from '@trailblazers/ui/site/share';
 	import { withBreadcrumbs } from '@trailblazers/core/util/seo';
+	import { renderRichText } from '@trailblazers/core/util/rich-text';
 	import { container } from '@trailblazers/ui/tb-layout';
 
 	let { data } = $props();
@@ -83,7 +84,13 @@
 
 		<div class="{container} prose prose-lg mt-12 max-w-3xl text-brand-dark prose-headings:font-sans prose-headings:font-bold prose-a:text-brand-primary">
 			{#if p.content}
-				<p class="whitespace-pre-line text-lg leading-relaxed text-brand-dark/90">{p.content}</p>
+				<!-- `renderRichText` HTML-escapes everything first, so this is as
+				     safe as the plain-text version it replaces — see
+				     packages/core/src/util/rich-text.ts. The surrounding `.prose`
+				     classes on this section already style the p/ul/a/strong/em
+				     it produces. -->
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -- renderRichText escapes all input before emitting any markup; see its doc comment. -->
+				{@html renderRichText(p.content)}
 			{/if}
 		</div>
 

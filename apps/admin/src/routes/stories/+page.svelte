@@ -226,6 +226,10 @@
 				<div>
 					<label for="story-content" class="block text-xs font-semibold text-[var(--zinc-700)] uppercase mb-1">Full Article / Testimony Content</label>
 					<textarea id="story-content" name="content" bind:value={editingPost.content} rows="6" class="admin-input"></textarea>
+					<p class="mt-1 text-xs text-[var(--zinc-500)]">
+						A blank line starts a new paragraph. **bold**, *italic*, [link text](https://…), and "- " bullet
+						lines all render on the public page.
+					</p>
 				</div>
 
 				<div class="flex items-center justify-end space-x-3 pt-4 border-t border-[var(--zinc-200)]">

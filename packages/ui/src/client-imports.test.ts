@@ -39,10 +39,12 @@ const SCAN = [
  */
 const CLIENT_SAFE = [
 	'@trailblazers/core/modules/settings/site-content',
-	'@trailblazers/core/modules/pages/section-types',
+	'@trailblazers/core/modules/pages/block-registry',
 	'@trailblazers/core/util/seo',
 	// Pure string rewrite, no imports of its own — same as util/seo above.
-	'@trailblazers/core/util/public-media-url'
+	'@trailblazers/core/util/public-media-url',
+	// Escapes to HTML with no imports of its own — same shape as the two above.
+	'@trailblazers/core/util/rich-text'
 ];
 
 /** Server-only files may import whatever they like. */
