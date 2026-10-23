@@ -70,6 +70,8 @@ export const eventRegistrations = pgTable(
 		// Serves the confirmed-seat count that capacity is checked against.
 		index('event_registrations_event_status_idx').on(table.eventId, table.status),
 		// Serves the reminder job's "who is due and hasn't been reminded" scan.
-		index('event_registrations_reminder_idx').on(table.status, table.reminderSentAt)
+		index('event_registrations_reminder_idx').on(table.status, table.reminderSentAt),
+		// Serves a signed-in member's "my registrations" lookup.
+		index('event_registrations_email_idx').on(table.email)
 	]
 );

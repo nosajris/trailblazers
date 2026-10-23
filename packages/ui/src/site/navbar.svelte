@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import { onDestroy } from 'svelte';
 	import { container } from '../tb-layout.js';
 	import { trackClick } from './track-click.js';
@@ -203,6 +204,12 @@
 				</svg>
 			</button>
 			<a
+				class="rounded-full px-3 py-2 text-[13px] font-semibold text-brand-dark/90 transition hover:bg-black/5 hover:text-brand-primary xl:px-4 xl:text-sm"
+				href={resolve(page.data.user ? '/account' : '/account/login')}
+			>
+				{page.data.user ? 'My account' : 'Sign in'}
+			</a>
+			<a
 				class="ml-1 rounded-full bg-brand-primary px-5 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-white shadow-[0_4px_20px_rgb(var(--brand-primary-rgb)/0.35)] transition hover:bg-[var(--brand-primary-hover)] hover:shadow-[0_6px_25px_rgb(var(--brand-primary-rgb)/0.45)] lg:px-6"
 				href={cta.href}>{cta.label}</a
 			>
@@ -293,6 +300,13 @@
 						href={givingHref}
 						onclick={() => { trackClick(givingHref, 'Give'); closeMenu(); }}>Give</a
 					>
+					<a
+						class="rounded-lg px-3 py-2 text-sm font-semibold text-brand-dark hover:bg-brand-primary/10 hover:text-brand-primary transition"
+						href={resolve(page.data.user ? '/account' : '/account/login')}
+						onclick={closeMenu}
+					>
+						{page.data.user ? 'My account' : 'Sign in'}
+					</a>
 				</div>
 				<nav class="flex flex-1 flex-col gap-1 px-4 pb-8" aria-label="Mobile">
 					{#each navItems as item, mi (`mnav-${mi}`)}
