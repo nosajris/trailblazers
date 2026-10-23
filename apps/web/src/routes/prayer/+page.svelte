@@ -48,6 +48,7 @@
 						<label for="prayer-website">Leave this field empty</label>
 						<input id="prayer-website" type="text" name="website" tabindex="-1" autocomplete="off" />
 					</div>
+					<input type="hidden" name="_ft" value={data.formToken} />
 
 					<div>
 						<label

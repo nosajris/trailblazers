@@ -198,6 +198,7 @@
 										<label for="join-website-{g.id}">Leave this field empty</label>
 										<input id="join-website-{g.id}" type="text" name="website" tabindex="-1" autocomplete="off" />
 									</div>
+									<input type="hidden" name="_ft" value={data.formToken} />
 									{#if form?.error}
 										<p class="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] p-2 text-xs font-semibold text-[var(--color-danger-fg)]">
 											{form.error}

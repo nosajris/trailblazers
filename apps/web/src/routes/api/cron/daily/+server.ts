@@ -33,7 +33,10 @@ function requireCronSecret(request: Request): void {
 }
 
 function whenText(eventDate: Date): string {
-	const weekday = eventDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Africa/Harare' });
+	const weekday = eventDate.toLocaleDateString('en-US', {
+		weekday: 'long',
+		timeZone: 'Africa/Harare'
+	});
 	const time = eventDate.toLocaleTimeString('en-US', {
 		hour: 'numeric',
 		minute: '2-digit',
@@ -81,7 +84,9 @@ async function sendWeeklyDigestIfDue(now: Date): Promise<boolean> {
 	]);
 
 	const siteTitle = settings.siteExtras.organizationName ?? 'Trailblazers';
-	const reportUrl = process.env.ADMIN_URL ? `${process.env.ADMIN_URL}/analytics` : 'the staff analytics page';
+	const reportUrl = process.env.ADMIN_URL
+		? `${process.env.ADMIN_URL}/analytics`
+		: 'the staff analytics page';
 
 	const email = weeklyDigestEmail(lastWeek, previousWeek, siteTitle, reportUrl);
 	// Marked sent either way: a quiet week isn't retried every day until it
@@ -93,11 +98,39 @@ async function sendWeeklyDigestIfDue(now: Date): Promise<boolean> {
 	return true;
 }
 
+/**
+ * Publishes every page whose scheduled time has passed.
+ *
+ * `status` and `publishedAt` columns existed on most content tables with
+ * nothing to schedule them; this is the other half. Each page is published on
+ * its own so one failure cannot take the rest of the run down with it, and
+ * `publishPage` clears the schedule, which makes a repeat run a no-op.
+ */
+async function publishScheduledPages(now: Date): Promise<number> {
+	const due = await services.pages.listDueForPublish(now);
+	let published = 0;
+
+	for (const page of due) {
+		try {
+			await services.pages.publishPage(page.id, now);
+			logger.info('Cron', 'published a scheduled page', { pageId: page.id });
+			published += 1;
+		} catch (err) {
+			logger.error('Cron', 'scheduled publish failed', {
+				pageId: page.id,
+				message: err instanceof Error ? err.message : String(err)
+			});
+		}
+	}
+
+	return published;
+}
+
 export const GET: RequestHandler = async ({ request }) => {
 	requireCronSecret(request);
 
 	const now = new Date();
-	const [remindersSent, digestSent] = await Promise.all([
+	const [remindersSent, digestSent, pagesPublished] = await Promise.all([
 		sendEventReminders(now).catch((err) => {
 			logger.error('Cron', 'event reminders failed', {
 				message: err instanceof Error ? err.message : String(err)
@@ -109,8 +142,21 @@ export const GET: RequestHandler = async ({ request }) => {
 				message: err instanceof Error ? err.message : String(err)
 			});
 			return false;
+		}),
+		publishScheduledPages(now).catch((err) => {
+			logger.error('Cron', 'scheduled publishing failed', {
+				message: err instanceof Error ? err.message : String(err)
+			});
+			return 0;
+		}),
+		// Form rate-limit counters whose window closed a day ago. Housekeeping,
+		// not a feature: nothing breaks if it is skipped, the table just grows.
+		services.formGuard.pruneCounters(now).catch((err) => {
+			logger.error('Cron', 'form counter prune failed', {
+				message: err instanceof Error ? err.message : String(err)
+			});
 		})
 	]);
 
-	return json({ ok: true, remindersSent, digestSent });
+	return json({ ok: true, remindersSent, digestSent, pagesPublished });
 };

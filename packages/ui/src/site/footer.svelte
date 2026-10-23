@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import type { SiteExtras } from '@trailblazers/core';
 	// Browser-safe subpath — the package root would bring the server graph with it.
 	import { telHref } from '@trailblazers/core/modules/settings/site-content';
@@ -9,6 +10,17 @@
 	type FooterColumn = { title: string; links: { label: string; href: string }[] };
 
 	let { columns, extras }: { columns: FooterColumn[]; extras: SiteExtras } = $props();
+
+	/**
+	 * The newsletter box's form token, minted once per request by the root
+	 * layout's load (see `apps/web/src/lib/server/form-guard.ts`). Read from
+	 * page data rather than taken as a prop because this footer sits inside
+	 * `SiteShell`, which every page renders — a prop would have to be threaded
+	 * through all of them to reach here.
+	 */
+	const newsletterToken = $derived(
+		typeof page.data.newsletterToken === 'string' ? page.data.newsletterToken : ''
+	);
 
 	const givingHref = $derived(extras.givingUrl?.trim() ? extras.givingUrl : '/give');
 	const watchHref = $derived(extras.watchUrl?.trim() ? extras.watchUrl : '/watch');
@@ -101,6 +113,11 @@
 							autocomplete="off"
 						/>
 					</div>
+					<!--
+						Proves the submission came from a page we served — see
+						`apps/web/src/lib/server/form-guard.ts`.
+					-->
+					<input type="hidden" name="_ft" value={newsletterToken} />
 					<div class="mt-4 flex flex-col gap-3 sm:flex-row">
 						<label class="sr-only" for="footer-newsletter-email">Email address</label>
 						<input

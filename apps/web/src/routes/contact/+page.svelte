@@ -7,7 +7,7 @@
 	import { telHref } from '@trailblazers/core/modules/settings/site-content';
 	import { whatsappChatUrl } from '@trailblazers/ui/site/share';
 
-	let { data }: { data: { settings: SiteSettingsBundle } } = $props();
+	let { data }: { data: { settings: SiteSettingsBundle; formToken: string } } = $props();
 
 	const extras = $derived(data.settings.siteExtras);
 	const phoneHref = $derived(telHref(extras.contactPhone));
@@ -122,6 +122,7 @@
 							<label for="contact-website">Leave this field empty</label>
 							<input id="contact-website" type="text" name="website" tabindex="-1" autocomplete="off" />
 						</div>
+						<input type="hidden" name="_ft" value={data.formToken} />
 						<div>
 							<label class="text-xs font-bold uppercase tracking-wide text-brand-dark/60" for="name">Name</label>
 							<input

@@ -2,11 +2,7 @@ import { services } from '$lib/server/services';
 import { fail } from '@sveltejs/kit';
 import { logger, parseForm, submitPrayerSchema, summarizeErrors } from '@trailblazers/core';
 import { cacheHeaders } from '$lib/server/cache';
-import {
-	consumeFormSubmission,
-	isHoneypotTripped,
-	throttleMessage
-} from '$lib/server/rate-limit';
+import { guardFormSubmission, issueFormToken } from '$lib/server/form-guard';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ setHeaders }) => {
@@ -19,21 +15,19 @@ export const load: PageServerLoad = async ({ setHeaders }) => {
 		services.prayer.listPublic(20)
 	]);
 
-	return { settings, wall };
+	return { settings, wall, formToken: issueFormToken('prayer') };
 };
 
 export const actions: Actions = {
 	submit: async ({ request, getClientAddress }) => {
 		const form = await request.formData();
 
-		if (isHoneypotTripped(form)) {
-			logger.warn('Prayer', 'honeypot tripped', { address: getClientAddress() });
-			return { success: true };
-		}
-
-		const throttle = consumeFormSubmission(getClientAddress(), 'prayer');
-		if (!throttle.allowed) {
-			return fail(429, { error: throttleMessage(throttle.retryAfterSeconds) });
+		const guard = await guardFormSubmission(form, 'prayer', getClientAddress());
+		if (!guard.ok) {
+			// A bot tripped the decoy field: answer as a success and drop it,
+			// rather than naming the field that gave it away.
+			if (guard.pretendSuccess) return { success: true };
+			return fail(guard.status, { error: guard.message });
 		}
 
 		const parsed = parseForm(form, submitPrayerSchema);

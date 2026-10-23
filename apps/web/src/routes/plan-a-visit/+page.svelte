@@ -185,6 +185,7 @@
 						<label for="visit-website">Leave this field empty</label>
 						<input id="visit-website" type="text" name="website" tabindex="-1" autocomplete="off" />
 					</div>
+					<input type="hidden" name="_ft" value={data.formToken} />
 					<label class="sr-only" for="visit-name">Your name</label>
 					<input
 						id="visit-name"

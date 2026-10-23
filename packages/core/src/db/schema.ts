@@ -21,6 +21,8 @@ export * from '../modules/audit-logs/schema.js';
 export * from '../modules/tasks/schema.js';
 export * from '../modules/prayer/schema.js';
 export * from '../modules/analytics/schema.js';
+export * from '../modules/forms/schema.js';
+export * from '../modules/payments/schema.js';
 export { usersRelations } from './relations.js';
 
 

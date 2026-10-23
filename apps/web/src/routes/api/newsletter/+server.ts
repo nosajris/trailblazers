@@ -1,16 +1,13 @@
 import { services } from '$lib/server/services';
 import { json, redirect, error } from '@sveltejs/kit';
 import { logger } from '@trailblazers/core';
-import {
-	consumeFormSubmission,
-	isHoneypotTripped,
-	throttleMessage
-} from '$lib/server/rate-limit';
+import { FORM_TOKEN_FIELD, HONEYPOT_FIELD, guardValues } from '$lib/server/form-guard';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 	let email: string | undefined;
-	let honeypotTripped = false;
+	let token: string | undefined;
+	let honeypot: string | undefined;
 
 	const ct = request.headers.get('content-type') ?? '';
 	const wantsJson =
@@ -19,21 +16,30 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 	if (ct.includes('application/json')) {
 		const body = await request.json().catch(() => null);
 		email = typeof body?.email === 'string' ? body.email : undefined;
+		token = typeof body?.[FORM_TOKEN_FIELD] === 'string' ? body[FORM_TOKEN_FIELD] : undefined;
 	} else {
 		const fd = await request.formData();
 		email = fd.get('email')?.toString();
-		honeypotTripped = isHoneypotTripped(fd);
+		token = fd.get(FORM_TOKEN_FIELD)?.toString();
+		honeypot = fd.get(HONEYPOT_FIELD)?.toString();
 	}
 
-	// Accept and drop, rather than naming the decoy field.
-	if (honeypotTripped) {
-		logger.warn('Newsletter', 'honeypot tripped', { address: getClientAddress() });
-		return wantsJson ? json({ ok: true }) : redirect(303, '/?subscribed=1');
-	}
+	// Honeypot, signed token, then the durable per-visitor limit — see
+	// `form-guard.ts`. The footer's box is on every page, so it is the most
+	// reachable write endpoint on the site.
+	const guard = await guardValues({
+		formName: 'newsletter',
+		address: getClientAddress(),
+		token,
+		honeypot
+	});
 
-	const throttle = consumeFormSubmission(getClientAddress(), 'newsletter');
-	if (!throttle.allowed) {
-		throw error(429, throttleMessage(throttle.retryAfterSeconds));
+	if (!guard.ok) {
+		// A bot: answer exactly as a success, and drop it.
+		if (guard.pretendSuccess) {
+			return wantsJson ? json({ ok: true }) : redirect(303, '/?subscribed=1');
+		}
+		throw error(guard.status, guard.message);
 	}
 
 	if (!email?.includes('@')) {

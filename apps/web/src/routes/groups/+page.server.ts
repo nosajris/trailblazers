@@ -2,11 +2,7 @@ import { services } from '$lib/server/services';
 import { fail } from '@sveltejs/kit';
 import { PolicyError, joinGroupSchema, logger, parseForm, summarizeErrors } from '@trailblazers/core';
 import { cacheHeaders } from '$lib/server/cache';
-import {
-	consumeFormSubmission,
-	isHoneypotTripped,
-	throttleMessage
-} from '$lib/server/rate-limit';
+import { guardFormSubmission, issueFormToken } from '$lib/server/form-guard';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ setHeaders }) => {
@@ -16,7 +12,7 @@ export const load: PageServerLoad = async ({ setHeaders }) => {
 		services.settings.getBundle(),
 		services.groups.listPublished()
 	]);
-	return { settings, groups };
+	return { settings, groups, formToken: issueFormToken('group-join') };
 };
 
 export const actions: Actions = {
@@ -29,14 +25,12 @@ export const actions: Actions = {
 	joinGroup: async ({ request, getClientAddress }) => {
 		const form = await request.formData();
 
-		if (isHoneypotTripped(form)) {
-			logger.warn('GroupInterest', 'honeypot tripped', { address: getClientAddress() });
-			return { success: true };
-		}
-
-		const throttle = consumeFormSubmission(getClientAddress(), 'group-join');
-		if (!throttle.allowed) {
-			return fail(429, { error: throttleMessage(throttle.retryAfterSeconds) });
+		const guard = await guardFormSubmission(form, 'group-join', getClientAddress());
+		if (!guard.ok) {
+			// A bot tripped the decoy field: answer as a success and drop it,
+			// rather than naming the field that gave it away.
+			if (guard.pretendSuccess) return { success: true };
+			return fail(guard.status, { error: guard.message });
 		}
 
 		const parsed = parseForm(form, joinGroupSchema);
