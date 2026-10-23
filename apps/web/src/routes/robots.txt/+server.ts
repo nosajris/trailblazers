@@ -4,6 +4,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	const body = `User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /preview/
 
 Sitemap: ${url.origin}/sitemap.xml`;
 
