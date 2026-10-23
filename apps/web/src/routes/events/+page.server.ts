@@ -10,7 +10,8 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
 
 	const search = url.searchParams.get('q') || '';
 	const type = url.searchParams.get('type') || 'ALL';
-	const sort = url.searchParams.get('sort') || 'date_asc';
+	const when = url.searchParams.get('when') === 'past' ? 'past' : url.searchParams.get('when') === 'all' ? 'all' : 'upcoming';
+	const sort = url.searchParams.get('sort') || (when === 'past' ? 'date_desc' : 'date_asc');
 	const page = Number(url.searchParams.get('page')) || 1;
 	const limit = 9;
 	const view = url.searchParams.get('view') === 'calendar' ? 'calendar' : 'list';
@@ -41,7 +42,7 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
 				totalPages: 1,
 				totalEvents: calendarEvents.length
 			},
-			filters: { search: '', type: 'ALL', sort: 'date_asc' as const }
+			filters: { search: '', type: 'ALL', sort: 'date_asc' as const, when: 'upcoming' as const }
 		};
 	}
 
@@ -50,7 +51,8 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
 		type,
 		sort,
 		page,
-		limit
+		limit,
+		when
 	});
 
 	return {

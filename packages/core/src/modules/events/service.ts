@@ -40,7 +40,8 @@ export function createEventService(db: Database) {
 			return rows.map(toEventCard);
 		},
 
-		listListing: async (filters: EventListingFilters): Promise<EventListingResult> => {
+		listListing: async (rawFilters: EventListingFilters): Promise<EventListingResult> => {
+			const filters: EventListingFilters = { ...rawFilters, when: rawFilters.when ?? 'upcoming' };
 			const offset = (filters.page - 1) * filters.limit;
 			const whereClause = and(buildListingWhere(filters), publishedEventsOnly());
 
@@ -65,7 +66,8 @@ export function createEventService(db: Database) {
 				filters: {
 					search: filters.search,
 					type: filters.type,
-					sort: filters.sort
+					sort: filters.sort,
+					when: filters.when ?? 'upcoming'
 				}
 			};
 		},

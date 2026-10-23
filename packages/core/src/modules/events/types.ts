@@ -19,11 +19,13 @@ export type EventListingFilters = {
 	sort: string;
 	page: number;
 	limit: number;
+	/** 'upcoming' (default) hides events that already happened; 'past' is the photo-gallery view; 'all' is unfiltered. */
+	when?: 'upcoming' | 'past' | 'all';
 };
 
 export type EventListingResult = {
 	events: EventCardVm[];
 	featuredEvent: EventCardVm | null;
 	pagination: { currentPage: number; totalPages: number; totalEvents: number };
-	filters: { search: string; type: string; sort: string };
+	filters: { search: string; type: string; sort: string; when: 'upcoming' | 'past' | 'all' };
 };

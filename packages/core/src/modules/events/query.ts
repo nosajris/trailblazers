@@ -1,9 +1,11 @@
-import { and, asc, desc, eq, gt, ilike, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, ilike, lte, or, sql } from 'drizzle-orm';
 import type { SQL } from 'drizzle-orm';
 import { events } from './schema.js';
 import type { EventListingFilters } from './types.js';
 
-export function buildListingWhere(filters: Pick<EventListingFilters, 'search' | 'type'>): SQL | undefined {
+export function buildListingWhere(
+	filters: Pick<EventListingFilters, 'search' | 'type' | 'when'>
+): SQL | undefined {
 	const parts: SQL[] = [];
 	if (filters.search) {
 		parts.push(
@@ -12,6 +14,14 @@ export function buildListingWhere(filters: Pick<EventListingFilters, 'search' | 
 	}
 	if (filters.type && filters.type !== 'ALL') {
 		parts.push(eq(events.type, filters.type as 'CAMP' | 'WORKSHOP' | 'MEETUP'));
+	}
+	// Default view: hide what's already happened, same as the old unconditional
+	// upcoming-only home-page rail — the listing page previously had no date
+	// filter at all, so a date_asc sort surfaced the oldest past event first.
+	if (filters.when === 'past') {
+		parts.push(lte(events.date, new Date()));
+	} else if (filters.when !== 'all') {
+		parts.push(gt(events.date, new Date()));
 	}
 	return parts.length ? and(...parts) : undefined;
 }

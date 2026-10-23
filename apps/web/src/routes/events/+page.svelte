@@ -57,6 +57,7 @@
 		params.set('sort', selectedSort);
 		params.set('page', '1');
 		params.delete('view');
+		if (data.filters.when === 'past') params.set('when', 'past');
 		goto(resolve(`/events?${params.toString()}`), { keepFocus: true });
 	}
 
@@ -65,6 +66,16 @@
 		params.set('page', newPage.toString());
 		params.delete('view');
 		goto(resolve(`/events?${params.toString()}`));
+	}
+
+	function setWhen(when: 'upcoming' | 'past') {
+		const params = new SvelteURLSearchParams();
+		if (data.filters.search) params.set('q', data.filters.search);
+		if (data.filters.type !== 'ALL') params.set('type', data.filters.type);
+		params.set('sort', when === 'past' ? 'date_desc' : 'date_asc');
+		params.set('when', when);
+		params.set('page', '1');
+		goto(resolve(`/events?${params}`));
 	}
 
 	function setView(view: 'list' | 'calendar') {
@@ -78,6 +89,7 @@
 			if (data.filters.type !== 'ALL') params.set('type', data.filters.type);
 			params.set('sort', data.filters.sort);
 			params.set('page', String(data.pagination.currentPage));
+			if (data.filters.when === 'past') params.set('when', 'past');
 		}
 		goto(resolve(`/events?${params}`), { replaceState: true });
 	}
@@ -219,6 +231,32 @@
 							Calendar
 						</button>
 					</div>
+					{#if data.view === 'list'}
+						<div class="inline-flex rounded-full border border-gray-200 bg-brand-light/50 p-1">
+							<button
+								type="button"
+								class="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide transition {data.filters.when !==
+								'past'
+									? 'bg-white text-brand-dark shadow-sm'
+									: 'text-brand-dark/60 hover:text-brand-dark'}"
+								aria-pressed={data.filters.when !== 'past'}
+								onclick={() => setWhen('upcoming')}
+							>
+								Upcoming
+							</button>
+							<button
+								type="button"
+								class="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide transition {data.filters.when ===
+								'past'
+									? 'bg-white text-brand-dark shadow-sm'
+									: 'text-brand-dark/60 hover:text-brand-dark'}"
+								aria-pressed={data.filters.when === 'past'}
+								onclick={() => setWhen('past')}
+							>
+								Past (photos)
+							</button>
+						</div>
+					{/if}
 					{#if data.view === 'calendar'}
 						<div class="flex items-center gap-3">
 							<button
@@ -346,6 +384,41 @@
 					>
 						Clear filters
 					</button>
+				</div>
+			</section>
+		{:else if data.filters.when === 'past'}
+			<!--
+				Past-events photo gallery (item 5): a simple grid of each past
+				event's own cover photo, newest first. No price/capacity/register
+				chrome — those don't apply to something that already happened —
+				just the memory and a link to the recap.
+			-->
+			<section class="container mx-auto max-w-7xl px-6 py-12">
+				<div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+					{#each data.events as event (event.id)}
+						<a
+							href={resolve('/events/[id]', { id: String(event.id) })}
+							class="group relative block aspect-square overflow-hidden rounded-xl bg-brand-dark shadow-md"
+						>
+							<img
+								src={event.imageUrl || '/images/wallpaper04.jpg'}
+								alt={event.title}
+								loading="lazy"
+								decoding="async"
+								sizes="(max-width: 768px) 50vw, 25vw"
+								class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+							/>
+							<div
+								class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"
+							></div>
+							<div class="absolute inset-x-0 bottom-0 p-3">
+								<p class="text-[10px] font-bold uppercase tracking-wide text-white/70">
+									{formatDate(event.date)}
+								</p>
+								<h3 class="line-clamp-2 font-serif text-sm font-bold text-white">{event.title}</h3>
+							</div>
+						</a>
+					{/each}
 				</div>
 			</section>
 		{:else}
