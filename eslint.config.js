@@ -45,6 +45,21 @@ export default ts.config(
 		}
 	},
 	{
+		// `*.svelte.ts` / `*.svelte.js` are the Svelte 5 convention for a plain
+		// module that uses runes outside a component (a shared store, e.g.
+		// `packages/ui/src/components/toast-store.svelte.ts`). They are not
+		// component files, but `flat/recommended` above matches them with
+		// `svelte-eslint-parser` anyway because of the shared `.svelte`
+		// infix, which then fails to parse ordinary TypeScript (`export type
+		// ...`) as if it were component markup. Overriding back to the plain
+		// TS parser here — after the svelte config, so it wins — fixes that
+		// without touching real `.svelte` component files.
+		files: ['**/*.svelte.ts', '**/*.svelte.js'],
+		languageOptions: {
+			parser: ts.parser
+		}
+	},
+	{
 		// Generated, vendored, or not ours.
 		ignores: [
 			'**/.svelte-kit/**',

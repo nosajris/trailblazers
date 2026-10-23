@@ -3,5 +3,7 @@ export { default as Navbar } from './site/navbar.svelte';
 export { default as Footer } from './site/footer.svelte';
 export { default as HomeBlocks } from './home/home-blocks.svelte';
 export { default as Omnibar } from './components/Omnibar.svelte';
+export { default as Toast } from './components/Toast.svelte';
+export { toast } from './components/toast-store.svelte.js';
 export * from './tb-layout.js';
 

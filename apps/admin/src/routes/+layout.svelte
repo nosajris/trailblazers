@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
+	import Toast from '@trailblazers/ui/components/Toast.svelte';
 	import '../app.css';
 
 	let { children, data } = $props();
@@ -176,6 +177,14 @@
 					</a>
 					{#if canManage}
 					<a
+						href={resolve('/payments')}
+						data-active={isActive('/payments') ? 'true' : 'false'}
+						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/payments') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+					>
+						<svg class="h-4 w-4 text-[var(--brand-primary)] fill-none stroke-current stroke-2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+						Giving & Payments
+					</a>
+					<a
 						href={resolve('/users')}
 						data-active={isActive('/users') ? 'true' : 'false'}
 						class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition {isActive('/users') ? 'bg-white/10 text-white font-semibold border-l-2 border-[var(--brand-primary,#f95c4b)]' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
@@ -246,3 +255,5 @@
 		</div>
 	</div>
 {/if}
+
+<Toast />
