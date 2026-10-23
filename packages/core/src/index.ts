@@ -6,7 +6,11 @@ export { createIamService } from './modules/iam/service.js';
 export { createEventService } from './modules/events/service.js';
 export { createSermonService } from './modules/sermons/service.js';
 
-export type { EventCardVm, EventListingResult, EventListingFilters } from './modules/events/types.js';
+export type {
+	EventCardVm,
+	EventListingResult,
+	EventListingFilters
+} from './modules/events/types.js';
 export type { BlogPostVm } from './modules/blog/types.js';
 export { createBlogService } from './modules/blog/service.js';
 export { createGroupService } from './modules/groups/service.js';
@@ -52,11 +56,46 @@ export {
 } from './modules/settings/validation.js';
 export { createPageComposerService } from './modules/pages/composer.js';
 export {
+	PREVIEW_TOKEN_TTL_MS,
+	createPagePreviewToken,
+	isDueForPublish,
+	pendingChanges,
+	previewPath,
+	verifyPagePreviewToken
+} from './modules/pages/publishing.js';
+export type { PendingChanges, PublishableSection } from './modules/pages/publishing.js';
+export {
+	createFormGuardService,
+	throttleMessage,
+	STALE_FORM_MESSAGE
+} from './modules/forms/service.js';
+export type { GuardVerdict } from './modules/forms/service.js';
+export { FORM_TOKEN_FIELD, createFormToken, verifyFormToken } from './modules/forms/form-token.js';
+export {
+	MAX_FORM_FIELDS,
+	composeInquiry,
+	formFieldsProblem,
+	parseFormFields,
+	validateSubmission
+} from './modules/forms/form-fields.js';
+export type { FormFieldDef, FormFieldKind } from './modules/forms/form-fields.js';
+export {
+	BLOCKS,
 	PAGE_SECTION_TYPES,
-	SECTION_TYPE_INFO,
-	isPageSectionType
-} from './modules/pages/section-types.js';
-export type { PageSectionType, SectionFieldSet } from './modules/pages/section-types.js';
+	fieldsFor,
+	formFieldNames,
+	isPageSectionType,
+	patchBlockConfig,
+	projectConfig,
+	readBlockConfig
+} from './modules/pages/block-registry.js';
+export type {
+	BlockConfigData,
+	BlockDefinition,
+	BlockField,
+	BlockFieldKind,
+	PageSectionType
+} from './modules/pages/block-registry.js';
 export {
 	MAX_EVENTS_RAIL_LIMIT,
 	pageSchema,
@@ -70,6 +109,7 @@ export { createParentService } from './modules/parents/service.js';
 export { createAuditLogsService } from './modules/audit-logs/service.js';
 export { createTasksService } from './modules/tasks/service.js';
 export { createExportService, escapeCsvValue, toCsvCell } from './modules/export/service.js';
+export { renderRichText } from './util/rich-text.js';
 export {
 	formDataToObject,
 	parseForm,
@@ -162,8 +202,6 @@ export type {
 	UserMutation
 } from './modules/iam/permissions.js';
 
-
-
 export type {
 	HomeSectionBlock,
 	HomeHeroVm,
@@ -174,6 +212,7 @@ export type {
 	HomeLeadersVm,
 	HomeFaqVm,
 	HomeContactVm,
+	HomeFormVm,
 	HomeCustomVm
 } from './modules/pages/view-models.js';
 export type {
@@ -189,7 +228,11 @@ export { isMegaNavItem } from './modules/settings/service.js';
 export type { RichSectionVm } from './modules/serve/types.js';
 export type { PublicUserVm, UserRole } from './modules/iam/types.js';
 
-export { createPrayerService, submitPrayerSchema, updatePrayerSchema } from './modules/prayer/service.js';
+export {
+	createPrayerService,
+	submitPrayerSchema,
+	updatePrayerSchema
+} from './modules/prayer/service.js';
 export type { SubmitPrayerInput, UpdatePrayerInput } from './modules/prayer/service.js';
 export {
 	canShowPublicly,
@@ -224,8 +267,46 @@ export {
 export { createAnalyticsService } from './modules/analytics/service.js';
 export type { AnalyticsConfig, RecordViewInput } from './modules/analytics/service.js';
 export type { AnalyticsReport } from './modules/analytics/logic.js';
-export { isTrackablePageView, type TrackableRequest } from './modules/analytics/request-filter.js';
+export {
+	isTrackablePageView,
+	shouldCountView,
+	type CountableRequest,
+	type TrackableRequest
+} from './modules/analytics/request-filter.js';
 export { weeklyDigestEmail, type WeeklyDigestEmail } from './modules/analytics/digest.js';
 export { ogCardSvg, OG_IMAGE_SIZE, type OgCardInput } from './modules/og-image/card.js';
-export { ogImageUrl, signOgParams, verifyOgParams, type OgCardParams } from './modules/og-image/sign.js';
+export {
+	createPaymentsService,
+	mintPaymentReference,
+	type PaymentsConfig,
+	type StartPaymentInput,
+	type ProviderName
+} from './modules/payments/service.js';
+export type {
+	CreatePaymentInput,
+	CreatePaymentResult,
+	Payer,
+	PaymentMethod,
+	PaymentProvider,
+	PaymentStatus,
+	ProviderResult
+} from './modules/payments/types.js';
+export { PaymentConfigError } from './modules/payments/types.js';
+export { createPaynowProvider, type PaynowConfig } from './modules/payments/providers/paynow.js';
+export { createPesepayProvider, type PesepayConfig } from './modules/payments/providers/pesepay.js';
+export {
+	startGivingPaymentSchema,
+	markPaymentPaidSchema,
+	PAYMENT_METHODS,
+	MIN_GIVING_CENTS,
+	MAX_GIVING_CENTS,
+	type StartGivingPaymentInput,
+	type MarkPaymentPaidInput
+} from './modules/payments/validation.js';
+export {
+	ogImageUrl,
+	signOgParams,
+	verifyOgParams,
+	type OgCardParams
+} from './modules/og-image/sign.js';
 export { renderOgCard } from './modules/og-image/render.js';
