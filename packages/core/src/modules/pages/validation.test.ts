@@ -1,19 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MAX_EVENTS_RAIL_LIMIT, pageSchema, pageSectionSchema, toSectionConfig } from './validation.js';
-import { isPageSectionType, PAGE_SECTION_TYPES, SECTION_TYPE_INFO } from './section-types.js';
+import {
+	MAX_EVENTS_RAIL_LIMIT,
+	pageSchema,
+	pageSectionSchema,
+	toSectionConfig
+} from './validation.js';
 
-test('every section type has editor metadata', () => {
-	for (const type of PAGE_SECTION_TYPES) {
-		assert.ok(SECTION_TYPE_INFO[type], type);
-		assert.ok(SECTION_TYPE_INFO[type].label.length > 0, type);
-		assert.ok(SECTION_TYPE_INFO[type].help.length > 0, type);
-		assert.ok(SECTION_TYPE_INFO[type].glyph.length > 0, type);
-	}
-	assert.equal(isPageSectionType('HERO'), true);
-	assert.equal(isPageSectionType('CUSTOM'), false);
-	assert.equal(isPageSectionType('nonsense'), false);
-});
+// Block metadata, field projection and the preview/render invariant are covered
+// in `block-registry.test.ts`, which owns the registry those come from.
 
 test('a hero keeps only the values that were filled in', () => {
 	const parsed = pageSectionSchema.safeParse({
@@ -50,10 +45,19 @@ test('an unknown section type is refused', () => {
 });
 
 test('the events rail limit stays within range', () => {
-	assert.equal(pageSectionSchema.safeParse({ sectionType: 'EVENTS_RAIL', limit: '3' }).success, true);
-	assert.equal(pageSectionSchema.safeParse({ sectionType: 'EVENTS_RAIL', limit: '0' }).success, false);
 	assert.equal(
-		pageSectionSchema.safeParse({ sectionType: 'EVENTS_RAIL', limit: String(MAX_EVENTS_RAIL_LIMIT + 1) }).success,
+		pageSectionSchema.safeParse({ sectionType: 'EVENTS_RAIL', limit: '3' }).success,
+		true
+	);
+	assert.equal(
+		pageSectionSchema.safeParse({ sectionType: 'EVENTS_RAIL', limit: '0' }).success,
+		false
+	);
+	assert.equal(
+		pageSectionSchema.safeParse({
+			sectionType: 'EVENTS_RAIL',
+			limit: String(MAX_EVENTS_RAIL_LIMIT + 1)
+		}).success,
 		false
 	);
 	const empty = pageSectionSchema.safeParse({ sectionType: 'EVENTS_RAIL', limit: '' });

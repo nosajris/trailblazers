@@ -9,6 +9,7 @@
 	import LeadersSection from './leaders-section.svelte';
 	import FaqSection from './faq-section.svelte';
 	import ContactSection from './contact-section.svelte';
+	import FormSection from './form-section.svelte';
 	import IntentTiles from './intent-tiles.svelte';
 	import LatestMessageSection from './latest-message-section.svelte';
 	import WaysToAttendSection from './ways-to-attend-section.svelte';
@@ -80,6 +81,8 @@
 		</div>
 	{:else if block.kind === 'CONTACT'}
 		<ContactSection data={block.data} />
+	{:else if block.kind === 'FORM'}
+		<FormSection data={block.data} />
 	{/if}
 	<!-- CUSTOM blocks have no public design yet. They used to dump their raw JSON onto the page, so they render nothing. -->
 {/each}

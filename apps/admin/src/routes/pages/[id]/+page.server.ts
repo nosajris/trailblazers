@@ -1,5 +1,12 @@
 import { error, fail } from '@sveltejs/kit';
-import { pageSectionSchema, parseForm, summarizeErrors, toSectionConfig } from '@trailblazers/core';
+import {
+	createPagePreviewToken,
+	pageSectionSchema,
+	parseForm,
+	previewPath,
+	summarizeErrors,
+	toSectionConfig
+} from '@trailblazers/core';
 import type { PageServerLoad, Actions } from './$types';
 import { services } from '$lib/server/services.js';
 import { requireSection } from '$lib/server/auth.js';
@@ -22,7 +29,19 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const previewBlocks = await services.pages.composePreviewPage(id);
 
-	return { page: result.page, sections: result.sections, previewBlocks };
+	// A link someone outside the portal can open — a pastor approving wording on
+	// their phone — without being given a staff account. Signed and expiring;
+	// see `modules/pages/publishing.ts`.
+	const secret = process.env.SECRET_KEY;
+	const previewLink = secret ? previewPath(id, createPagePreviewToken(secret, id)) : null;
+
+	return {
+		page: result.page,
+		sections: result.sections,
+		changes: result.changes,
+		previewBlocks,
+		previewLink
+	};
 };
 
 export const actions: Actions = {
@@ -65,12 +84,16 @@ export const actions: Actions = {
 		const id = Number(form.get('id'));
 		if (!id) return fail(400, { error: 'That section could not be found.' });
 
-		await services.pages.deleteSection(id);
+		// A published section is only marked: it keeps rendering until the next
+		// publish, so a removal waits like every other edit.
+		const outcome = await services.pages.deleteSection(id);
 		await services.auditLogs.logAction(
 			'DELETE_PAGE_SECTION',
 			'PAGE',
 			String(params.id),
-			`Removed section ${id} from page ${params.id}`,
+			outcome === 'marked'
+				? `Marked section ${id} on page ${params.id} for removal at the next publish`
+				: `Removed unpublished section ${id} from page ${params.id}`,
 			locals.user?.id,
 			locals.user?.fullName
 		);
@@ -158,6 +181,79 @@ export const actions: Actions = {
 		}
 
 		await services.pages.moveSection(id, direction);
+		return { success: true };
+	},
+
+	/** Takes back a removal that has not been published yet. */
+	restoreSection: async ({ request, locals }) => {
+		requireSection(locals.user, 'content');
+
+		const form = await request.formData();
+		const id = Number(form.get('id'));
+		if (!id) return fail(400, { error: 'That section could not be restored.' });
+
+		await services.pages.restoreSection(id);
+		return { success: true };
+	},
+
+	/**
+	 * Makes every waiting change live, in one transaction. All of it or none —
+	 * see `publishPage` in the composer.
+	 */
+	publishPage: async ({ params, locals }) => {
+		requireSection(locals.user, 'content');
+
+		const pageId = Number(params.id);
+		const current = await services.pages.getPageForAdmin(pageId);
+		if (!current) return fail(404, { error: 'That page could not be found.' });
+
+		await services.pages.publishPage(pageId);
+		await services.auditLogs.logAction(
+			'PUBLISH_PAGE',
+			'PAGE',
+			String(pageId),
+			`Published page ${pageId} (${current.changes.total} change${current.changes.total === 1 ? '' : 's'})`,
+			locals.user?.id,
+			locals.user?.fullName
+		);
+
+		return { success: true, published: true };
+	},
+
+	/**
+	 * Sets or clears the time a page goes live by itself. The time arrives as
+	 * the browser's `datetime-local` value, which carries no zone — it is read
+	 * as Harare time, since that is where whoever typed it is. Africa/Harare is
+	 * UTC+2 all year with no daylight saving, so the fixed offset is correct
+	 * rather than merely convenient.
+	 */
+	schedulePage: async ({ request, params, locals }) => {
+		requireSection(locals.user, 'content');
+
+		const form = await request.formData();
+		const pageId = Number(params.id);
+		const raw = form.get('publishAt')?.toString().trim() ?? '';
+
+		if (raw === '') {
+			await services.pages.schedulePage(pageId, null);
+			return { success: true };
+		}
+
+		const parsed = new Date(`${raw}:00+02:00`);
+		if (Number.isNaN(parsed.getTime())) {
+			return fail(400, { error: 'That date could not be read.' });
+		}
+
+		await services.pages.schedulePage(pageId, parsed);
+		await services.auditLogs.logAction(
+			'SCHEDULE_PAGE',
+			'PAGE',
+			String(pageId),
+			`Scheduled page ${pageId} to publish at ${parsed.toISOString()}`,
+			locals.user?.id,
+			locals.user?.fullName
+		);
+
 		return { success: true };
 	},
 

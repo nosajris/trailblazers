@@ -9,6 +9,7 @@
 	import LeadersSection from './leaders-section.svelte';
 	import FaqSection from './faq-section.svelte';
 	import ContactSection from './contact-section.svelte';
+	import FormSection from './form-section.svelte';
 
 	/**
 	 * A staff-only rendering of a page's blocks, for the admin editor's live
@@ -80,6 +81,8 @@
 				<FaqSection data={block.data} />
 			{:else if block.kind === 'CONTACT'}
 				<ContactSection data={block.data} />
+			{:else if block.kind === 'FORM'}
+				<FormSection data={block.data} />
 			{/if}
 		</div>
 	{/each}

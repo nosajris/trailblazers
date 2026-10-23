@@ -5,6 +5,7 @@ import type { GroupCardVm } from '../groups/types.js';
 import type { LeaderVm } from '../leaders/types.js';
 import type { RichSectionVm } from '../serve/types.js';
 import type { TestimonialVm } from '../testimonials/types.js';
+import type { FormFieldDef } from '../forms/form-fields.js';
 
 export type HomeHeroVm = {
 	title: string;
@@ -52,6 +53,24 @@ export type HomeContactVm = {
 	intro?: string;
 };
 
+/**
+ * A form staff designed themselves.
+ *
+ * `sectionId` is part of the data rather than the block wrapper because the
+ * public composer does not tag blocks with their section (only the editor's
+ * preview does), and the form posts to `/forms/<sectionId>`.
+ */
+export type HomeFormVm = {
+	sectionId: number;
+	title: string;
+	intro?: string;
+	/** Icon name from `packages/ui/src/icons.ts`, if staff picked one. */
+	icon?: string;
+	fields: FormFieldDef[];
+	submitLabel: string;
+	successMessage: string;
+};
+
 export type HomeCustomVm = Record<string, unknown>;
 
 type HomeSectionBlockVariant =
@@ -66,6 +85,7 @@ type HomeSectionBlockVariant =
 	| { kind: 'PARENTS'; data: RichSectionVm | null }
 	| { kind: 'FAQ'; data: HomeFaqVm }
 	| { kind: 'CONTACT'; data: HomeContactVm }
+	| { kind: 'FORM'; data: HomeFormVm }
 	| { kind: 'CUSTOM'; data: HomeCustomVm };
 
 /**

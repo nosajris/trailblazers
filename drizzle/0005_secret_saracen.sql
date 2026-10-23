@@ -1,0 +1,1 @@
+ALTER TYPE "public"."page_section_type" ADD VALUE 'FORM' BEFORE 'CUSTOM';

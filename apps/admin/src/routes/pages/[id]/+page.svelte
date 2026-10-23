@@ -1,58 +1,58 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { enhance, deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import SectionPreview from '@trailblazers/ui/home/section-preview.svelte';
+	import Icon from '@trailblazers/ui/components/Icon.svelte';
 	import MediaPicker from '$lib/components/MediaPicker.svelte';
+	import IconPicker from '$lib/components/IconPicker.svelte';
 	// Browser-safe subpath — see the note in the settings page.
 	import {
-		PAGE_SECTION_TYPES,
-		SECTION_TYPE_INFO,
-		type PageSectionType,
-		type SectionGlyph
-	} from '@trailblazers/core/modules/pages/section-types';
+		BLOCKS,
+		fieldsFor,
+		flattenConfig,
+		formFieldNames,
+		patchBlockConfig,
+		searchBlocks,
+		type BlockField,
+		type PageSectionType
+	} from '@trailblazers/core/modules/pages/block-registry';
 	import type { HomeSectionBlock } from '@trailblazers/core/modules/pages/view-models';
 	import type { PageData, ActionData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	/**
-	 * One 16×16 stroke path per section glyph (see section-types.ts). Plain
-	 * inline SVG, not an icon package — this editor is the only place that
-	 * needs them, and the whole set is a handful of lines.
-	 */
-	const GLYPH_PATHS: Record<SectionGlyph, string> = {
-		hero: 'M3 5h18M3 12h12M3 19h18',
-		calendar: 'M4 5h16v16H4zM4 9h16M8 3v4M16 3v4M8 14h2M14 14h2',
-		book: 'M4 4h8a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H4zM20 4h-8a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h9z',
-		quote: 'M7 7a4 4 0 0 0-4 4v2a2 2 0 0 0 2 2h2v4H5v2h4v-8H5a2 2 0 0 1 2-4zM17 7a4 4 0 0 0-4 4v2a2 2 0 0 0 2 2h2v4h-2v2h4v-8h-2a2 2 0 0 1 2-4z',
-		users: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20a6 6 0 0 1 12 0M17 11a3 3 0 1 0 0-6M21 20a6 6 0 0 0-5.5-6',
-		badge: 'M12 2l3 3h4v4l3 3-3 3v4h-4l-3 3-3-3H5v-4l-3-3 3-3V5h4z M9.5 12l1.8 1.8L15 10',
-		heart: 'M12 20s-7-4.5-9.5-9A5 5 0 0 1 12 6a5 5 0 0 1 9.5 5c-2.5 4.5-9.5 9-9.5 9z',
-		baby: 'M12 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM5 21a7 7 0 0 1 14 0M9 13.5c.6.6 1.4 1 3 1s2.4-.4 3-1',
-		help: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9a2.5 2.5 0 1 1 4 2c-.6.5-1.5 1-1.5 2.5M12 17h.01',
-		mail: 'M4 5h16v14H4zM4 6l8 7 8-7'
-	};
-
 	type SectionRow = PageData['sections'][number];
 
-
-	/** The section being edited, or a new one. `null` closes the editor. */
+	/**
+	 * The section being edited, or a new one. `null` closes the editor.
+	 *
+	 * `values` is the flat, one-string-per-input shape the block registry reads
+	 * and writes (`flattenConfig` / `projectConfig`), so this component no longer
+	 * names a single field of a single block: which inputs exist, what they are
+	 * called and what a blank one means are all the registry's to say. Before, a
+	 * new field meant editing this file, the zod schema, the config mapper, the
+	 * section strategy and the preview patch — and when those drifted, a hero's
+	 * buttons rendered in the preview and were missing from the live page.
+	 */
 	let editing = $state<{
 		id?: number;
 		sectionType: PageSectionType;
 		status: string;
-		title: string;
-		subtitle: string;
-		intro: string;
-		imageUrl: string;
-		videoUrl: string;
-		primaryCtaLabel: string;
-		primaryCtaHref: string;
-		secondaryCtaLabel: string;
-		secondaryCtaHref: string;
-		limit: string;
+		values: Record<string, string>;
 	} | null>(null);
+
+	/**
+	 * Where a section added with a "+" between rows should land. A new section is
+	 * always created at the end (one insert, no sort-order arithmetic), then moved
+	 * into place by the same reorder action a drag uses.
+	 */
+	let pendingInsertIndex = $state<number | null>(null);
+
+	/** Filters the type grid in the editor; blank shows every block. */
+	let blockQuery = $state('');
+	const blockChoices = $derived(searchBlocks(blockQuery));
 
 	/**
 	 * Autosave + undo/redo for the section editor, borrowed from Strata's
@@ -76,19 +76,17 @@
 	function buildSectionFormData(): FormData {
 		const body = new FormData();
 		if (!editing) return body;
+
 		if (editing.id) body.set('id', String(editing.id));
 		body.set('sectionType', editing.sectionType);
 		body.set('status', editing.status);
-		body.set('title', editing.title);
-		body.set('subtitle', editing.subtitle);
-		body.set('intro', editing.intro);
-		body.set('imageUrl', editing.imageUrl);
-		body.set('videoUrl', editing.videoUrl);
-		body.set('primaryCtaLabel', editing.primaryCtaLabel);
-		body.set('primaryCtaHref', editing.primaryCtaHref);
-		body.set('secondaryCtaLabel', editing.secondaryCtaLabel);
-		body.set('secondaryCtaHref', editing.secondaryCtaHref);
-		body.set('limit', editing.limit);
+		// Only the fields this block declares are submitted; the server projects
+		// them through the same registry, so a value left over from a type the
+		// staff member switched away from cannot reach the saved config.
+		for (const name of formFieldNames(editing.sectionType)) {
+			body.set(name, editing.values[name] ?? '');
+		}
+
 		return body;
 	}
 
@@ -97,14 +95,18 @@
 		data?: { savedId?: number; error?: string; errors?: Record<string, string> };
 	}) {
 		if (result.type === 'success') {
-			if (editing && result.data?.savedId && !editing.id) {
+			const savedId = result.data?.savedId;
+			const wasNew = editing && !editing.id;
+
+			if (editing && savedId && wasNew) {
 				skipNextChange = true;
-				editing.id = result.data.savedId;
+				editing.id = savedId;
 			}
 			saveStatus = 'saved';
 			saveError = '';
 			saveFieldErrors = {};
 			void invalidateAll();
+			if (wasNew && savedId) void placeNewSection(savedId);
 		} else {
 			saveStatus = 'error';
 			saveError = result.data?.error ?? 'That save failed.';
@@ -161,6 +163,8 @@
 	function closeEditor() {
 		flushPendingSave();
 		editing = null;
+		pendingInsertIndex = null;
+		blockQuery = '';
 	}
 
 	function undo() {
@@ -233,7 +237,26 @@
 		draggingId = null;
 	}
 
-	const fieldsFor = (type: PageSectionType) => SECTION_TYPE_INFO[type].fields;
+	/**
+	 * Moves a just-created section to the position its "+" was clicked at.
+	 *
+	 * Deliberately a reorder rather than an insert with a computed sort order:
+	 * the reorder action already renumbers a whole page in one transaction and
+	 * validates the id set, so inserting reuses a tested path instead of adding
+	 * midpoint arithmetic that would eventually run out of gap. `tick()` lets
+	 * the hidden form's value catch up with `order` before it is submitted.
+	 */
+	async function placeNewSection(savedId: number) {
+		const index = pendingInsertIndex;
+		pendingInsertIndex = null;
+		if (index === null) return;
+
+		const next = order.filter((id) => id !== savedId);
+		next.splice(index, 0, savedId);
+		order = next;
+		await tick();
+		reorderForm?.requestSubmit();
+	}
 
 	/**
 	 * Live preview, synced both ways with the section list: hovering a row
@@ -246,65 +269,27 @@
 	const activeSectionId = $derived(editing?.id ?? hoveredRowId);
 
 	/**
-	 * Patches the one block being edited with whatever is in the form right
-	 * now, so typing a headline updates the preview before "Save section" is
-	 * even clicked. Only for fields that need no extra data (text and links);
-	 * a changed `limit` still needs a fresh events/posts query, so that one
-	 * only updates once saved.
+	 * Patches the one block being edited with whatever is in the form right now,
+	 * so typing a headline updates the preview before anything is saved.
+	 *
+	 * `patchBlockConfig` is the registry's own read path applied to the form's
+	 * values, which is what makes this preview trustworthy: it cannot interpret a
+	 * field differently from the published page, because it is the same function.
+	 * Fields the registry marks as needing a fresh query (a count) are left
+	 * alone until the section is saved, rather than showing three events under a
+	 * heading that says six.
 	 */
 	const previewBlocks: HomeSectionBlock[] = $derived.by(() => {
 		const blocks = data.previewBlocks;
 		const cur = editing;
 		if (!cur?.id) return blocks;
 
+		const patch = patchBlockConfig(cur.sectionType, cur.values);
+		if (Object.keys(patch).length === 0) return blocks;
+
 		return blocks.map((block): HomeSectionBlock => {
 			if (block.sectionId !== cur.id || block.kind !== cur.sectionType) return block;
-
-			if (block.kind === 'HERO') {
-				return {
-					...block,
-					data: {
-						...block.data,
-						title: cur.title || 'Welcome',
-						subtitle: cur.subtitle || undefined,
-						imageUrl: cur.imageUrl || undefined,
-						videoUrl: cur.videoUrl || undefined,
-						primaryCta:
-							cur.primaryCtaLabel && cur.primaryCtaHref
-								? { label: cur.primaryCtaLabel, href: cur.primaryCtaHref }
-								: undefined,
-						secondaryCta:
-							cur.secondaryCtaLabel && cur.secondaryCtaHref
-								? { label: cur.secondaryCtaLabel, href: cur.secondaryCtaHref }
-								: undefined
-					}
-				};
-			}
-
-			if (block.kind === 'CONTACT') {
-				return {
-					...block,
-					data: { ...block.data, title: cur.title || undefined, intro: cur.intro || undefined }
-				};
-			}
-
-			if (block.kind === 'BLOG') {
-				return { ...block, data: { ...block.data, title: cur.title || undefined } };
-			}
-			if (block.kind === 'TESTIMONIALS') {
-				return { ...block, data: { ...block.data, title: cur.title || undefined } };
-			}
-			if (block.kind === 'GROUPS') {
-				return { ...block, data: { ...block.data, title: cur.title || undefined } };
-			}
-			if (block.kind === 'LEADERS') {
-				return { ...block, data: { ...block.data, title: cur.title || undefined } };
-			}
-			if (block.kind === 'FAQ') {
-				return { ...block, data: { ...block.data, title: cur.title || undefined } };
-			}
-
-			return block;
+			return { ...block, data: { ...(block.data as object), ...patch } } as HomeSectionBlock;
 		});
 	});
 
@@ -314,16 +299,16 @@
 		if (section) openEdit(section);
 	}
 
-	/** Uploading for the hero background image field — see the `uploadImage` action. */
-	let uploading = $state(false);
+	/** Uploading for an image field — see the `uploadImage` action. */
+	let uploadingField = $state<string | null>(null);
 	let uploadError = $state('');
 
-	async function handleImageUpload(event: Event) {
+	async function handleImageUpload(event: Event, fieldName: string) {
 		const input = event.currentTarget as HTMLInputElement;
 		const file = input.files?.[0];
 		if (!file || !editing) return;
 
-		uploading = true;
+		uploadingField = fieldName;
 		uploadError = '';
 		try {
 			const body = new FormData();
@@ -332,7 +317,7 @@
 			const result = deserialize<{ uploadedUrl?: string }, { error?: string }>(await response.text());
 
 			if (result.type === 'success' && result.data?.uploadedUrl) {
-				editing.imageUrl = result.data.uploadedUrl;
+				editing.values[fieldName] = result.data.uploadedUrl;
 			} else if (result.type === 'failure') {
 				uploadError = result.data?.error ?? 'That upload failed.';
 			} else {
@@ -341,7 +326,7 @@
 		} catch {
 			uploadError = 'That upload failed.';
 		} finally {
-			uploading = false;
+			uploadingField = null;
 			input.value = '';
 		}
 	}
@@ -351,55 +336,234 @@
 		return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
 	}
 
-	function cta(config: Record<string, unknown>, key: string, part: 'label' | 'href'): string {
-		const value = config[key];
-		if (!value || typeof value !== 'object') return '';
-		const pair = value as { label?: unknown; href?: unknown };
-		const picked = part === 'label' ? pair.label : pair.href;
-		return typeof picked === 'string' ? picked : '';
-	}
-
-	function openNew() {
+	function openNew(insertIndex: number | null = null) {
+		pendingInsertIndex = insertIndex;
 		editing = {
 			sectionType: 'HERO',
 			status: 'PUBLISHED',
-			title: '',
-			subtitle: '',
-			intro: '',
-			imageUrl: '',
-			videoUrl: '',
-			primaryCtaLabel: '',
-			primaryCtaHref: '',
-			secondaryCtaLabel: '',
-			secondaryCtaHref: '',
-			limit: ''
+			values: flattenConfig('HERO', {})
 		};
+		blockQuery = '';
 		resetAutosave();
 	}
 
 	function openEdit(section: SectionRow) {
-		const config = (section.config ?? {}) as Record<string, unknown>;
+		const type = section.sectionType as PageSectionType;
+		pendingInsertIndex = null;
 		editing = {
 			id: section.id,
-			sectionType: section.sectionType as PageSectionType,
+			sectionType: type,
 			status: section.status,
-			title: str(config, 'title'),
-			subtitle: str(config, 'subtitle'),
-			intro: str(config, 'intro'),
-			imageUrl: str(config, 'imageUrl'),
-			videoUrl: str(config, 'videoUrl'),
-			primaryCtaLabel: cta(config, 'primaryCta', 'label'),
-			primaryCtaHref: cta(config, 'primaryCta', 'href'),
-			secondaryCtaLabel: cta(config, 'secondaryCta', 'label'),
-			secondaryCtaHref: cta(config, 'secondaryCta', 'href'),
-			limit: str(config, 'limit')
+			// The draft is what staff are working on; `config` is what visitors
+			// are still reading until the next publish.
+			values: flattenConfig(type, effectiveConfig(section))
 		};
+		blockQuery = '';
 		resetAutosave();
 	}
 
-	const limitOf = (section: SectionRow) => str((section.config ?? {}) as Record<string, unknown>, 'limit');
-	const titleOf = (section: SectionRow) => str((section.config ?? {}) as Record<string, unknown>, 'title');
+	/**
+	 * Switching type keeps any value the new block also has a field for — a
+	 * heading typed under the wrong type carries over instead of being retyped —
+	 * and gives its own fields an empty string to bind to.
+	 */
+	function chooseType(type: PageSectionType) {
+		if (!editing) return;
+		const kept: Record<string, string> = {};
+		for (const name of formFieldNames(type)) {
+			if (editing.values[name] !== undefined) kept[name] = editing.values[name];
+		}
+		editing.sectionType = type;
+		editing.values = { ...flattenConfig(type, {}), ...kept };
+	}
+
+	const labelOf = (section: SectionRow) =>
+		BLOCKS[section.sectionType as PageSectionType]?.label ?? section.sectionType;
+	const iconOf = (section: SectionRow) =>
+		BLOCKS[section.sectionType as PageSectionType]?.icon ?? 'help';
+	/** What the section will look like once published: its draft, else what is live. */
+	const effectiveConfig = (section: SectionRow) =>
+		((section.draftConfig ?? section.config) ?? {}) as Record<string, unknown>;
+
+	const limitOf = (section: SectionRow) => str(effectiveConfig(section), 'limit');
+	const titleOf = (section: SectionRow) => str(effectiveConfig(section), 'title');
+
+	/** One short line per section saying what is waiting, or nothing at all. */
+	function pendingLabel(section: SectionRow): string | null {
+		if (section.pendingDelete) return 'Removing on publish';
+		if (section.publishedAt === null) return 'New — not published yet';
+		if (section.draftConfig !== null && section.draftSortOrder !== null) return 'Edited and moved';
+		if (section.draftConfig !== null) return 'Edited, not published';
+		if (section.draftSortOrder !== null) return 'Moved, not published';
+		return null;
+	}
+
+	const changeSummary = $derived.by(() => {
+		const c = data.changes;
+		if (c.total === 0) return null;
+
+		const parts: string[] = [];
+		if (c.additions) parts.push(`${c.additions} new`);
+		if (c.edits) parts.push(`${c.edits} edited`);
+		if (c.reorders) parts.push(`${c.reorders} moved`);
+		if (c.deletions) parts.push(`${c.deletions} to remove`);
+		return parts.join(' · ');
+	});
+
+	/** `datetime-local` wants `YYYY-MM-DDTHH:mm` in Harare's time, not UTC. */
+	function toHarareInput(value: string | Date | null | undefined): string {
+		if (!value) return '';
+		const date = typeof value === 'string' ? new Date(value) : value;
+		if (Number.isNaN(date.getTime())) return '';
+		const harare = new Date(date.getTime() + 2 * 60 * 60 * 1000);
+		return harare.toISOString().slice(0, 16);
+	}
+
+	let scheduleOpen = $state(false);
+	const errorFor = (name: string) => saveFieldErrors[name];
 </script>
+
+{#snippet fieldInputs(field: BlockField, values: Record<string, string>)}
+	{#if field.kind === 'cta'}
+		<div class="grid grid-cols-2 gap-4">
+			<div>
+				<label
+					for="section-field-{field.name}-label"
+					class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]"
+				>
+					{field.label} label
+				</label>
+				<input
+					id="section-field-{field.name}-label"
+					type="text"
+					maxlength={field.maxLength}
+					class="admin-input"
+					value={values[`${field.name}Label`] ?? ''}
+					oninput={(e) => (values[`${field.name}Label`] = e.currentTarget.value)}
+				/>
+				{#if errorFor(`${field.name}Label`)}
+					<p class="mt-1 text-xs font-semibold text-[var(--color-danger-fg)]">
+						{errorFor(`${field.name}Label`)}
+					</p>
+				{/if}
+			</div>
+			<div>
+				<label
+					for="section-field-{field.name}-href"
+					class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]"
+				>
+					{field.label} link
+				</label>
+				<input
+					id="section-field-{field.name}-href"
+					type="text"
+					placeholder={field.placeholder}
+					class="admin-input"
+					value={values[`${field.name}Href`] ?? ''}
+					oninput={(e) => (values[`${field.name}Href`] = e.currentTarget.value)}
+				/>
+				{#if errorFor(`${field.name}Href`)}
+					<p class="mt-1 text-xs font-semibold text-[var(--color-danger-fg)]">
+						{errorFor(`${field.name}Href`)}
+					</p>
+				{/if}
+			</div>
+		</div>
+		{#if field.help}
+			<p class="-mt-2 text-xs text-[var(--zinc-500)]">{field.help}</p>
+		{/if}
+	{:else}
+		<div>
+			<label
+				for="section-field-{field.name}"
+				class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]"
+			>
+				{field.label}
+			</label>
+
+			{#if field.kind === 'longText'}
+				<textarea
+					id="section-field-{field.name}"
+					rows="3"
+					maxlength={field.maxLength}
+					class="admin-input"
+					value={values[field.name] ?? ''}
+					oninput={(e) => (values[field.name] = e.currentTarget.value)}
+				></textarea>
+			{:else if field.kind === 'count'}
+				<input
+					id="section-field-{field.name}"
+					type="number"
+					min={field.min}
+					max={field.max}
+					placeholder={field.fallbackCount ? String(field.fallbackCount) : undefined}
+					class="admin-input max-w-xs"
+					value={values[field.name] ?? ''}
+					oninput={(e) => (values[field.name] = e.currentTarget.value)}
+				/>
+			{:else if field.kind === 'icon'}
+				<IconPicker
+					value={values[field.name] ?? ''}
+					onselect={(name) => (values[field.name] = name)}
+				/>
+			{:else if field.kind === 'image'}
+				<div class="flex items-center gap-2">
+					<input
+						id="section-field-{field.name}"
+						type="text"
+						placeholder={field.placeholder}
+						class="admin-input"
+						value={values[field.name] ?? ''}
+						oninput={(e) => (values[field.name] = e.currentTarget.value)}
+					/>
+					<label class="admin-btn-secondary shrink-0 cursor-pointer px-3 py-2 text-xs">
+						{uploadingField === field.name ? 'Uploading…' : 'Upload'}
+						<input
+							type="file"
+							accept="image/jpeg,image/png,image/webp"
+							class="hidden"
+							disabled={uploadingField !== null}
+							onchange={(e) => handleImageUpload(e, field.name)}
+						/>
+					</label>
+					<MediaPicker onselect={(url) => (values[field.name] = url)} />
+				</div>
+				{#if uploadError && uploadingField === null}
+					<p class="mt-1 text-xs font-semibold text-[var(--color-danger-fg)]">{uploadError}</p>
+				{/if}
+			{:else}
+				<input
+					id="section-field-{field.name}"
+					type="text"
+					maxlength={field.maxLength}
+					placeholder={field.placeholder}
+					class="admin-input"
+					value={values[field.name] ?? ''}
+					oninput={(e) => (values[field.name] = e.currentTarget.value)}
+				/>
+			{/if}
+
+			{#if errorFor(field.name)}
+				<p class="mt-1 text-xs font-semibold text-[var(--color-danger-fg)]">{errorFor(field.name)}</p>
+			{:else if field.help}
+				<p class="mt-1 text-xs text-[var(--zinc-500)]">{field.help}</p>
+			{/if}
+		</div>
+	{/if}
+{/snippet}
+
+{#snippet insertHere(index: number, description: string)}
+	<div class="group/insert flex items-center justify-center py-1">
+		<button
+			type="button"
+			onclick={() => openNew(index)}
+			aria-label="Add a section {description}"
+			class="admin-insert-here opacity-40 transition group-hover/insert:opacity-100 focus-visible:opacity-100"
+		>
+			<span aria-hidden="true">+</span> Add a section {description}
+		</button>
+	</div>
+{/snippet}
 
 <div class="space-y-6">
 	<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -407,12 +571,118 @@
 			<a href={resolve('/pages')} class="text-xs font-semibold text-brand-primary hover:underline">← All pages</a>
 			<h1 class="mt-2 text-2xl font-bold text-[var(--zinc-900)]">{data.page.title}</h1>
 			<p class="text-sm text-[var(--zinc-500)]">
-				Sections render top to bottom at <code>{data.page.slug}</code>. Draft sections stay hidden
-				from visitors. Drag a section by its handle to reorder it, or use the arrows.
+				Sections render top to bottom at <code>{data.page.slug}</code>. Edits here are saved as a
+				draft and go live when you publish, so visitors never read a half-finished page. Drag a
+				section by its handle to reorder it, use the arrows, or add one exactly where you want it
+				with the "+" between rows.
 			</p>
 		</div>
-		<button onclick={openNew} class="admin-btn-primary">+ Add Section</button>
+		<button onclick={() => openNew()} class="admin-btn-primary">+ Add Section</button>
 	</div>
+
+	<!--
+		Publishing. Editing a section autosaves, so without this the public page
+		changed as staff typed; now every edit waits here until someone says so.
+	-->
+	<div class="admin-card flex flex-col gap-3 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+		<div class="min-w-0">
+			{#if data.changes.total > 0}
+				<p class="text-sm font-semibold text-[var(--zinc-900)]">
+					{data.changes.total} change{data.changes.total === 1 ? '' : 's'} waiting to go live
+				</p>
+				<p class="text-xs text-[var(--zinc-500)]">{changeSummary}</p>
+			{:else}
+				<p class="text-sm font-semibold text-[var(--zinc-900)]">Everything here is published.</p>
+				<p class="text-xs text-[var(--zinc-500)]">
+					Visitors are seeing this page exactly as it looks in the preview.
+				</p>
+			{/if}
+			{#if data.page.publishAt}
+				<p class="mt-1 text-xs font-semibold text-[var(--color-warning-fg)]">
+					Scheduled to publish automatically on {new Date(data.page.publishAt).toLocaleString('en-GB', {
+						timeZone: 'Africa/Harare',
+						dateStyle: 'medium',
+						timeStyle: 'short'
+					})}
+				</p>
+			{/if}
+		</div>
+
+		<div class="flex shrink-0 flex-wrap items-center gap-2">
+			{#if data.previewLink}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- a signed link into the public site, not an admin route -->
+				<a
+					href={data.previewLink}
+					target="_blank"
+					rel="noreferrer"
+					class="admin-btn-secondary px-3 py-1.5 text-xs"
+				>
+					Preview draft ↗
+				</a>
+			{/if}
+			<button
+				type="button"
+				onclick={() => (scheduleOpen = !scheduleOpen)}
+				class="admin-btn-secondary px-3 py-1.5 text-xs"
+				aria-expanded={scheduleOpen}
+			>
+				{data.page.publishAt ? 'Change schedule' : 'Schedule'}
+			</button>
+			<form action="?/publishPage" method="POST" use:enhance class="inline">
+				<button
+					type="submit"
+					class="admin-btn-primary px-4 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-40"
+					disabled={data.changes.total === 0}
+				>
+					Publish {data.changes.total > 0 ? `(${data.changes.total})` : ''}
+				</button>
+			</form>
+		</div>
+	</div>
+
+	{#if scheduleOpen}
+		<form
+			action="?/schedulePage"
+			method="POST"
+			use:enhance={() => {
+				return async ({ update }) => {
+					await update();
+					scheduleOpen = false;
+				};
+			}}
+			class="admin-card flex flex-col gap-3 bg-[var(--zinc-50)] p-4 sm:flex-row sm:items-end"
+		>
+			<div class="min-w-0 flex-1">
+				<label
+					for="publish-at"
+					class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]"
+				>
+					Publish automatically at (Harare time)
+				</label>
+				<input
+					id="publish-at"
+					type="datetime-local"
+					name="publishAt"
+					value={toHarareInput(data.page.publishAt)}
+					class="admin-input max-w-xs"
+				/>
+				<p class="mt-1 text-xs text-[var(--zinc-500)]">
+					Checked once a day, so a time is honoured to the day rather than to the minute. Leave
+					blank to publish only by hand.
+				</p>
+			</div>
+			<div class="flex shrink-0 items-center gap-2">
+				<button type="submit" class="admin-btn-primary px-4 py-1.5 text-xs">Save schedule</button>
+				<button
+					type="button"
+					onclick={() => (scheduleOpen = false)}
+					class="admin-btn-secondary px-3 py-1.5 text-xs"
+				>
+					Cancel
+				</button>
+			</div>
+		</form>
+	{/if}
 
 	{#if form?.error}
 		<div
@@ -432,110 +702,122 @@
 				Add a hero first, then the sections you want under it. Until a page has sections, the public
 				site falls back to its built-in layout.
 			</p>
-			<button onclick={openNew} class="admin-btn-primary mt-6">+ Add the first section</button>
+			<button onclick={() => openNew()} class="admin-btn-primary mt-6">+ Add the first section</button>
 		</div>
 	{:else}
-		<ol class="space-y-3">
+		<ol>
 			{#each order as id, i (id)}
 				{@const section = sectionFor(id)}
-				<li
-					class="admin-card flex flex-col gap-4 bg-white p-5 transition-all sm:flex-row sm:items-center sm:justify-between {draggingId ===
-					section.id
-						? 'opacity-40'
-						: ''} {activeSectionId === section.id ? 'admin-section-row-active' : ''}"
-					draggable="true"
-					ondragstart={() => onDragStart(section.id)}
-					ondragover={(e) => onDragOver(e, section.id)}
-					ondrop={onDrop}
-					ondragend={() => (draggingId = null)}
-					onmouseenter={() => (hoveredRowId = section.id)}
-					onmouseleave={() => (hoveredRowId = null)}
-				>
-					<div class="flex min-w-0 items-start gap-3">
-						<span
-							class="mt-0.5 shrink-0 cursor-grab select-none text-[var(--zinc-400)]"
-							aria-hidden="true"
-							title="Drag to reorder"
-						>
-							⠿
-						</span>
-						<svg
-							class="mt-0.5 h-5 w-5 shrink-0 text-[var(--zinc-400)]"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.75"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							aria-hidden="true"
-						>
-							<path d={GLYPH_PATHS[SECTION_TYPE_INFO[section.sectionType as PageSectionType]?.glyph ?? 'help']} />
-						</svg>
-						<div class="min-w-0">
-						<div class="flex flex-wrap items-center gap-2">
-							<span class="admin-badge admin-badge-neutral">
-								{SECTION_TYPE_INFO[section.sectionType as PageSectionType]?.label ?? section.sectionType}
+				<li>
+					{@render insertHere(i, i === 0 ? 'at the top' : `above ${labelOf(section)}`)}
+					<div
+						class="admin-card flex flex-col gap-4 bg-white p-5 transition-all sm:flex-row sm:items-center sm:justify-between {draggingId ===
+						section.id
+							? 'opacity-40'
+							: ''} {activeSectionId === section.id ? 'admin-section-row-active' : ''}"
+						draggable="true"
+						ondragstart={() => onDragStart(section.id)}
+						ondragover={(e) => onDragOver(e, section.id)}
+						ondrop={onDrop}
+						ondragend={() => (draggingId = null)}
+						onmouseenter={() => (hoveredRowId = section.id)}
+						onmouseleave={() => (hoveredRowId = null)}
+						role="presentation"
+					>
+						<div class="flex min-w-0 items-start gap-3">
+							<span
+								class="mt-0.5 shrink-0 cursor-grab select-none text-[var(--zinc-400)]"
+								aria-hidden="true"
+								title="Drag to reorder"
+							>
+								⠿
 							</span>
-							{#if section.status === 'PUBLISHED'}
-								<span class="admin-badge admin-badge-success">Published</span>
+							<span class="mt-0.5 shrink-0 text-[var(--zinc-400)]">
+								<Icon name={iconOf(section)} />
+							</span>
+							<div class="min-w-0">
+							<div class="flex flex-wrap items-center gap-2">
+								<span class="admin-badge admin-badge-neutral">{labelOf(section)}</span>
+								{#if section.status === 'PUBLISHED'}
+									<span class="admin-badge admin-badge-success">Published</span>
+								{:else}
+									<span class="admin-badge admin-badge-warning">Draft</span>
+								{/if}
+								{#if pendingLabel(section)}
+									<span class="admin-badge admin-badge-warning">{pendingLabel(section)}</span>
+								{/if}
+							</div>
+							<p class="mt-2 truncate text-sm font-semibold text-[var(--zinc-900)]">
+								{titleOf(section) || BLOCKS[section.sectionType as PageSectionType]?.help}
+							</p>
+							{#if limitOf(section)}
+								<p class="text-xs text-[var(--zinc-500)]">Shows {limitOf(section)}</p>
+							{/if}
+							</div>
+						</div>
+
+						<div class="flex shrink-0 flex-wrap items-center gap-2">
+							<form action="?/moveSection" method="POST" class="inline">
+								<input type="hidden" name="id" value={section.id} />
+								<input type="hidden" name="direction" value="up" />
+								<button
+									type="submit"
+									class="admin-btn-secondary px-3 py-1.5 text-xs"
+									disabled={i === 0}
+									aria-label="Move {titleOf(section) || section.sectionType} up">↑</button
+								>
+							</form>
+							<form action="?/moveSection" method="POST" class="inline">
+								<input type="hidden" name="id" value={section.id} />
+								<input type="hidden" name="direction" value="down" />
+								<button
+									type="submit"
+									class="admin-btn-secondary px-3 py-1.5 text-xs"
+									disabled={i === data.sections.length - 1}
+									aria-label="Move {titleOf(section) || section.sectionType} down">↓</button
+								>
+							</form>
+							<form action="?/toggleSection" method="POST" class="inline">
+								<input type="hidden" name="id" value={section.id} />
+								<input
+									type="hidden"
+									name="status"
+									value={section.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'}
+								/>
+								<button type="submit" class="admin-btn-secondary px-3 py-1.5 text-xs">
+									{section.status === 'PUBLISHED' ? 'Unpublish' : 'Publish'}
+								</button>
+							</form>
+							<button onclick={() => openEdit(section)} class="text-xs font-semibold text-brand-primary hover:underline"
+								>Edit</button
+							>
+							{#if section.pendingDelete}
+								<form action="?/restoreSection" method="POST" class="inline">
+									<input type="hidden" name="id" value={section.id} />
+									<button type="submit" class="text-xs font-semibold text-brand-primary hover:underline"
+										>Keep it</button
+									>
+								</form>
 							{:else}
-								<span class="admin-badge admin-badge-warning">Draft</span>
+								<form action="?/deleteSection" method="POST" class="inline">
+									<input type="hidden" name="id" value={section.id} />
+									<button
+										type="submit"
+										class="text-xs font-semibold text-[var(--color-danger-fg)] hover:underline"
+										title={section.publishedAt === null
+											? 'Deletes it now — visitors have never seen it'
+											: 'Stays on the public page until you publish'}
+									>
+										{section.publishedAt === null ? 'Delete' : 'Remove'}
+									</button>
+								</form>
 							{/if}
 						</div>
-						<p class="mt-2 truncate text-sm font-semibold text-[var(--zinc-900)]">
-							{titleOf(section) || SECTION_TYPE_INFO[section.sectionType as PageSectionType]?.help}
-						</p>
-						{#if limitOf(section)}
-							<p class="text-xs text-[var(--zinc-500)]">Shows {limitOf(section)}</p>
-						{/if}
-						</div>
-					</div>
-
-					<div class="flex shrink-0 flex-wrap items-center gap-2">
-						<form action="?/moveSection" method="POST" class="inline">
-							<input type="hidden" name="id" value={section.id} />
-							<input type="hidden" name="direction" value="up" />
-							<button
-								type="submit"
-								class="admin-btn-secondary px-3 py-1.5 text-xs"
-								disabled={i === 0}
-								aria-label="Move {titleOf(section) || section.sectionType} up">↑</button
-							>
-						</form>
-						<form action="?/moveSection" method="POST" class="inline">
-							<input type="hidden" name="id" value={section.id} />
-							<input type="hidden" name="direction" value="down" />
-							<button
-								type="submit"
-								class="admin-btn-secondary px-3 py-1.5 text-xs"
-								disabled={i === data.sections.length - 1}
-								aria-label="Move {titleOf(section) || section.sectionType} down">↓</button
-							>
-						</form>
-						<form action="?/toggleSection" method="POST" class="inline">
-							<input type="hidden" name="id" value={section.id} />
-							<input
-								type="hidden"
-								name="status"
-								value={section.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'}
-							/>
-							<button type="submit" class="admin-btn-secondary px-3 py-1.5 text-xs">
-								{section.status === 'PUBLISHED' ? 'Unpublish' : 'Publish'}
-							</button>
-						</form>
-						<button onclick={() => openEdit(section)} class="text-xs font-semibold text-brand-primary hover:underline"
-							>Edit</button
-						>
-						<form action="?/deleteSection" method="POST" class="inline">
-							<input type="hidden" name="id" value={section.id} />
-							<button type="submit" class="text-xs font-semibold text-[var(--color-danger-fg)] hover:underline"
-								>Delete</button
-							>
-						</form>
 					</div>
 				</li>
 			{/each}
 		</ol>
+		{@render insertHere(order.length, 'at the bottom')}
 
 		<form
 			bind:this={reorderForm}
@@ -595,7 +877,7 @@
 					</button>
 				</div>
 			</div>
-			<p class="mb-1 text-xs text-[var(--zinc-500)]">{SECTION_TYPE_INFO[editing.sectionType].help}</p>
+			<p class="mb-1 text-xs text-[var(--zinc-500)]">{BLOCKS[editing.sectionType].help}</p>
 			<p class="mb-5 text-xs font-medium">
 				{#if saveStatus === 'saving'}
 					<span class="text-[var(--zinc-500)]">Saving…</span>
@@ -611,38 +893,42 @@
 			<form class="space-y-4">
 
 				<div>
-					<p id="section-type-label" class="mb-2 block text-xs font-semibold uppercase text-[var(--zinc-700)]">Section type</p>
+					<div class="mb-2 flex items-center justify-between gap-3">
+						<p id="section-type-label" class="block text-xs font-semibold uppercase text-[var(--zinc-700)]">
+							Section type
+						</p>
+						<input
+							type="search"
+							bind:value={blockQuery}
+							placeholder="Search section types"
+							aria-label="Search section types"
+							class="admin-input max-w-[14rem] py-1 text-xs"
+						/>
+					</div>
 					<div
 						role="radiogroup"
 						aria-labelledby="section-type-label"
 						class="grid grid-cols-3 gap-2 sm:grid-cols-4"
 					>
-						{#each PAGE_SECTION_TYPES as type (type)}
+						{#each blockChoices as type (type)}
 							<button
 								type="button"
 								role="radio"
 								aria-checked={editing.sectionType === type}
-								onclick={() => {
-									if (editing) editing.sectionType = type;
-								}}
+								onclick={() => chooseType(type)}
+								title={BLOCKS[type].help}
 								class="admin-type-pick {editing.sectionType === type ? 'admin-type-pick-active' : ''}"
 							>
-								<svg
-									class="h-5 w-5"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="1.75"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									aria-hidden="true"
-								>
-									<path d={GLYPH_PATHS[SECTION_TYPE_INFO[type].glyph]} />
-								</svg>
-								{SECTION_TYPE_INFO[type].label}
+								<Icon name={BLOCKS[type].icon} />
+								{BLOCKS[type].label}
 							</button>
 						{/each}
 					</div>
+					{#if blockChoices.length === 0}
+						<p class="mt-2 text-xs text-[var(--zinc-500)]">
+							No section type matches “{blockQuery}”.
+						</p>
+					{/if}
 				</div>
 
 				<div>
@@ -653,120 +939,19 @@
 					</select>
 				</div>
 
-				{#if fieldsFor(editing.sectionType) === 'none'}
+				{#if BLOCKS[editing.sectionType].sourced}
 					<p class="rounded-lg border border-[var(--zinc-200)] bg-[var(--zinc-50)] p-3 text-xs text-[var(--zinc-600)]">
 						This section has no settings here — its content is edited in its own area of the portal.
 					</p>
 				{:else}
-					<div>
-						<label for="section-title" class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]">
-							{fieldsFor(editing.sectionType) === 'hero' ? 'Headline' : 'Heading'}
-						</label>
-						<input id="section-title" type="text" name="title" bind:value={editing.title} class="admin-input" />
-						{#if saveFieldErrors.title}
-							<p class="mt-1 text-xs font-semibold text-[var(--color-danger-fg)]">{saveFieldErrors.title}</p>
-						{:else if SECTION_TYPE_INFO[editing.sectionType].defaultTitle}
-							<p class="mt-1 text-xs text-[var(--zinc-500)]">
-								Leave blank to use the default heading, "{SECTION_TYPE_INFO[editing.sectionType].defaultTitle}".
-							</p>
-						{/if}
-					</div>
-				{/if}
-
-				{#if fieldsFor(editing.sectionType) === 'hero'}
-					<div>
-						<label for="section-subtitle" class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]">Short line under the headline</label>
-						<textarea id="section-subtitle" name="subtitle" rows="2" bind:value={editing.subtitle} class="admin-input"></textarea>
-					</div>
-					<div class="grid grid-cols-2 gap-4">
-						<div>
-							<label for="section-image" class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]">Background image</label>
-							<div class="flex items-center gap-2">
-								<input id="section-image" type="text" name="imageUrl" bind:value={editing.imageUrl} placeholder="https://..." class="admin-input" />
-								<label class="admin-btn-secondary shrink-0 cursor-pointer px-3 py-2 text-xs">
-									{uploading ? 'Uploading…' : 'Upload'}
-									<input
-										type="file"
-										accept="image/jpeg,image/png,image/webp"
-										class="hidden"
-										disabled={uploading}
-										onchange={handleImageUpload}
-									/>
-								</label>
-								<MediaPicker onselect={(url) => {
-									if (editing) editing.imageUrl = url;
-								}} />
-							</div>
-							<p class="mt-1 text-xs text-[var(--zinc-500)]">
-								Upload a photo and it's resized and compressed automatically — or paste a URL instead.
-							</p>
-							{#if uploadError}
-								<p class="mt-1 text-xs font-semibold text-[var(--color-danger-fg)]">{uploadError}</p>
-							{/if}
-							{#if saveFieldErrors.imageUrl}
-								<p class="mt-1 text-xs font-semibold text-[var(--color-danger-fg)]">{saveFieldErrors.imageUrl}</p>
-							{/if}
-						</div>
-						<div>
-							<label for="section-video" class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]">Background video (YouTube)</label>
-							<input id="section-video" type="text" name="videoUrl" bind:value={editing.videoUrl} placeholder="https://youtu.be/..." class="admin-input" />
-							{#if saveFieldErrors.videoUrl}
-								<p class="mt-1 text-xs font-semibold text-[var(--color-danger-fg)]">{saveFieldErrors.videoUrl}</p>
-							{/if}
-							<p class="mt-1 text-xs text-[var(--zinc-500)]">Phones and metered connections always get the photo.</p>
-						</div>
-					</div>
-					<div class="grid grid-cols-2 gap-4">
-						<div>
-							<label for="section-cta1-label" class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]">Main button label</label>
-							<input id="section-cta1-label" type="text" name="primaryCtaLabel" bind:value={editing.primaryCtaLabel} class="admin-input" />
-						</div>
-						<div>
-							<label for="section-cta1-href" class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]">Main button link</label>
-							<input id="section-cta1-href" type="text" name="primaryCtaHref" bind:value={editing.primaryCtaHref} placeholder="/plan-a-visit" class="admin-input" />
-						</div>
-					</div>
-					<div class="grid grid-cols-2 gap-4">
-						<div>
-							<label for="section-cta2-label" class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]">Second button label</label>
-							<input id="section-cta2-label" type="text" name="secondaryCtaLabel" bind:value={editing.secondaryCtaLabel} class="admin-input" />
-						</div>
-						<div>
-							<label for="section-cta2-href" class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]">Second button link</label>
-							<input id="section-cta2-href" type="text" name="secondaryCtaHref" bind:value={editing.secondaryCtaHref} placeholder="/watch" class="admin-input" />
-						</div>
-					</div>
-					<p class="text-xs text-[var(--zinc-500)]">A button appears only when it has both a label and a link.</p>
-				{/if}
-
-				{#if fieldsFor(editing.sectionType) === 'titleAndLimit'}
-					<div>
-						<label for="section-limit" class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]">How many to show</label>
-						<input
-							id="section-limit"
-							type="number"
-							name="limit"
-							min="1"
-							max="12"
-							placeholder="3"
-							bind:value={editing.limit}
-							class="admin-input"
-						/>
-						{#if saveFieldErrors.limit}
-							<p class="mt-1 text-xs font-semibold text-[var(--color-danger-fg)]">{saveFieldErrors.limit}</p>
-						{:else}
-							<p class="mt-1 text-xs text-[var(--zinc-500)]">
-								Counts only published, upcoming events — a past or draft event never fills a slot.
-							</p>
-						{/if}
-					</div>
-				{/if}
-
-				{#if fieldsFor(editing.sectionType) === 'titleAndIntro'}
-					<div>
-						<label for="section-intro" class="mb-1 block text-xs font-semibold uppercase text-[var(--zinc-700)]">Invitation text</label>
-						<textarea id="section-intro" name="intro" rows="3" bind:value={editing.intro} class="admin-input"></textarea>
-					</div>
+					{#each fieldsFor(editing.sectionType) as field (field.name)}
+						{@render fieldInputs(field, editing.values)}
+					{/each}
+					{#if BLOCKS[editing.sectionType].defaultTitle}
+						<p class="text-xs text-[var(--zinc-500)]">
+							Leave the heading blank to use the default, "{BLOCKS[editing.sectionType].defaultTitle}".
+						</p>
+					{/if}
 				{/if}
 
 				<div class="flex items-center justify-between gap-3 border-t border-[var(--zinc-200)] pt-4">
@@ -780,3 +965,27 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	/**
+	 * The "+" between two rows. Faint until the strip is hovered or the button
+	 * is focused, so a page of sections does not read as a page of buttons —
+	 * but never fully hidden, because an invisible control is one nobody finds.
+	 */
+	.admin-insert-here {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.1rem 0.6rem;
+		border: 1px dashed var(--color-border);
+		border-radius: 999px;
+		background-color: var(--zinc-50);
+		color: var(--zinc-500);
+		font-size: 0.7rem;
+		font-weight: 600;
+	}
+	.admin-insert-here:hover {
+		border-color: var(--brand-primary);
+		color: var(--brand-primary);
+	}
+</style>
