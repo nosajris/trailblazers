@@ -198,6 +198,13 @@
 										<p class="mt-1 text-[var(--color-success-fg)]">
 											This event is full. We will email you if a place opens up.
 										</p>
+									{:else if form.status === 'PENDING_PAYMENT'}
+										<p class="font-bold text-[var(--color-success-fg)]">Your seat is held</p>
+										<p class="mt-1 text-[var(--color-success-fg)]">
+											{form.awaitingPayment
+												? 'You already started a payment for this event. Check your phone, or try registering again to pick up where you left off.'
+												: (form.error ?? 'Complete payment to confirm your seat.')}
+										</p>
 									{:else if form.alreadyRegistered}
 										<p class="font-bold text-[var(--color-success-fg)]">You are already registered</p>
 										<p class="mt-1 text-[var(--color-success-fg)]">
@@ -213,6 +220,10 @@
 							{:else if availability && !availability.isOpen}
 								<p class="rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-center text-sm text-gray-600">
 									Registration for this event has closed.
+								</p>
+							{:else if event.price > 0 && !data.paymentsAvailable}
+								<p class="rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-center text-sm text-gray-600">
+									Online payment is not set up yet for this event. Please contact the office to register.
 								</p>
 							{:else}
 								{#if form?.error}
@@ -233,6 +244,7 @@
 										<label for="rsvp-website">Leave this field empty</label>
 										<input id="rsvp-website" type="text" name="website" tabindex="-1" autocomplete="off" />
 									</div>
+									<input type="hidden" name="_ft" value={data.formToken} />
 									<label class="sr-only" for="rsvp-name">Your name</label>
 									<input
 										id="rsvp-name"
@@ -262,7 +274,11 @@
 										class="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
 									/>
 									<button type="submit" class="btn btn-primary flex w-full items-center justify-center py-3 text-center">
-										{availability?.willWaitlist ? 'Join the waitlist' : 'Register'}
+										{availability?.willWaitlist
+											? 'Join the waitlist'
+											: event.price > 0
+												? `Pay ${formatPrice(event.price)} & register`
+												: 'Register'}
 									</button>
 								</form>
 							{/if}

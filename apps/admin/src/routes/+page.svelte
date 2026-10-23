@@ -3,6 +3,8 @@
 	import type { PageData } from './$types';
 	let { data }: { data: PageData } = $props();
 
+	const isAdmin = $derived('user' in data && data.user?.role === 'ADMIN');
+
 	function getActionBadgeClass(action: string) {
 		const act = action.toUpperCase();
 		if (act.includes('CREATE') || act.includes('ADD')) return 'admin-badge-success';
@@ -178,6 +180,33 @@
 					View Equipment Inventory
 					<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 				</a>
+			</div>
+		</div>
+		<!-- Stat Card 7: Giving & Payments -->
+		<div class="stat-card admin-card admin-card-hover p-5 relative overflow-hidden group bg-white border border-zinc-200 rounded-xl shadow-sm">
+			<div class="flex items-center justify-between">
+				<div class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Giving This Month</div>
+				<div class="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+					<svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+				</div>
+			</div>
+			<div class="mt-3 flex items-baseline gap-2">
+				<span class="text-3xl font-bold text-emerald-700">
+					USD {(data.stats.givingTotalCentsThisMonth / 100).toFixed(2)}
+				</span>
+				<span class="text-xs text-zinc-400 font-medium">
+					{data.stats.giftsThisMonth} {data.stats.giftsThisMonth === 1 ? 'gift' : 'gifts'}, {data.stats.pendingPayments} pending
+				</span>
+			</div>
+			<div class="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
+				{#if isAdmin}
+					<a href={resolve('/payments')} class="font-semibold text-brand-primary hover:underline flex items-center gap-1">
+						Manage Giving & Payments
+						<svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+					</a>
+				{:else}
+					<span class="text-zinc-400">Ask an administrator for payment details.</span>
+				{/if}
 			</div>
 		</div>
 	</div>

@@ -11,7 +11,7 @@
  * directly.
  */
 
-import { and, count, desc, eq, gt } from 'drizzle-orm';
+import { and, count, desc, eq, gt, sum } from 'drizzle-orm';
 import type { SQL } from 'drizzle-orm';
 import type { PgTable } from 'drizzle-orm/pg-core';
 import type { Database } from '../../db/client.js';
@@ -25,6 +25,7 @@ import { leaders } from '../leaders/schema.js';
 import { sermons } from '../sermons/schema.js';
 import { tasks } from '../tasks/schema.js';
 import { testimonials } from '../testimonials/schema.js';
+import { payments } from '../payments/schema.js';
 
 export type DashboardCounts = {
 	totalSermons: number;
@@ -41,7 +42,18 @@ export type DashboardCounts = {
 	pendingTasks: number;
 	totalEquipment: number;
 	totalBep: number;
+	/** Count of PAID giving payments (not event-registration fees). */
+	giftsThisMonth: number;
+	/** Sum of PAID giving payments, in cents. */
+	givingTotalCentsThisMonth: number;
+	pendingPayments: number;
 };
+
+/** Midnight on the 1st of the current month, in server-local time. */
+function startOfMonth(): Date {
+	const now = new Date();
+	return new Date(now.getFullYear(), now.getMonth(), 1);
+}
 
 export function createDashboardService(db: Database) {
 	/** One `count(*)`, optionally filtered. */
@@ -71,7 +83,9 @@ export function createDashboardService(db: Database) {
 				newVisitorRows,
 				pendingTaskRows,
 				equipmentRows,
-				bepRows
+				bepRows,
+				givingRows,
+				pendingPaymentRows
 			] = await Promise.all([
 				countOf(sermons),
 				countOf(events),
@@ -91,7 +105,18 @@ export function createDashboardService(db: Database) {
 				),
 				countOf(tasks, eq(tasks.isCompleted, false)),
 				countOf(equipment),
-				countOf(bepProfiles)
+				countOf(bepProfiles),
+				db
+					.select({ count: count(), total: sum(payments.amount) })
+					.from(payments)
+					.where(
+						and(
+							eq(payments.status, 'PAID'),
+							eq(payments.purpose, 'GIVING'),
+							gt(payments.createdAt, startOfMonth())
+						)
+					),
+				countOf(payments, eq(payments.status, 'PENDING'))
 			]);
 
 			const value = (rows: { value: number }[]) => rows[0]?.value ?? 0;
@@ -109,7 +134,10 @@ export function createDashboardService(db: Database) {
 				newVisitorsThisWeek: value(newVisitorRows),
 				pendingTasks: value(pendingTaskRows),
 				totalEquipment: value(equipmentRows),
-				totalBep: value(bepRows)
+				totalBep: value(bepRows),
+				giftsThisMonth: givingRows[0]?.count ?? 0,
+				givingTotalCentsThisMonth: Number(givingRows[0]?.total ?? 0),
+				pendingPayments: value(pendingPaymentRows)
 			};
 		},
 

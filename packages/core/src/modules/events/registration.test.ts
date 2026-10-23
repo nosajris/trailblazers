@@ -43,6 +43,18 @@ test('an event with no capacity set is unlimited, not full', () => {
 	assert.equal(seatsRemaining({ capacity: null, confirmed: 5000 }), null);
 });
 
+test('a priced event never hands out a free CONFIRMED seat', () => {
+	assert.equal(nextRegistrationStatus({ capacity: 100, confirmed: 0 }, 2500), 'PENDING_PAYMENT');
+	assert.equal(
+		nextRegistrationStatus({ capacity: null, confirmed: 5000 }, 2500),
+		'PENDING_PAYMENT'
+	);
+});
+
+test('a priced event that is full still waitlists, rather than asking for payment', () => {
+	assert.equal(nextRegistrationStatus({ capacity: 100, confirmed: 100 }, 2500), 'WAITLIST');
+});
+
 test('seats remaining never goes negative', () => {
 	// Capacity can be lowered after people have registered.
 	assert.equal(seatsRemaining({ capacity: 10, confirmed: 25 }), 0);

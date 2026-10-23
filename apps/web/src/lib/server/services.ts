@@ -10,5 +10,19 @@ export const services = createCoreServices(db, {
 		apiKey: process.env.RESEND_API_KEY,
 		from: process.env.EMAIL_FROM,
 		officeAddress: process.env.OFFICE_EMAIL
+	},
+	// Without these, services.payments.startPayment throws a clear
+	// PaymentConfigError for every provider rather than silently doing
+	// nothing — there is no safe "log instead of sending" fallback for money.
+	payments: {
+		paynow: {
+			integrationId: process.env.PAYNOW_INTEGRATION_ID,
+			integrationKey: process.env.PAYNOW_INTEGRATION_KEY
+		},
+		pesepay: {
+			integrationKey: process.env.PESEPAY_INTEGRATION_KEY,
+			encryptionKey: process.env.PESEPAY_ENCRYPTION_KEY
+		},
+		defaultProvider: process.env.PAYMENTS_PROVIDER === 'PESEPAY' ? 'PESEPAY' : 'PAYNOW'
 	}
 });

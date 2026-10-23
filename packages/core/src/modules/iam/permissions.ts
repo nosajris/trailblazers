@@ -13,7 +13,7 @@
 export type UserRole = 'ADMIN' | 'SECRETARY' | 'LEADER' | 'MEMBER';
 
 /** Coarse grouping of admin routes that share an access rule. */
-export type AdminSection = 'content' | 'submissions' | 'users' | 'settings' | 'audit';
+export type AdminSection = 'content' | 'submissions' | 'users' | 'settings' | 'audit' | 'finance';
 
 /** Roles allowed to reach the staff portal at all. */
 export const ADMIN_PORTAL_ROLES: readonly UserRole[] = ['ADMIN', 'SECRETARY'];
@@ -28,7 +28,10 @@ const SECTION_ROLES: Readonly<Record<AdminSection, readonly UserRole[]>> = {
 	submissions: ['ADMIN', 'SECRETARY'],
 	users: ['ADMIN'],
 	settings: ['ADMIN'],
-	audit: ['ADMIN']
+	audit: ['ADMIN'],
+	// Giving and registration payments — ADMIN only, same bar as staff
+	// accounts and site settings.
+	finance: ['ADMIN']
 };
 
 /**
@@ -40,7 +43,8 @@ const SECTION_BY_PREFIX: readonly (readonly [string, AdminSection])[] = [
 	['/users', 'users'],
 	['/settings', 'settings'],
 	['/audit-logs', 'audit'],
-	['/submissions', 'submissions']
+	['/submissions', 'submissions'],
+	['/payments', 'finance']
 ];
 
 /** True when `pathname` is `prefix` itself or a descendant of it. */

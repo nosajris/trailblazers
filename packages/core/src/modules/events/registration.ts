@@ -3,7 +3,7 @@
  * testable. Import-free on purpose.
  */
 
-export type RegistrationStatus = 'CONFIRMED' | 'WAITLIST' | 'CANCELLED';
+export type RegistrationStatus = 'CONFIRMED' | 'WAITLIST' | 'CANCELLED' | 'PENDING_PAYMENT';
 
 export type CapacityState = {
 	/** Seats on the event. Null or 0 means unlimited. */
@@ -18,10 +18,20 @@ export type CapacityState = {
  * An event with no capacity set is treated as unlimited rather than as zero
  * seats — otherwise every existing event, none of which has ever had a
  * capacity meaningfully set, would waitlist everybody.
+ *
+ * A priced event (`priceCents > 0`) never hands out a CONFIRMED seat for
+ * free: a slot that would otherwise be CONFIRMED is PENDING_PAYMENT instead,
+ * and only becomes CONFIRMED once a payment for it is marked PAID (see
+ * `registration-service.ts`'s `confirmPaidRegistration`). A slot that is
+ * already full still WAITLISTs rather than asking someone to pay to join a
+ * waitlist.
  */
-export function nextRegistrationStatus(state: CapacityState): RegistrationStatus {
-	if (state.capacity === null || state.capacity <= 0) return 'CONFIRMED';
-	return state.confirmed < state.capacity ? 'CONFIRMED' : 'WAITLIST';
+export function nextRegistrationStatus(state: CapacityState, priceCents = 0): RegistrationStatus {
+	if (state.capacity === null || state.capacity <= 0) {
+		return priceCents > 0 ? 'PENDING_PAYMENT' : 'CONFIRMED';
+	}
+	if (state.confirmed >= state.capacity) return 'WAITLIST';
+	return priceCents > 0 ? 'PENDING_PAYMENT' : 'CONFIRMED';
 }
 
 /** Seats left, or null when the event is unlimited. */

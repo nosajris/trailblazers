@@ -26,6 +26,8 @@ import { createDashboardService } from './modules/statistics/dashboard.js';
 import { createEventRegistrationService } from './modules/events/registration-service.js';
 import { createPrayerService } from './modules/prayer/service.js';
 import { createAnalyticsService } from './modules/analytics/service.js';
+import { createFormGuardService } from './modules/forms/service.js';
+import { createPaymentsService, type PaymentsConfig } from './modules/payments/service.js';
 
 export type CoreServicesConfig = {
 	/**
@@ -42,9 +44,23 @@ export type CoreServicesConfig = {
 		from: string | undefined;
 		officeAddress: string | undefined;
 	};
+	/**
+	 * Paynow/Pesepay credentials for online giving and paid event
+	 * registration. Omit and `payments.startPayment` throws a
+	 * `PaymentConfigError` for every provider rather than silently doing
+	 * nothing — unlike email, there is no safe "log instead of sending"
+	 * fallback for money.
+	 */
+	payments?: PaymentsConfig;
 };
 
 export function createCoreServices(db: Database, config: CoreServicesConfig) {
+	// Built ahead of the returned object so `payments` can be given its
+	// `confirmPaidRegistration` callback below — a manual "mark as paid"
+	// override on an event-registration payment must flip the hold the
+	// same way the provider callback does (see registration-service.ts).
+	const eventRegistrationsService = createEventRegistrationService(db);
+
 	return {
 		iam: createIamService(db, { secretKey: config.secretKey }),
 		events: createEventService(db),
@@ -69,16 +85,25 @@ export function createCoreServices(db: Database, config: CoreServicesConfig) {
 		email: createEmailService(
 			config.email ?? { apiKey: undefined, from: undefined, officeAddress: undefined }
 		),
-		eventRegistrations: createEventRegistrationService(db),
+		eventRegistrations: eventRegistrationsService,
 		prayer: createPrayerService(db),
 		statistics: createStatisticsService(db),
 		dashboard: createDashboardService(db),
-		analytics: createAnalyticsService(db, { secretKey: config.secretKey })
+		analytics: createAnalyticsService(db, { secretKey: config.secretKey }),
+		formGuard: createFormGuardService(db, { secretKey: config.secretKey }),
+		payments: createPaymentsService(
+			db,
+			config.payments ?? {
+				paynow: { integrationId: undefined, integrationKey: undefined },
+				pesepay: { integrationKey: undefined, encryptionKey: undefined },
+				defaultProvider: 'PAYNOW'
+			},
+			undefined,
+			async (registrationId) => {
+				await eventRegistrationsService.confirmPaidRegistration(registrationId);
+			}
+		)
 	};
 }
-
-
-
-
 
 export type CoreServices = ReturnType<typeof createCoreServices>;
