@@ -1,7 +1,7 @@
 import { services } from '$lib/server/services';
 import { isDatabaseUrlConfigured } from '$lib/server/db';
 import { SESSION_COOKIE } from '$lib/server/auth-constants';
-import { assertUsableSecret, isTrackablePageView, resolveLocale } from '@trailblazers/core';
+import { assertUsableSecret, resolveLocale, shouldCountView } from '@trailblazers/core';
 import { securityHeaders } from '$lib/server/security-headers';
 import type { Handle } from '@sveltejs/kit';
 
@@ -30,15 +30,32 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
+	const token = event.cookies.get(SESSION_COOKIE);
+	if (token) {
+		// A token that predates the hashed-session change, or one signed with a
+		// different SECRET_KEY, simply fails to resolve — treat it as signed out.
+		event.locals.user = await services.iam.validateSession(token).catch(() => null);
+	} else {
+		event.locals.user = null;
+	}
+
 	// Fire-and-forget: a dropped or slow analytics write must never slow down
 	// or break the page itself. No cookie is read or set — see
 	// `@trailblazers/core`'s analytics module for what is and isn't stored.
+	//
+	// Deliberately after the session is resolved: `shouldCountView` leaves out
+	// a signed-in staff member's own visits, which it can only know once the
+	// session has been validated. A stale cookie that fails to resolve is an
+	// ordinary visitor and still counts.
 	if (
-		isTrackablePageView({
+		shouldCountView({
 			method: event.request.method,
 			pathname: event.url.pathname,
 			accept: event.request.headers.get('accept'),
-			isDataRequest: event.isDataRequest
+			isDataRequest: event.isDataRequest,
+			dnt: event.request.headers.get('dnt'),
+			globalPrivacyControl: event.request.headers.get('sec-gpc'),
+			isStaff: event.locals.user !== null
 		})
 	) {
 		const utm = services.analytics.utmOf({
@@ -56,15 +73,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 				utm
 			})
 			.catch(() => undefined);
-	}
-
-	const token = event.cookies.get(SESSION_COOKIE);
-	if (token) {
-		// A token that predates the hashed-session change, or one signed with a
-		// different SECRET_KEY, simply fails to resolve — treat it as signed out.
-		event.locals.user = await services.iam.validateSession(token).catch(() => null);
-	} else {
-		event.locals.user = null;
 	}
 
 	// Resolved here as well as in the layout so `<html lang>` is correct in the

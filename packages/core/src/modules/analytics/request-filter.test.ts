@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isTrackablePageView } from './request-filter.js';
+import { isTrackablePageView, shouldCountView } from './request-filter.js';
 
 const base = { method: 'GET', pathname: '/events', accept: null, isDataRequest: false };
 
@@ -27,4 +27,41 @@ test('an API call is never trackable', () => {
 
 test('a non-GET request is never trackable', () => {
 	assert.equal(isTrackablePageView({ ...base, method: 'POST', accept: 'text/html' }), false);
+});
+
+const countable = {
+	...base,
+	accept: 'text/html',
+	dnt: null,
+	globalPrivacyControl: null,
+	isStaff: false
+};
+
+test('an ordinary visitor on a real page is counted', () => {
+	assert.equal(shouldCountView(countable), true);
+});
+
+test('a visitor who asked not to be tracked is not counted', () => {
+	// DNT is a request, and this is our own first-party counter, so honouring it
+	// costs nothing but the count.
+	assert.equal(shouldCountView({ ...countable, dnt: '1' }), false);
+	// Only an explicit 1 is a request; '0' and anything else are not.
+	assert.equal(shouldCountView({ ...countable, dnt: '0' }), true);
+	assert.equal(shouldCountView({ ...countable, dnt: 'unspecified' }), true);
+});
+
+test('Global Privacy Control is honoured the same way', () => {
+	assert.equal(shouldCountView({ ...countable, globalPrivacyControl: '1' }), false);
+	assert.equal(shouldCountView({ ...countable, globalPrivacyControl: '0' }), true);
+});
+
+test("a signed-in staff member's own visits are not counted", () => {
+	// Staff open the site all day while editing it. Counting them makes the
+	// numbers mostly about the office.
+	assert.equal(shouldCountView({ ...countable, isStaff: true }), false);
+});
+
+test('a request that was never a page view is still not counted', () => {
+	assert.equal(shouldCountView({ ...countable, method: 'POST' }), false);
+	assert.equal(shouldCountView({ ...countable, pathname: '/api/media' }), false);
 });
