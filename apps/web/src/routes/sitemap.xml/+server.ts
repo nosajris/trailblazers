@@ -17,6 +17,8 @@ type SitemapEntry = {
 	changefreq: 'daily' | 'weekly' | 'monthly';
 	priority: string;
 	lastmod?: Date | null;
+	/** Absolute or site-relative image URL, when the page has a real photo of its own. */
+	image?: string | null;
 };
 
 /** XML has five characters that must be escaped inside element text. */
@@ -29,16 +31,33 @@ function escapeXml(value: string): string {
 		.replace(/'/g, '&apos;');
 }
 
+/** Site-relative paths resolve against `origin`; anything already absolute (our own Blob storage URLs) passes through. */
+function absoluteImageUrl(origin: string, image: string): string {
+	return /^https?:\/\//i.test(image) ? image : origin + image;
+}
+
+/**
+ * The `image` sitemap extension — Google Images indexes a page faster when
+ * its sitemap entry names the photo directly rather than making the crawler
+ * render the page to find it. Only emitted for pages with a real, specific
+ * photo (an event's own cover, a story's own image) — never a shared
+ * placeholder, which would make every entry point at the same image.
+ */
 function toEntry(origin: string, entry: SitemapEntry): string {
 	const lastmod = entry.lastmod
 		? `<lastmod>${entry.lastmod.toISOString().split('T')[0]}</lastmod>`
+		: '';
+	const image = entry.image
+		? `<image:image><image:loc>${escapeXml(absoluteImageUrl(origin, entry.image))}</image:loc></image:image>`
 		: '';
 
 	return (
 		`<url><loc>${escapeXml(origin + entry.path)}</loc>` +
 		lastmod +
 		`<changefreq>${entry.changefreq}</changefreq>` +
-		`<priority>${entry.priority}</priority></url>`
+		`<priority>${entry.priority}</priority>` +
+		image +
+		`</url>`
 	);
 }
 
@@ -93,13 +112,15 @@ export const GET: RequestHandler = async ({ url, setHeaders }) => {
 			path: `/events/${event.id}`,
 			changefreq: 'daily' as const,
 			priority: '0.8',
-			lastmod: null
+			lastmod: null,
+			image: event.imageUrl
 		})),
 		...posts.map((post) => ({
 			path: `/stories/${post.id}`,
 			changefreq: 'monthly' as const,
 			priority: '0.6',
-			lastmod: null
+			lastmod: null,
+			image: post.imageUrl
 		})),
 		...sermons.map((sermon) => ({
 			path: `/watch/${sermon.slug}`,
@@ -127,7 +148,7 @@ export const GET: RequestHandler = async ({ url, setHeaders }) => {
 
 	const body =
 		`<?xml version="1.0" encoding="UTF-8"?>\n` +
-		`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+		`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n` +
 		entries.map((entry) => toEntry(origin, entry)).join('\n') +
 		`\n</urlset>`;
 
